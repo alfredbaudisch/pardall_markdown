@@ -6,4 +6,10 @@ defmodule LiveMarkdown.Content.Cache do
     Logger.info("[Content.Cache] saved #{key}, #{inspect(value)}")
     ConCache.put(@cache_name, key, value)
   end
+
+  def get_all do
+    ConCache.ets(@cache_name)
+    |> :ets.tab2list()
+    |> Enum.map(fn {_key, value} -> value end)
+  end
 end

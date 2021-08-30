@@ -1,9 +1,20 @@
 defmodule LiveMarkdownWeb.PageLive do
   use LiveMarkdownWeb, :live_view
+  alias LiveMarkdown.Content.Repository
 
   @impl true
   def mount(_params, _session, socket) do
-    {:ok, assign(socket, query: "", results: %{})}
+    if connected?(socket) do
+      LiveMarkdownWeb.Endpoint.subscribe("content")
+    end
+
+    posts =
+      Repository.get_all()
+      |> Enum.reduce(%{}, fn %{id: id} = post, posts ->
+        Map.put(posts, id, post)
+      end)
+
+    {:ok, assign(socket, query: "", results: %{}, posts: posts)}
   end
 
   @impl true
@@ -23,6 +34,13 @@ defmodule LiveMarkdownWeb.PageLive do
          |> put_flash(:error, "No dependencies found matching \"#{query}\"")
          |> assign(results: %{}, query: query)}
     end
+  end
+
+  @impl true
+  def handle_info(%{event: "post_updated", payload: %{id: id} = content}, socket) do
+    posts = Map.put(socket.assigns[:posts], id, content)
+
+    {:noreply, socket |> assign(:posts, posts)}
   end
 
   defp search(query) do

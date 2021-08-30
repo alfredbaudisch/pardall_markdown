@@ -1,6 +1,7 @@
 defmodule LiveMarkdown.FileWatcher do
   use GenServer
   alias LiveMarkdown.Content.Receiver
+  require Logger
 
   def start_link(args) do
     GenServer.start_link(__MODULE__, args)
@@ -13,9 +14,10 @@ defmodule LiveMarkdown.FileWatcher do
   end
 
   def handle_info(
-        {:file_event, _watcher_pid, {path, events}},
+        {:file_event, _watcher_pid, {path, events} = data},
         %{watcher_pid: _watcher_pid} = state
       ) do
+    Logger.info("[FileWatcher] #{inspect(data)}")
     Receiver.event(path, events)
     {:noreply, state}
   end
