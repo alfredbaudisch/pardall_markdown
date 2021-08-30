@@ -9,7 +9,7 @@ defmodule InstaMarkdown.Content.ParseFile do
 
       _ ->
         Logger.info(
-          "Received file #{path}, but a parser for this file type has not been implemented yet"
+          "Content.ParseFile] Received file #{path}, but a parser for this file type has not been implemented yet"
         )
     end
   end
@@ -17,11 +17,14 @@ defmodule InstaMarkdown.Content.ParseFile do
   defp parse_markdown(path) do
     with {:ok, raw_content} <- File.read(path),
          {:ok, html_content, _} <- Earmark.as_html(raw_content) do
-      Repository.push(path, html_content, title: get_title_from_path(path))
-      Logger.info("Parsed and pushed Markdown file #{path}")
+      Repository.push(path, html_content, get_title_from_path(path))
+      Logger.info("[Content.ParseFile] Pushed rendered Markdown: #{path}")
     else
-      {:error, error} -> Logger.error("Could not read file #{path}", error)
-      {:error, _, error} -> Logger.error("Could not render Markdown file #{path}", error)
+      {:error, error} ->
+        Logger.error("[Content.ParseFile] Could not read file #{path}", error)
+
+      {:error, _, error} ->
+        Logger.error("[Content.ParseFile] Could not render Markdown file #{path}", error)
     end
   end
 
