@@ -24,7 +24,8 @@ defmodule LiveMarkdown.Content.Repository do
         title: attrs.title,
         content: content,
         slug: attrs.slug,
-        date: attrs.date
+        date: attrs.date,
+        is_published: attrs.published || false
       })
       |> put_timestamps(model)
       |> Ecto.Changeset.apply_changes()

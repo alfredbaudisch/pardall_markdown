@@ -1,2 +1,8 @@
+<%= if(not @post.is_published) do %>
+<p class="alert alert-danger" role="alert">
+    This post is still a draft, its contents may change at any time
+</p>
+<% end %>
+
 <h1><%= @post.title %></h1>
 <%= raw(@post.content) %>

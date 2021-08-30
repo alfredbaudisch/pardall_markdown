@@ -10,8 +10,12 @@ defmodule LiveMarkdownWeb.PageLive do
 
     posts =
       Repository.get_all()
-      |> Enum.reduce(%{}, fn %{id: id} = post, posts ->
-        Map.put(posts, id, post)
+      |> Enum.reduce(%{}, fn
+        %{id: id, is_published: true} = post, posts ->
+          Map.put(posts, id, post)
+
+        _, posts ->
+          posts
       end)
 
     {:ok, assign(socket, query: "", results: %{}, posts: posts)}
