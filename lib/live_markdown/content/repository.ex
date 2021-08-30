@@ -1,7 +1,7 @@
-defmodule InstaMarkdown.Content.Repository do
-  alias InstaMarkdown.Content
-  alias InstaMarkdown.Content.{Cache, Utils}
-  alias InstaMarkdownWeb.Endpoint
+defmodule LiveMarkdown.Content.Repository do
+  alias LiveMarkdown.Content
+  alias LiveMarkdown.Content.{Cache, Utils}
+  alias LiveMarkdownWeb.Endpoint
   alias Ecto.Changeset
 
   def push(path, content, title, type \\ :html) do

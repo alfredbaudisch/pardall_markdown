@@ -1,12 +1,12 @@
-defmodule InstaMarkdownWeb do
+defmodule LiveMarkdownWeb do
   @moduledoc """
   The entrypoint for defining your web interface, such
   as controllers, views, channels and so on.
 
   This can be used in your application as:
 
-      use InstaMarkdownWeb, :controller
-      use InstaMarkdownWeb, :view
+      use LiveMarkdownWeb, :controller
+      use LiveMarkdownWeb, :view
 
   The definitions below will be executed for every view,
   controller, etc, so keep them short and clean, focused
@@ -19,19 +19,19 @@ defmodule InstaMarkdownWeb do
 
   def controller do
     quote do
-      use Phoenix.Controller, namespace: InstaMarkdownWeb
+      use Phoenix.Controller, namespace: LiveMarkdownWeb
 
       import Plug.Conn
-      import InstaMarkdownWeb.Gettext
-      alias InstaMarkdownWeb.Router.Helpers, as: Routes
+      import LiveMarkdownWeb.Gettext
+      alias LiveMarkdownWeb.Router.Helpers, as: Routes
     end
   end
 
   def view do
     quote do
       use Phoenix.View,
-        root: "lib/insta_markdown_web/templates",
-        namespace: InstaMarkdownWeb
+        root: "lib/live_markdown_web/templates",
+        namespace: LiveMarkdownWeb
 
       # Import convenience functions from controllers
       import Phoenix.Controller,
@@ -45,7 +45,7 @@ defmodule InstaMarkdownWeb do
   def live_view do
     quote do
       use Phoenix.LiveView,
-        layout: {InstaMarkdownWeb.LayoutView, "live.html"}
+        layout: {LiveMarkdownWeb.LayoutView, "live.html"}
 
       unquote(view_helpers())
     end
@@ -72,7 +72,7 @@ defmodule InstaMarkdownWeb do
   def channel do
     quote do
       use Phoenix.Channel
-      import InstaMarkdownWeb.Gettext
+      import LiveMarkdownWeb.Gettext
     end
   end
 
@@ -87,9 +87,9 @@ defmodule InstaMarkdownWeb do
       # Import basic rendering functionality (render, render_layout, etc)
       import Phoenix.View
 
-      import InstaMarkdownWeb.ErrorHelpers
-      import InstaMarkdownWeb.Gettext
-      alias InstaMarkdownWeb.Router.Helpers, as: Routes
+      import LiveMarkdownWeb.ErrorHelpers
+      import LiveMarkdownWeb.Gettext
+      alias LiveMarkdownWeb.Router.Helpers, as: Routes
     end
   end
 

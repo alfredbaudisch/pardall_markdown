@@ -1,5 +1,5 @@
-defmodule InstaMarkdownWeb.ErrorView do
-  use InstaMarkdownWeb, :view
+defmodule LiveMarkdownWeb.ErrorView do
+  use LiveMarkdownWeb, :view
 
   # If you want to customize a particular status code
   # for a certain format, you may uncomment below.

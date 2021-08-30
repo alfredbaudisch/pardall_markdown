@@ -1,5 +1,5 @@
-defmodule InstaMarkdownWeb.PageLive do
-  use InstaMarkdownWeb, :live_view
+defmodule LiveMarkdownWeb.PageLive do
+  use LiveMarkdownWeb, :live_view
 
   @impl true
   def mount(_params, _session, socket) do
@@ -26,7 +26,7 @@ defmodule InstaMarkdownWeb.PageLive do
   end
 
   defp search(query) do
-    if not InstaMarkdownWeb.Endpoint.config(:code_reloader) do
+    if not LiveMarkdownWeb.Endpoint.config(:code_reloader) do
       raise "action disabled when not in development"
     end
 

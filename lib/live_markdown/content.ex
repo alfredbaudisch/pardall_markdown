@@ -1,4 +1,4 @@
-defmodule InstaMarkdown.Content do
+defmodule LiveMarkdown.Content do
   use Ecto.Schema
   import Ecto.Changeset
 

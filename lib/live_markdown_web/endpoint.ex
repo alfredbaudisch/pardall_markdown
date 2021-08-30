@@ -1,16 +1,16 @@
-defmodule InstaMarkdownWeb.Endpoint do
-  use Phoenix.Endpoint, otp_app: :insta_markdown
+defmodule LiveMarkdownWeb.Endpoint do
+  use Phoenix.Endpoint, otp_app: :live_markdown
 
   # The session will be stored in the cookie and signed,
   # this means its contents can be read but not tampered with.
   # Set :encryption_salt if you would also like to encrypt it.
   @session_options [
     store: :cookie,
-    key: "_insta_markdown_key",
+    key: "_live_markdown_key",
     signing_salt: "G66iKrmJ"
   ]
 
-  socket "/socket", InstaMarkdownWeb.UserSocket,
+  socket "/socket", LiveMarkdownWeb.UserSocket,
     websocket: true,
     longpoll: false
 
@@ -22,7 +22,7 @@ defmodule InstaMarkdownWeb.Endpoint do
   # when deploying your static files in production.
   plug Plug.Static,
     at: "/",
-    from: :insta_markdown,
+    from: :live_markdown,
     gzip: false,
     only: ~w(assets fonts images favicon.ico robots.txt)
 
@@ -32,7 +32,7 @@ defmodule InstaMarkdownWeb.Endpoint do
     socket "/phoenix/live_reload/socket", Phoenix.LiveReloader.Socket
     plug Phoenix.LiveReloader
     plug Phoenix.CodeReloader
-    plug Phoenix.Ecto.CheckRepoStatus, otp_app: :insta_markdown
+    plug Phoenix.Ecto.CheckRepoStatus, otp_app: :live_markdown
   end
 
   plug Phoenix.LiveDashboard.RequestLogger,
@@ -50,5 +50,5 @@ defmodule InstaMarkdownWeb.Endpoint do
   plug Plug.MethodOverride
   plug Plug.Head
   plug Plug.Session, @session_options
-  plug InstaMarkdownWeb.Router
+  plug LiveMarkdownWeb.Router
 end

@@ -5,16 +5,16 @@ use Mix.Config
 # The MIX_TEST_PARTITION environment variable can be used
 # to provide built-in test partitioning in CI environment.
 # Run `mix help test` for more information.
-config :insta_markdown, InstaMarkdown.Repo,
+config :live_markdown, LiveMarkdown.Repo,
   username: "postgres",
   password: "postgres",
-  database: "insta_markdown_test#{System.get_env("MIX_TEST_PARTITION")}",
+  database: "live_markdown_test#{System.get_env("MIX_TEST_PARTITION")}",
   hostname: "localhost",
   pool: Ecto.Adapters.SQL.Sandbox
 
 # We don't run a server during test. If one is required,
 # you can enable the server option below.
-config :insta_markdown, InstaMarkdownWeb.Endpoint,
+config :live_markdown, LiveMarkdownWeb.Endpoint,
   http: [port: 4002],
   server: false
 

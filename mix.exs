@@ -1,9 +1,9 @@
-defmodule InstaMarkdown.MixProject do
+defmodule LiveMarkdown.MixProject do
   use Mix.Project
 
   def project do
     [
-      app: :insta_markdown,
+      app: :live_markdown,
       version: "0.1.0",
       elixir: "~> 1.7",
       elixirc_paths: elixirc_paths(Mix.env()),
@@ -19,7 +19,7 @@ defmodule InstaMarkdown.MixProject do
   # Type `mix help compile.app` for more information.
   def application do
     [
-      mod: {InstaMarkdown.Application, []},
+      mod: {LiveMarkdown.Application, []},
       extra_applications: [:logger, :runtime_tools, :con_cache]
     ]
   end

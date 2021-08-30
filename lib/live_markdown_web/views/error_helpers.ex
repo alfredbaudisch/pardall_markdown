@@ -1,4 +1,4 @@
-defmodule InstaMarkdownWeb.ErrorHelpers do
+defmodule LiveMarkdownWeb.ErrorHelpers do
   @moduledoc """
   Conveniences for translating and building error messages.
   """
@@ -39,9 +39,9 @@ defmodule InstaMarkdownWeb.ErrorHelpers do
     # should be written to the errors.po file. The :count option is
     # set by Ecto and indicates we should also apply plural rules.
     if count = opts[:count] do
-      Gettext.dngettext(InstaMarkdownWeb.Gettext, "errors", msg, msg, count, opts)
+      Gettext.dngettext(LiveMarkdownWeb.Gettext, "errors", msg, msg, count, opts)
     else
-      Gettext.dgettext(InstaMarkdownWeb.Gettext, "errors", msg, opts)
+      Gettext.dgettext(LiveMarkdownWeb.Gettext, "errors", msg, opts)
     end
   end
 end

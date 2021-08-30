@@ -1,6 +1,6 @@
-defmodule InstaMarkdown.FileWatcher do
+defmodule LiveMarkdown.FileWatcher do
   use GenServer
-  alias InstaMarkdown.Content.Receiver
+  alias LiveMarkdown.Content.Receiver
 
   def start_link(args) do
     GenServer.start_link(__MODULE__, args)

@@ -1,5 +1,5 @@
-defmodule InstaMarkdownWeb.PageLiveTest do
-  use InstaMarkdownWeb.ConnCase
+defmodule LiveMarkdownWeb.PageLiveTest do
+  use LiveMarkdownWeb.ConnCase
 
   import Phoenix.LiveViewTest
 

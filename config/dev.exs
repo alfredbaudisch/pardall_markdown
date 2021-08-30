@@ -1,10 +1,10 @@
 use Mix.Config
 
 # Configure your database
-config :insta_markdown, InstaMarkdown.Repo,
+config :live_markdown, LiveMarkdown.Repo,
   username: "postgres",
   password: "postgres",
-  database: "insta_markdown_dev",
+  database: "live_markdown_dev",
   hostname: "localhost",
   show_sensitive_data_on_connection_error: true,
   pool_size: 10
@@ -15,7 +15,7 @@ config :insta_markdown, InstaMarkdown.Repo,
 # The watchers configuration can be used to run external
 # watchers to your application. For example, we use it
 # with webpack to recompile .js and .css sources.
-config :insta_markdown, InstaMarkdownWeb.Endpoint,
+config :live_markdown, LiveMarkdownWeb.Endpoint,
   http: [port: 4000],
   debug_errors: true,
   code_reloader: true,
@@ -50,13 +50,13 @@ config :insta_markdown, InstaMarkdownWeb.Endpoint,
 # different ports.
 
 # Watch static and templates for browser reloading.
-config :insta_markdown, InstaMarkdownWeb.Endpoint,
+config :live_markdown, LiveMarkdownWeb.Endpoint,
   live_reload: [
     patterns: [
       ~r"priv/static/.*(js|css|png|jpeg|jpg|gif|svg)$",
       ~r"priv/gettext/.*(po)$",
-      ~r"lib/insta_markdown_web/(live|views)/.*(ex)$",
-      ~r"lib/insta_markdown_web/templates/.*(eex)$"
+      ~r"lib/live_markdown_web/(live|views)/.*(ex)$",
+      ~r"lib/live_markdown_web/templates/.*(eex)$"
     ]
   ]
 

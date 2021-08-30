@@ -1,5 +1,5 @@
-defmodule InstaMarkdown.Content.Receiver do
-  alias InstaMarkdown.Content.ParseFile
+defmodule LiveMarkdown.Content.Receiver do
+  alias LiveMarkdown.Content.ParseFile
 
   @moduledoc """
   Process `FileSystem` events, directing the paths to their

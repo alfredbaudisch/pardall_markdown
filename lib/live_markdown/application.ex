@@ -1,4 +1,4 @@
-defmodule InstaMarkdown.Application do
+defmodule LiveMarkdown.Application do
   # See https://hexdocs.pm/elixir/Application.html
   # for more information on OTP Applications
   @moduledoc false
@@ -8,36 +8,36 @@ defmodule InstaMarkdown.Application do
   def start(_type, _args) do
     children = [
       # Start the Ecto repository
-      InstaMarkdown.Repo,
+      LiveMarkdown.Repo,
       # Start the Telemetry supervisor
-      InstaMarkdownWeb.Telemetry,
+      LiveMarkdownWeb.Telemetry,
       # Start the PubSub system
-      {Phoenix.PubSub, name: InstaMarkdown.PubSub},
+      {Phoenix.PubSub, name: LiveMarkdown.PubSub},
       # Start the Endpoint (http/https)
-      InstaMarkdownWeb.Endpoint,
+      LiveMarkdownWeb.Endpoint,
       {
-        InstaMarkdown.FileWatcher,
-        name: InstaMarkdown.FileWatcher, dirs: [InstaMarkdown.Content.Utils.root_folder()]
+        LiveMarkdown.FileWatcher,
+        name: LiveMarkdown.FileWatcher, dirs: [LiveMarkdown.Content.Utils.root_folder()]
       },
       {ConCache,
        [
-         name: Application.get_env(:insta_markdown, InstaMarkdown.Content)[:cache_name],
+         name: Application.get_env(:live_markdown, LiveMarkdown.Content)[:cache_name],
          ttl_check_interval: false
        ]}
-      # Start a worker by calling: InstaMarkdown.Worker.start_link(arg)
-      # {InstaMarkdown.Worker, arg}
+      # Start a worker by calling: LiveMarkdown.Worker.start_link(arg)
+      # {LiveMarkdown.Worker, arg}
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html
     # for other strategies and supported options
-    opts = [strategy: :one_for_one, name: InstaMarkdown.Supervisor]
+    opts = [strategy: :one_for_one, name: LiveMarkdown.Supervisor]
     Supervisor.start_link(children, opts)
   end
 
   # Tell Phoenix to update the endpoint configuration
   # whenever the application is updated.
   def config_change(changed, _new, removed) do
-    InstaMarkdownWeb.Endpoint.config_change(changed, removed)
+    LiveMarkdownWeb.Endpoint.config_change(changed, removed)
     :ok
   end
 end

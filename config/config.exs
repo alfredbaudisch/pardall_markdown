@@ -7,18 +7,18 @@
 # General application configuration
 use Mix.Config
 
-config :insta_markdown,
-  ecto_repos: [InstaMarkdown.Repo]
+config :live_markdown,
+  ecto_repos: [LiveMarkdown.Repo]
 
 # Configures the endpoint
-config :insta_markdown, InstaMarkdownWeb.Endpoint,
+config :live_markdown, LiveMarkdownWeb.Endpoint,
   url: [host: "localhost"],
   secret_key_base: "vlzywSsO+2L1dOf6SVsVn7VJPMJ/oyr10wH7jCLcNl++SAuXkPQ20t/qDSefGEgI",
-  render_errors: [view: InstaMarkdownWeb.ErrorView, accepts: ~w(html json), layout: false],
-  pubsub_server: InstaMarkdown.PubSub,
+  render_errors: [view: LiveMarkdownWeb.ErrorView, accepts: ~w(html json), layout: false],
+  pubsub_server: LiveMarkdown.PubSub,
   live_view: [signing_salt: "5fx/EcCU"]
 
-config :insta_markdown, InstaMarkdown.Content,
+config :live_markdown, LiveMarkdown.Content,
   root_folder: "/home/alfredbaudisch/Documents/content",
   cache_name: :content_cache
 

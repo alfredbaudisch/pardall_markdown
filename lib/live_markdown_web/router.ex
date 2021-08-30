@@ -1,11 +1,11 @@
-defmodule InstaMarkdownWeb.Router do
-  use InstaMarkdownWeb, :router
+defmodule LiveMarkdownWeb.Router do
+  use LiveMarkdownWeb, :router
 
   pipeline :browser do
     plug :accepts, ["html"]
     plug :fetch_session
     plug :fetch_live_flash
-    plug :put_root_layout, {InstaMarkdownWeb.LayoutView, :root}
+    plug :put_root_layout, {LiveMarkdownWeb.LayoutView, :root}
     plug :protect_from_forgery
     plug :put_secure_browser_headers
   end
@@ -14,14 +14,14 @@ defmodule InstaMarkdownWeb.Router do
     plug :accepts, ["json"]
   end
 
-  scope "/", InstaMarkdownWeb do
+  scope "/", LiveMarkdownWeb do
     pipe_through :browser
 
     live "/", PageLive, :index
   end
 
   # Other scopes may use custom stacks.
-  # scope "/api", InstaMarkdownWeb do
+  # scope "/api", LiveMarkdownWeb do
   #   pipe_through :api
   # end
 
@@ -37,7 +37,7 @@ defmodule InstaMarkdownWeb.Router do
 
     scope "/" do
       pipe_through :browser
-      live_dashboard "/dashboard", metrics: InstaMarkdownWeb.Telemetry
+      live_dashboard "/dashboard", metrics: LiveMarkdownWeb.Telemetry
     end
   end
 end

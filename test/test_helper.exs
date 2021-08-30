@@ -1,2 +1,2 @@
 ExUnit.start()
-Ecto.Adapters.SQL.Sandbox.mode(InstaMarkdown.Repo, :manual)
+Ecto.Adapters.SQL.Sandbox.mode(LiveMarkdown.Repo, :manual)

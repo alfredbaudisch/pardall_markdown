@@ -1,4 +1,4 @@
-defmodule InstaMarkdownWeb.Telemetry do
+defmodule LiveMarkdownWeb.Telemetry do
   use Supervisor
   import Telemetry.Metrics
 
@@ -31,11 +31,11 @@ defmodule InstaMarkdownWeb.Telemetry do
       ),
 
       # Database Metrics
-      summary("insta_markdown.repo.query.total_time", unit: {:native, :millisecond}),
-      summary("insta_markdown.repo.query.decode_time", unit: {:native, :millisecond}),
-      summary("insta_markdown.repo.query.query_time", unit: {:native, :millisecond}),
-      summary("insta_markdown.repo.query.queue_time", unit: {:native, :millisecond}),
-      summary("insta_markdown.repo.query.idle_time", unit: {:native, :millisecond}),
+      summary("live_markdown.repo.query.total_time", unit: {:native, :millisecond}),
+      summary("live_markdown.repo.query.decode_time", unit: {:native, :millisecond}),
+      summary("live_markdown.repo.query.query_time", unit: {:native, :millisecond}),
+      summary("live_markdown.repo.query.queue_time", unit: {:native, :millisecond}),
+      summary("live_markdown.repo.query.idle_time", unit: {:native, :millisecond}),
 
       # VM Metrics
       summary("vm.memory.total", unit: {:byte, :kilobyte}),
@@ -49,7 +49,7 @@ defmodule InstaMarkdownWeb.Telemetry do
     [
       # A module, function and arguments to be invoked periodically.
       # This function must call :telemetry.execute/3 and a metric must be added above.
-      # {InstaMarkdownWeb, :count_users, []}
+      # {LiveMarkdownWeb, :count_users, []}
     ]
   end
 end

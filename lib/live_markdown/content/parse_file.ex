@@ -1,6 +1,6 @@
-defmodule InstaMarkdown.Content.ParseFile do
+defmodule LiveMarkdown.Content.ParseFile do
   require Logger
-  alias InstaMarkdown.Content.{Utils, Repository}
+  alias LiveMarkdown.Content.{Utils, Repository}
 
   def parse(path) do
     case Path.extname(path) do
