@@ -17,8 +17,13 @@ defmodule InstaMarkdown.Application do
       InstaMarkdownWeb.Endpoint,
       {
         InstaMarkdown.FileWatcher,
-        name: InstaMarkdown.FileWatcher, dirs: ["/home/alfredbaudisch/Documents/content"]
-      }
+        name: InstaMarkdown.FileWatcher, dirs: [InstaMarkdown.Content.Utils.root_folder()]
+      },
+      {ConCache,
+       [
+         name: Application.get_env(:insta_markdown, InstaMarkdown.Content)[:cache_name],
+         ttl_check_interval: false
+       ]}
       # Start a worker by calling: InstaMarkdown.Worker.start_link(arg)
       # {InstaMarkdown.Worker, arg}
     ]

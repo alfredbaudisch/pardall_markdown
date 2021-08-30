@@ -1,6 +1,6 @@
 defmodule InstaMarkdown.FileWatcher do
   use GenServer
-  alias InstaMarkdown.FileProcessor
+  alias InstaMarkdown.Content.Receiver
 
   def start_link(args) do
     GenServer.start_link(__MODULE__, args)
@@ -13,15 +13,14 @@ defmodule InstaMarkdown.FileWatcher do
   end
 
   def handle_info(
-        {:file_event, watcher_pid, {path, events} = data},
-        %{watcher_pid: watcher_pid} = state
+        {:file_event, _watcher_pid, {path, events}},
+        %{watcher_pid: _watcher_pid} = state
       ) do
-    IO.inspect(data)
-    # Your own logic for path and events
+    Receiver.event(path, events)
     {:noreply, state}
   end
 
-  def handle_info({:file_event, watcher_pid, :stop}, %{watcher_pid: watcher_pid} = state) do
+  def handle_info({:file_event, _watcher_pid, :stop}, %{watcher_pid: _watcher_pid} = state) do
     # Your own logic when monitor stop
     {:noreply, state}
   end

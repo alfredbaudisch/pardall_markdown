@@ -1,5 +1,5 @@
-defmodule InstaMarkdown.Content.ReceiveWatcherEvent do
-  alias InstaMarkdown.Content
+defmodule InstaMarkdown.Content.Receiver do
+  alias InstaMarkdown.Content.ParseFile
 
   @moduledoc """
   Process `FileSystem` events, directing the paths to their
@@ -51,33 +51,33 @@ defmodule InstaMarkdown.Content.ReceiveWatcherEvent do
 
   # Folder renamed or moved: source path.
   # Folder deleted
-  def process_event(path, [:moved_from, :isdir]) do
+  def event(path, [:moved_from, :isdir]) do
   end
 
   # Folder renamed or moved: destination path, there's a related `:moved_from` event.
   # Folder moved from an external folder
-  def process_event(path, [:moved_to, :isdir]) do
+  def event(path, [:moved_to, :isdir]) do
   end
 
-  def process_event(path, [:created, :isdir]) do
+  def event(path, [:created, :isdir]) do
   end
 
   # File renamed or moved: source path.
   # File deleted
-  def process_event(path, [:moved_from]) do
+  def event(path, [:moved_from]) do
   end
 
   # File renamed or moved: destination path
   # File moved from an external folder
-  def process_event(path, [:moved_to]) do
+  def event(path, [:moved_to]) do
   end
 
   # Final event related to a file's creation or modification,
   # it's the only one needed to be tracked in order to react
   # to a new or updated filed.
-  def process_event(path, [:modified, :closed]) do
-    Content.ParseFile.process_path(path)
+  def event(path, [:modified, :closed]) do
+    ParseFile.parse(path)
   end
 
-  def process_event({_path, _events}), do: {:ok, :ignore}
+  def event(_path, _events), do: {:ok, :ignore}
 end

@@ -19,7 +19,8 @@ config :insta_markdown, InstaMarkdownWeb.Endpoint,
   live_view: [signing_salt: "5fx/EcCU"]
 
 config :insta_markdown, InstaMarkdown.Content,
-  root_folder: "/home/alfredbaudisch/Documents/content"
+  root_folder: "/home/alfredbaudisch/Documents/content",
+  cache_name: :content_cache
 
 # Configures Elixir's Logger
 config :logger, :console,
