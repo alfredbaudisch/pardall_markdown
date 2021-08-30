@@ -8,33 +8,38 @@ defmodule LiveMarkdown.Content.Repository do
     Cache.get_all()
   end
 
+  def get_by_slug!(slug) do
+    Cache.get_by_slug(slug) ||
+      raise NotFoundError, "post with slug=#{slug} not found"
+  end
+
   def push(path, attrs, content, type \\ :post) do
-    model = get_content(path)
+    model = get_content_model(path)
 
     model =
       model
       |> Content.changeset(%{
         type: type,
-        path: path,
+        file_path: path,
         title: attrs.title,
         content: content,
         slug: attrs.slug,
-        url: attrs.slug,
         date: attrs.date
       })
       |> put_timestamps(model)
       |> Ecto.Changeset.apply_changes()
 
-    Cache.save(path, model)
+    Cache.save(model)
 
     Endpoint.broadcast!("content", "post_updated", model)
+    Endpoint.broadcast!("post_" <> attrs.slug, "post_updated", model)
   end
 
-  def get_path_id(path) do
+  defp get_path_id(path) do
     :crypto.hash(:sha, path) |> Base.encode16() |> String.downcase()
   end
 
-  defp get_content(path) do
+  defp get_content_model(path) do
     %Content{id: get_path_id(path)}
   end
 end

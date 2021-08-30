@@ -35,6 +35,7 @@ defmodule LiveMarkdown.Content.FileParser do
     end
   end
 
+  # From https://github.com/dashbitco/nimble_publisher
   defp parse_contents(path, contents) do
     case :binary.split(contents, ["\n---\n", "\r\n---\r\n"]) do
       [_] ->
