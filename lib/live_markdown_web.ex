@@ -90,6 +90,8 @@ defmodule LiveMarkdownWeb do
       import LiveMarkdownWeb.ErrorHelpers
       import LiveMarkdownWeb.Gettext
       alias LiveMarkdownWeb.Router.Helpers, as: Routes
+
+      import LiveMarkdownWeb.Utils
     end
   end
 

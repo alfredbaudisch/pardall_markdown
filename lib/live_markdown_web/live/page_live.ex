@@ -18,44 +18,22 @@ defmodule LiveMarkdownWeb.PageLive do
           posts
       end)
 
-    {:ok, assign(socket, query: "", results: %{}, posts: posts)}
+    {:ok, assign(socket, posts: posts) |> assign_page_title()}
   end
 
   @impl true
-  def handle_event("suggest", %{"q" => query}, socket) do
-    {:noreply, assign(socket, results: search(query), query: query)}
-  end
-
-  @impl true
-  def handle_event("search", %{"q" => query}, socket) do
-    case search(query) do
-      %{^query => vsn} ->
-        {:noreply, redirect(socket, external: "https://hexdocs.pm/#{query}/#{vsn}")}
-
-      _ ->
-        {:noreply,
-         socket
-         |> put_flash(:error, "No dependencies found matching \"#{query}\"")
-         |> assign(results: %{}, query: query)}
-    end
-  end
-
-  @impl true
-  def handle_info(%{event: "post_updated", payload: %{id: id} = content}, socket) do
-    posts = Map.put(socket.assigns[:posts], id, content)
+  def handle_info(
+        %{event: "post_updated", payload: %{id: id, is_published: is_published} = content},
+        socket
+      ) do
+    posts =
+      if is_published,
+        do: Map.put(socket.assigns[:posts], id, content),
+        else: Map.delete(socket.assigns[:posts], id)
 
     {:noreply, socket |> assign(:posts, posts)}
   end
 
-  defp search(query) do
-    if not LiveMarkdownWeb.Endpoint.config(:code_reloader) do
-      raise "action disabled when not in development"
-    end
-
-    for {app, desc, vsn} <- Application.started_applications(),
-        app = to_string(app),
-        String.starts_with?(app, query) and not List.starts_with?(desc, ~c"ERTS"),
-        into: %{},
-        do: {app, vsn}
-  end
+  defp assign_page_title(socket),
+    do: socket |> assign(:page_title, site_name())
 end
