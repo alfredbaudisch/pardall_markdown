@@ -19,11 +19,22 @@ defmodule LiveMarkdown.Application do
         LiveMarkdown.FileWatcher,
         name: LiveMarkdown.FileWatcher, dirs: [LiveMarkdown.Content.Utils.root_folder()]
       },
-      {ConCache,
-       [
-         name: Application.get_env(:live_markdown, LiveMarkdown.Content)[:cache_name],
-         ttl_check_interval: false
-       ]}
+      Supervisor.child_spec(
+        {ConCache,
+         [
+           name: Application.get_env(:live_markdown, LiveMarkdown.Content)[:cache_name],
+           ttl_check_interval: false
+         ]},
+        id: Application.get_env(:live_markdown, LiveMarkdown.Content)[:cache_name]
+      ),
+      Supervisor.child_spec(
+        {ConCache,
+         [
+           name: Application.get_env(:live_markdown, LiveMarkdown.Content)[:index_cache_name],
+           ttl_check_interval: false
+         ]},
+        id: Application.get_env(:live_markdown, LiveMarkdown.Content)[:index_cache_name]
+      )
       # Start a worker by calling: LiveMarkdown.Worker.start_link(arg)
       # {LiveMarkdown.Worker, arg}
     ]

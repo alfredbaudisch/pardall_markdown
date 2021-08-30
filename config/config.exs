@@ -20,7 +20,8 @@ config :live_markdown, LiveMarkdownWeb.Endpoint,
 
 config :live_markdown, LiveMarkdown.Content,
   root_folder: "/home/alfredbaudisch/Documents/content",
-  cache_name: :content_cache
+  cache_name: :content_cache,
+  index_cache_name: :content_index_cache
 
 # Configures Elixir's Logger
 config :logger, :console,
