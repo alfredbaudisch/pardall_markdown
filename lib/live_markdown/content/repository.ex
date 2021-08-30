@@ -2,14 +2,15 @@ defmodule LiveMarkdown.Content.Repository do
   alias LiveMarkdown.Content
   alias LiveMarkdown.Content.{Cache, Utils}
   alias LiveMarkdownWeb.Endpoint
-  alias Ecto.Changeset
+  import LiveMarkdown.Content.Repository.Utils
 
   def push(path, content, title, type \\ :html) do
-    slug = get_slug_from_path(path, type)
+    slug = Utils.get_slug_from_path(path, type)
     model = get_content(path)
 
     changeset =
-      Content.changeset(model, %{
+      model
+      |> Content.changeset(%{
         type: type,
         path: path,
         title: title,
@@ -18,8 +19,11 @@ defmodule LiveMarkdown.Content.Repository do
         url: slug
       })
       |> put_timestamps(model)
+      |> Ecto.Changeset.apply_changes()
 
-    Cache.save(path, changeset |> Ecto.Changeset.apply_changes())
+    Cache.save(path, changeset)
+
+    Endpoint.broadcast!("content", "content_updated", changeset)
   end
 
   def get_path_id(path) do
@@ -28,31 +32,5 @@ defmodule LiveMarkdown.Content.Repository do
 
   defp get_content(path) do
     %Content{id: get_path_id(path)}
-  end
-
-  defp get_slug_from_path(path, type) do
-    cond do
-      type in [:text, :html] ->
-        path
-        |> String.replace(Path.extname(path), "")
-
-      true ->
-        path
-    end
-    |> String.replace(Utils.root_folder(), "")
-    |> Slug.slugify(ignore: "/")
-  end
-
-  defp put_timestamps(changeset, %Content{inserted_at: nil}) do
-    now = NaiveDateTime.utc_now()
-
-    changeset
-    |> Changeset.put_change(:inserted_at, now)
-    |> Changeset.put_change(:updated_at, now)
-  end
-
-  defp put_timestamps(changeset, _model) do
-    changeset
-    |> Changeset.put_change(:updated_at, NaiveDateTime.utc_now())
   end
 end
