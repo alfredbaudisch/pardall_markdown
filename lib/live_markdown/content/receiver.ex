@@ -1,5 +1,5 @@
 defmodule LiveMarkdown.Content.Receiver do
-  alias LiveMarkdown.Content.ParseFile
+  alias LiveMarkdown.Content.FileParser
 
   @moduledoc """
   Process `FileSystem` events, directing the paths to their
@@ -76,7 +76,7 @@ defmodule LiveMarkdown.Content.Receiver do
   # it's the only one needed to be tracked in order to react
   # to a new or updated filed.
   def event(path, [:modified, :closed]) do
-    ParseFile.parse(path)
+    FileParser.extract(path)
   end
 
   def event(_path, _events), do: {:ok, :ignore}

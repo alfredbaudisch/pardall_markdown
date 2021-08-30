@@ -11,11 +11,12 @@ defmodule LiveMarkdown.Content do
     field :title, :string
     field :slug, :string
     field :url, :string
-    timestamps(autogenerate: {NaiveDateTime, :utc_now, 1})
+    field :date, :utc_datetime
+    timestamps(autogenerate: {DateTime, :utc_now, 1})
   end
 
   def changeset(model, params) do
     model
-    |> cast(params, [:path, :content, :title, :slug, :url])
+    |> cast(params, [:path, :content, :title, :slug, :date, :url])
   end
 end

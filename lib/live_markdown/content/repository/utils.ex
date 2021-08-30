@@ -12,6 +12,6 @@ defmodule LiveMarkdown.Content.Repository.Utils do
 
   def put_timestamps(changeset, _model) do
     changeset
-    |> Changeset.put_change(:updated_at, NaiveDateTime.utc_now())
+    |> Changeset.put_change(:updated_at, DateTime.utc_now())
   end
 end

@@ -8,8 +8,7 @@ defmodule LiveMarkdown.Content.Repository do
     Cache.get_all()
   end
 
-  def push(path, content, title, type \\ :post) do
-    slug = Utils.get_slug_from_path(path, type)
+  def push(path, attrs, content, type \\ :post) do
     model = get_content(path)
 
     model =
@@ -17,10 +16,11 @@ defmodule LiveMarkdown.Content.Repository do
       |> Content.changeset(%{
         type: type,
         path: path,
-        title: title,
+        title: attrs.title,
         content: content,
-        slug: slug,
-        url: slug
+        slug: attrs.slug,
+        url: attrs.slug,
+        date: attrs.date
       })
       |> put_timestamps(model)
       |> Ecto.Changeset.apply_changes()
