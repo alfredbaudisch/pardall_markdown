@@ -3,14 +3,14 @@ defmodule LiveMarkdown.Content.Utils do
 
   def get_slug_from_path(path, type) do
     cond do
-      type in [:text, :html] ->
+      type in [:post] ->
         path
         |> String.replace(Path.extname(path), "")
 
       true ->
         path
     end
-    |> String.replace(Utils.root_folder(), "")
+    |> String.replace(root_folder(), "")
     |> Slug.slugify(ignore: "/")
   end
 end

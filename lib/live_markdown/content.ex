@@ -3,8 +3,9 @@ defmodule LiveMarkdown.Content do
   import Ecto.Changeset
 
   @primary_key {:id, :binary_id, autogenerate: true}
+  @foreign_key_type :binary_id
   embedded_schema do
-    field :type, Ecto.Enum, values: [:html, :text, :image, :audio, :video, :pdf]
+    field :type, Ecto.Enum, values: [:post, :image, :audio, :video, :pdf]
     field :path, :string
     field :content, :string
     field :title, :string

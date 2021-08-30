@@ -4,11 +4,15 @@ defmodule LiveMarkdown.Content.Repository do
   alias LiveMarkdownWeb.Endpoint
   import LiveMarkdown.Content.Repository.Utils
 
-  def push(path, content, title, type \\ :html) do
+  def get_all do
+    Cache.get_all()
+  end
+
+  def push(path, content, title, type \\ :post) do
     slug = Utils.get_slug_from_path(path, type)
     model = get_content(path)
 
-    changeset =
+    model =
       model
       |> Content.changeset(%{
         type: type,
@@ -21,9 +25,9 @@ defmodule LiveMarkdown.Content.Repository do
       |> put_timestamps(model)
       |> Ecto.Changeset.apply_changes()
 
-    Cache.save(path, changeset)
+    Cache.save(path, model)
 
-    Endpoint.broadcast!("content", "content_updated", changeset)
+    Endpoint.broadcast!("content", "post_updated", model)
   end
 
   def get_path_id(path) do
