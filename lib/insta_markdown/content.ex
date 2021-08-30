@@ -1,7 +1,17 @@
 defmodule InstaMarkdown.Content do
-  alias InstaMarkdown.Content.ReceiveWatcherEvent
+  use InstaMarkdown.Schema
 
-  def receive_watcher_event({path, events}) do
-    ReceiveWatcherEvent.process_event(path, events)
+  embedded_schema do
+    field :path, :string
+    field :content, :string
+    field :title, :string
+    field :slug, :string
+    field :url, :string
+    timestamps()
+  end
+
+  def changeset(model, params) do
+    model
+    |> cast(params, [:path, :content, :title, :slug, :url])
   end
 end
