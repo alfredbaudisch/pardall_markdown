@@ -21,6 +21,10 @@ defmodule LiveMarkdownWeb.Live.PostSingle do
     {:noreply, socket |> assign(:post, content) |> assign_page_title(content)}
   end
 
+  def handle_info(%{event: "post_deleted", payload: _}, socket) do
+    {:noreply, socket |> put_flash(:error, "This post has been deleted or moved to another URL.")}
+  end
+
   defp slug_params_to_slug(slug), do: "/" <> Enum.join(slug, "/")
 
   defp assign_page_title(socket, %Content{title: title}),

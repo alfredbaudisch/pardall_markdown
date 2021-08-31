@@ -1,6 +1,6 @@
 defmodule LiveMarkdown.Content.FileParser do
   require Logger
-  alias LiveMarkdown.Content.{Repository, Utils}
+  alias LiveMarkdown.Content.{Repository, Utils, Cache}
 
   def extract!(path) do
     if File.exists?(path) do
@@ -8,7 +8,7 @@ defmodule LiveMarkdown.Content.FileParser do
         do: extract_folder!(path),
         else: extract_file!(path)
     else
-      Repository.notify_deleted(path)
+      Repository.delete_path(path)
     end
   end
 
@@ -17,6 +17,17 @@ defmodule LiveMarkdown.Content.FileParser do
         path = Path.join(parent_path, child) do
       if File.dir?(path), do: extract_folder!(path), else: extract_file!(path)
     end
+
+    # Index contents only for the current folder, that's why
+    # we need another comprehension here. Each iteraction
+    # of `extract_folder/2` indexes itself into cache.
+    path_index_contents =
+      for child <- File.ls!(parent_path),
+          path = Path.join(parent_path, child) do
+        %{path: path, slug: Utils.get_slug_from_path(path)}
+      end
+
+    Cache.save_path(parent_path, path_index_contents)
   end
 
   def extract_file!(path) do
