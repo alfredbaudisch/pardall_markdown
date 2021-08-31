@@ -2,6 +2,13 @@ defmodule LiveMarkdown.Content.FileParser do
   require Logger
   alias LiveMarkdown.Content.{Repository, Utils}
 
+  def extract_folder!(parent_path) do
+    for child <- File.ls!(parent_path),
+        path = Path.join(parent_path, child) do
+      if File.dir?(path), do: extract_folder!(path), else: extract(path)
+    end
+  end
+
   def extract(path) do
     case path |> Path.extname() |> String.downcase() do
       extname when extname in [".md", ".markdown"] ->
@@ -20,7 +27,7 @@ defmodule LiveMarkdown.Content.FileParser do
       attrs =
         attrs
         |> put_slug(path)
-        |> parse_and_put_date()
+        |> parse_and_put_date!()
 
       Repository.push(path, attrs, html_content)
       Logger.info("[Content.ParseFile] Pushed converted Markdown: #{path}")
@@ -63,7 +70,7 @@ defmodule LiveMarkdown.Content.FileParser do
 
   defp put_slug(attrs, path), do: Map.put(attrs, :slug, Utils.get_slug_from_path(path))
 
-  defp parse_and_put_date(%{date: date} = attrs) do
+  defp parse_and_put_date!(%{date: date} = attrs) do
     date =
       case date do
         %Date{} = dt -> DateTime.new!(dt, ~T[00:00:00])

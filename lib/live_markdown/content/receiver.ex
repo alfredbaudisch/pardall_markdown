@@ -57,6 +57,7 @@ defmodule LiveMarkdown.Content.Receiver do
   # Folder renamed or moved: destination path, there's a related `:moved_from` event.
   # Folder moved from an external folder
   def event(path, [:moved_to, :isdir]) do
+    FileParser.extract_folder!(path)
   end
 
   def event(path, [:created, :isdir]) do

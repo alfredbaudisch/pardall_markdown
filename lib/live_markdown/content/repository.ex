@@ -1,6 +1,6 @@
 defmodule LiveMarkdown.Content.Repository do
   alias LiveMarkdown.Content
-  alias LiveMarkdown.Content.{Cache, Utils}
+  alias LiveMarkdown.Content.Cache
   alias LiveMarkdownWeb.Endpoint
   import LiveMarkdown.Content.Repository.Utils
 
@@ -10,7 +10,7 @@ defmodule LiveMarkdown.Content.Repository do
 
   def get_by_slug!(slug) do
     Cache.get_by_slug(slug) ||
-      raise NotFoundError, "post with slug=#{slug} not found"
+      raise LiveMarkdown.NotFoundError, "post with slug=#{slug} not found"
   end
 
   def push(path, attrs, content, type \\ :post) do

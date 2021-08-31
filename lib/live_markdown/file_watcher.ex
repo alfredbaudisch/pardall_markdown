@@ -14,16 +14,15 @@ defmodule LiveMarkdown.FileWatcher do
   end
 
   def handle_info(
-        {:file_event, _watcher_pid, {path, events} = data},
-        %{watcher_pid: _watcher_pid} = state
+        {:file_event, _, {path, events} = data},
+        %{watcher_pid: _} = state
       ) do
     Logger.info("[FileWatcher] #{inspect(data)}")
     Receiver.event(path, events)
     {:noreply, state}
   end
 
-  def handle_info({:file_event, _watcher_pid, :stop}, %{watcher_pid: _watcher_pid} = state) do
-    # Your own logic when monitor stop
+  def handle_info({:file_event, _, :stop}, %{watcher_pid: _} = state) do
     {:noreply, state}
   end
 end
