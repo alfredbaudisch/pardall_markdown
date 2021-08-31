@@ -2,24 +2,34 @@ defmodule LiveMarkdown.Content.FileParser do
   require Logger
   alias LiveMarkdown.Content.{Repository, Utils}
 
-  def extract_folder!(parent_path) do
-    for child <- File.ls!(parent_path),
-        path = Path.join(parent_path, child) do
-      if File.dir?(path), do: extract_folder!(path), else: extract(path)
+  def extract!(path) do
+    if File.exists?(path) do
+      if File.dir?(path),
+        do: extract_folder!(path),
+        else: extract_file!(path)
+    else
+      Repository.notify_deleted(path)
     end
   end
 
-  def extract(path) do
+  def extract_folder!(parent_path) do
+    for child <- File.ls!(parent_path),
+        path = Path.join(parent_path, child) do
+      if File.dir?(path), do: extract_folder!(path), else: extract_file!(path)
+    end
+  end
+
+  def extract_file!(path) do
     case path |> Path.extname() |> String.downcase() do
       extname when extname in [".md", ".markdown"] ->
-        parse(path)
+        parse!(path)
 
       _ ->
         Logger.warn("[Content.ParseFile] Received file #{path}, but no need to parse")
     end
   end
 
-  defp parse(path) do
+  defp parse!(path) do
     with {:ok, raw_content} <- File.read(path),
          {:ok, attrs, body} <- parse_contents(path, raw_content),
          {:ok, attrs} <- validate_attrs(attrs),

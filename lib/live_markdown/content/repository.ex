@@ -3,6 +3,7 @@ defmodule LiveMarkdown.Content.Repository do
   alias LiveMarkdown.Content.Cache
   alias LiveMarkdownWeb.Endpoint
   import LiveMarkdown.Content.Repository.Utils
+  require Logger
 
   def get_all do
     Cache.get_all()
@@ -11,6 +12,10 @@ defmodule LiveMarkdown.Content.Repository do
   def get_by_slug!(slug) do
     Cache.get_by_slug(slug) ||
       raise LiveMarkdown.NotFoundError, "post with slug=#{slug} not found"
+  end
+
+  def notify_deleted(path) do
+    Logger.error("Delete content not implemented yet (path #{path})")
   end
 
   def push(path, attrs, content, type \\ :post) do
