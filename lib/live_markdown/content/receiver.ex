@@ -1,5 +1,6 @@
 defmodule LiveMarkdown.Content.Receiver do
   alias LiveMarkdown.Content.FileParser
+  require Logger
 
   @moduledoc """
   Process `FileSystem` events, directing the paths to their
@@ -23,10 +24,6 @@ defmodule LiveMarkdown.Content.Receiver do
       for the folder, without any event being created for the folder's contents
       (not even for subfolders).
   
-  ### `:created`
-  
-    - Folder created.
-  
   ## File Events
   ### `:moved_from`
   
@@ -49,36 +46,32 @@ defmodule LiveMarkdown.Content.Receiver do
     but it's currently of no use for the purpose of this application.
   """
 
-  # Folder renamed or moved: source path.
-  # Folder deleted
-  def event(path, [:moved_from, :isdir]) do
-  end
+  # `:moved_from`:
+  #   - Folder renamed or moved: source path.
+  #   - Folder deleted
+  # `:moved_to`:
+  #   - Folder renamed or moved: destination path
+  #   - Folder moved from an external folder
+  def event(path, [event, :isdir]) when event in [:moved_from, :moved_to],
+    do: FileParser.extract!(path)
 
-  # Folder renamed or moved: destination path, there's a related `:moved_from` event.
-  # Folder moved from an external folder
-  def event(path, [:moved_to, :isdir]) do
-    FileParser.extract_folder!(path)
-  end
-
-  def event(path, [:created, :isdir]) do
-  end
-
-  # File renamed or moved: source path.
-  # File deleted
-  def event(path, [:moved_from]) do
-  end
-
-  # File renamed or moved: destination path
-  # File moved from an external folder
-  def event(path, [:moved_to]) do
-  end
-
-  # Final event related to a file's creation or modification,
-  # it's the only one needed to be tracked in order to react
-  # to a new or updated filed.
-  def event(path, [:modified, :closed]) do
-    FileParser.extract(path)
-  end
+  # `:moved_from`:
+  #   - File renamed or moved: source path.
+  #   - File deleted
+  # `:moved_to`:
+  #   - File renamed or moved: destination path
+  #   - File moved from an external folder
+  # `:modified, :closed`:
+  #   - Final event related to a file's creation or modification,
+  #     it's the only one needed to be tracked in order to react
+  #     to a new or updated filed.
+  def event(path, event)
+      when event in [
+             [:moved_from],
+             [:moved_to],
+             [:modified, :closed]
+           ],
+      do: FileParser.extract!(path)
 
   def event(_path, _events), do: {:ok, :ignore}
 end
