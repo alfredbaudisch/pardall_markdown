@@ -1,6 +1,6 @@
 <section class="row">
   <ul>
-  <%= for {_id, post} <- @posts do %>
+  <%= for post <- @posts do %>
     <li>
       <%= live_redirect post.title, to: post.slug %> (<%= Date.to_iso8601(post.date) %>)
     </li>

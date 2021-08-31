@@ -18,6 +18,11 @@ defmodule LiveMarkdown.Content.Repository do
     Cache.get_all()
   end
 
+  def get_all_published do
+    get_all()
+    |> Enum.filter(fn %{is_published: is_published} -> is_published end)
+  end
+
   def get_by_slug!(slug) do
     Cache.get_by_slug(slug) ||
       raise LiveMarkdown.NotFoundError, "post with slug=#{slug} not found"
