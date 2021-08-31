@@ -31,7 +31,7 @@ defmodule LiveMarkdown.Application do
       ),
       {
         LiveMarkdown.FileWatcher,
-        name: LiveMarkdown.FileWatcher, dirs: [LiveMarkdown.Content.Utils.root_folder()]
+        name: LiveMarkdown.FileWatcher, dirs: [LiveMarkdown.Content.Utils.root_path()]
       }
       # Start a worker by calling: LiveMarkdown.Worker.start_link(arg)
       # {LiveMarkdown.Worker, arg}

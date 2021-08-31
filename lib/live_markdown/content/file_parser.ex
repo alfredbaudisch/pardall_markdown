@@ -3,24 +3,31 @@ defmodule LiveMarkdown.Content.FileParser do
   alias LiveMarkdown.Content.{Repository, Utils, Cache}
 
   def load_all! do
-    Utils.root_folder()
+    Utils.root_path()
     |> extract_folder!()
   end
 
   def extract!(path) do
-    if File.exists?(path) do
-      if File.dir?(path),
-        do: extract_folder!(path),
-        else: extract_file!(path)
-    else
-      Repository.delete_path(path)
+    # I don't like nested if's in Elixir, but there's no better
+    # way to do this in this specific case
+    if not Utils.is_path_from_static_assets?(path) do
+      if File.exists?(path) do
+        if File.dir?(path),
+          do: extract_folder!(path),
+          else: extract_file!(path)
+      else
+        Repository.delete_path(path)
+      end
     end
   end
 
-  def extract_folder!(parent_path) do
+  defp extract_folder_if_valid!(path),
+    do: if(not Utils.is_path_from_static_assets?(path), do: extract_folder!(path))
+
+  defp extract_folder!(parent_path) do
     for child <- File.ls!(parent_path),
         path = Path.join(parent_path, child) do
-      if File.dir?(path), do: extract_folder!(path), else: extract_file!(path)
+      if File.dir?(path), do: extract_folder_if_valid!(path), else: extract_file!(path)
     end
 
     # Index contents only for the current folder, that's why
@@ -35,7 +42,7 @@ defmodule LiveMarkdown.Content.FileParser do
     Cache.save_path(parent_path, path_index_contents)
   end
 
-  def extract_file!(path) do
+  defp extract_file!(path) do
     case path |> Path.extname() |> String.downcase() do
       extname when extname in [".md", ".markdown"] ->
         parse!(path)

@@ -19,7 +19,8 @@ config :live_markdown, LiveMarkdownWeb.Endpoint,
   live_view: [signing_salt: "5fx/EcCU"]
 
 config :live_markdown, LiveMarkdown.Content,
-  root_folder: "/home/alfredbaudisch/Documents/content",
+  root_path: "/home/alfredbaudisch/Documents/content",
+  static_assets_folder_name: "static",
   cache_name: :content_cache,
   index_cache_name: :content_index_cache,
   site_name: "LiveMarkdown"

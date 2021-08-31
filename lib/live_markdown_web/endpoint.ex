@@ -1,5 +1,6 @@
 defmodule LiveMarkdownWeb.Endpoint do
   use Phoenix.Endpoint, otp_app: :live_markdown
+  alias LiveMarkdown.Content
 
   # The session will be stored in the cookie and signed,
   # this means its contents can be read but not tampered with.
@@ -28,9 +29,9 @@ defmodule LiveMarkdownWeb.Endpoint do
 
   plug Plug.Static,
     at: "/",
-    from: LiveMarkdown.Content.Utils.root_folder(),
+    from: Content.Utils.root_path(),
     gzip: true,
-    only: ~w(static)
+    only: [Content.Utils.static_assets_folder_name()]
 
   # Code reloading can be explicitly enabled under the
   # :code_reloader configuration of your endpoint.
