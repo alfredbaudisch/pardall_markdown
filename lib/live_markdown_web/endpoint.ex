@@ -23,7 +23,7 @@ defmodule LiveMarkdownWeb.Endpoint do
   plug Plug.Static,
     at: "/",
     from: :live_markdown,
-    gzip: false,
+    gzip: true,
     only: ~w(assets fonts images favicon.ico robots.txt)
 
   plug Plug.Static,
@@ -38,7 +38,6 @@ defmodule LiveMarkdownWeb.Endpoint do
     socket "/phoenix/live_reload/socket", Phoenix.LiveReloader.Socket
     plug Phoenix.LiveReloader
     plug Phoenix.CodeReloader
-    plug Phoenix.Ecto.CheckRepoStatus, otp_app: :live_markdown
   end
 
   plug Phoenix.LiveDashboard.RequestLogger,

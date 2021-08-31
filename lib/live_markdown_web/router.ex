@@ -14,18 +14,6 @@ defmodule LiveMarkdownWeb.Router do
     plug :accepts, ["json"]
   end
 
-  scope "/", LiveMarkdownWeb do
-    pipe_through :browser
-
-    live "/", PageLive, :index
-    live "/*slug", Live.PostSingle, :show, as: :posts
-  end
-
-  # Other scopes may use custom stacks.
-  # scope "/api", LiveMarkdownWeb do
-  #   pipe_through :api
-  # end
-
   # Enables LiveDashboard only for development
   #
   # If you want to use the LiveDashboard in production, you should put
@@ -41,4 +29,16 @@ defmodule LiveMarkdownWeb.Router do
       live_dashboard "/dashboard", metrics: LiveMarkdownWeb.Telemetry
     end
   end
+
+  scope "/", LiveMarkdownWeb do
+    pipe_through :browser
+
+    live "/", PageLive, :index
+    live "/*slug", Live.PostSingle, :show, as: :posts
+  end
+
+  # Other scopes may use custom stacks.
+  # scope "/api", LiveMarkdownWeb do
+  #   pipe_through :api
+  # end
 end

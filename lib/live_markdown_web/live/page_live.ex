@@ -12,20 +12,28 @@ defmodule LiveMarkdownWeb.PageLive do
   end
 
   @impl true
-  def handle_info(
-        %{event: "post_updated", payload: %{id: id, is_published: is_published} = content},
-        socket
-      ) do
+  def handle_info(%{event: "post_created", payload: _}, socket) do
+    {:noreply, socket |> assign(:posts, Repository.get_all_published())}
+  end
+
+  @impl true
+  def handle_info(%{event: "post_updated", payload: %{id: id} = post}, socket) do
+    # Isn't it easier to just reload all posts? `Repository.get_all_published()`
     posts =
-      if is_published,
-        do: Map.put(socket.assigns[:posts], id, content),
-        else: Map.delete(socket.assigns[:posts], id)
+      socket.assigns[:posts]
+      |> Enum.map(fn
+        %{id: post_id} when post_id == id -> post
+        i_post -> i_post
+      end)
+      |> Repository.filter_by_is_published()
+      |> Repository.sort_by_published_date()
 
     {:noreply, socket |> assign(:posts, posts)}
   end
 
   @impl true
   def handle_info(%{event: "post_events", payload: payload}, socket) do
+    # One or more posts were deleted, reload all posts
     if Enum.find(payload, fn
          {_, :deleted} -> true
          _ -> false
