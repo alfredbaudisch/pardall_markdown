@@ -13,10 +13,6 @@ defmodule LiveMarkdown.Application do
       {Phoenix.PubSub, name: LiveMarkdown.PubSub},
       # Start the Endpoint (http/https)
       LiveMarkdownWeb.Endpoint,
-      {
-        LiveMarkdown.FileWatcher,
-        name: LiveMarkdown.FileWatcher, dirs: [LiveMarkdown.Content.Utils.root_folder()]
-      },
       Supervisor.child_spec(
         {ConCache,
          [
@@ -32,7 +28,11 @@ defmodule LiveMarkdown.Application do
            ttl_check_interval: false
          ]},
         id: Application.get_env(:live_markdown, LiveMarkdown.Content)[:index_cache_name]
-      )
+      ),
+      {
+        LiveMarkdown.FileWatcher,
+        name: LiveMarkdown.FileWatcher, dirs: [LiveMarkdown.Content.Utils.root_folder()]
+      }
       # Start a worker by calling: LiveMarkdown.Worker.start_link(arg)
       # {LiveMarkdown.Worker, arg}
     ]

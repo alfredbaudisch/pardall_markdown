@@ -6,6 +6,10 @@ defmodule LiveMarkdown.Content.Repository do
   import LiveMarkdown.Content.Repository.Filters
   require Logger
 
+  def init do
+    Cache.delete_all()
+  end
+
   #
   # CRUD interface
   #

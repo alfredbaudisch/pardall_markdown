@@ -1,6 +1,5 @@
 defmodule LiveMarkdown.Content.Receiver do
   alias LiveMarkdown.Content.FileParser
-  require Logger
 
   @moduledoc """
   Process `FileSystem` events, directing the paths to their
@@ -42,7 +41,7 @@ defmodule LiveMarkdown.Content.Receiver do
     - When a file is created, the event `:created` is created.
     - For each modification, there's an event `:modified`.
     - Finishing the creation and/or modification of a file ends with `[:modified, :closed]`.
-    - The event `:attribute` is also created in file creation,
+    - The event `:attribute` is also created during file creation/modification,
     but it's currently of no use for the purpose of this application.
   """
 
@@ -64,7 +63,7 @@ defmodule LiveMarkdown.Content.Receiver do
   # `:modified, :closed`:
   #   - Final event related to a file's creation or modification,
   #     it's the only one needed to be tracked in order to react
-  #     to a new or updated filed.
+  #     to a new or updated file.
   def event(path, event)
       when event in [
              [:moved_from],

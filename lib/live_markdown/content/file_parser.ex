@@ -2,6 +2,11 @@ defmodule LiveMarkdown.Content.FileParser do
   require Logger
   alias LiveMarkdown.Content.{Repository, Utils, Cache}
 
+  def load_all! do
+    Utils.root_folder()
+    |> extract_folder!()
+  end
+
   def extract!(path) do
     if File.exists?(path) do
       if File.dir?(path),

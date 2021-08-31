@@ -59,6 +59,14 @@ defmodule LiveMarkdown.Content.Cache do
     ConCache.delete(@cache_name, get_key(slug))
   end
 
+  def delete_all do
+    ConCache.ets(@cache_name)
+    |> :ets.delete_all_objects()
+
+    ConCache.ets(@index_cache_name)
+    |> :ets.delete_all_objects()
+  end
+
   defp get_key(slug), do: {:slug, slug}
   defp get_path_key(path), do: {:path, path}
 end
