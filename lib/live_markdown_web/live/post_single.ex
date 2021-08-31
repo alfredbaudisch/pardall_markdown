@@ -1,6 +1,5 @@
 defmodule LiveMarkdownWeb.Live.PostSingle do
   use LiveMarkdownWeb, :live_view
-  alias LiveMarkdown.Content.Repository
   alias LiveMarkdown.Content
 
   def mount(%{"slug" => slug}, _session, socket) do
@@ -9,7 +8,7 @@ defmodule LiveMarkdownWeb.Live.PostSingle do
       |> slug_params_to_slug()
 
     if connected?(socket) do
-      LiveMarkdownWeb.Endpoint.subscribe("post_" <> slug)
+      Endpoint.subscribe("post_" <> slug)
     end
 
     post = Repository.get_by_slug!(slug)

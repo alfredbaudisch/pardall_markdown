@@ -47,6 +47,9 @@ defmodule LiveMarkdownWeb do
       use Phoenix.LiveView,
         layout: {LiveMarkdownWeb.LayoutView, "live.html"}
 
+      alias LiveMarkdownWeb.Endpoint
+      alias LiveMarkdown.Content.Repository
+
       unquote(view_helpers())
     end
   end

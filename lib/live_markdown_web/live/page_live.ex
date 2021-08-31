@@ -1,11 +1,10 @@
 defmodule LiveMarkdownWeb.PageLive do
   use LiveMarkdownWeb, :live_view
-  alias LiveMarkdown.Content.Repository
 
   @impl true
   def mount(_params, _session, socket) do
     if connected?(socket) do
-      LiveMarkdownWeb.Endpoint.subscribe("content")
+      Endpoint.subscribe("content")
     end
 
     {:ok, assign(socket, posts: Repository.get_all_published()) |> assign_page_title()}
@@ -25,8 +24,8 @@ defmodule LiveMarkdownWeb.PageLive do
         %{id: post_id} when post_id == id -> post
         i_post -> i_post
       end)
-      |> Repository.filter_by_is_published()
-      |> Repository.sort_by_published_date()
+      |> Repository.Filters.filter_by_is_published()
+      |> Repository.Filters.sort_by_published_date()
 
     {:noreply, socket |> assign(:posts, posts)}
   end

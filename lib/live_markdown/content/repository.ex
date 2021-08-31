@@ -3,6 +3,7 @@ defmodule LiveMarkdown.Content.Repository do
   alias LiveMarkdown.Content.Cache
   alias LiveMarkdownWeb.Endpoint
   import LiveMarkdown.Content.Repository.Utils
+  import LiveMarkdown.Content.Repository.Filters
   require Logger
 
   #
@@ -52,13 +53,6 @@ defmodule LiveMarkdown.Content.Repository do
       Endpoint.broadcast!("post_" <> slug, "post_deleted", true)
     end
   end
-
-  #
-  # Filtering and sorting helpers
-  #
-
-  def filter_by_is_published(posts), do: posts |> Enum.filter(& &1.is_published)
-  def sort_by_published_date(posts), do: posts |> Enum.sort_by(& &1.date, {:desc, DateTime})
 
   #
   # Data helpers
