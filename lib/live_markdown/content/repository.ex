@@ -34,17 +34,18 @@ defmodule LiveMarkdown.Content.Repository do
     end
   end
 
-  def push_post(path, %{slug: slug} = attrs, content, type \\ :post) do
+  def push_post(path, %{slug: slug} = attrs, content, _type \\ :post) do
     model = get_by_slug(slug) || %Post{}
 
     model
     |> Post.changeset(%{
-      type: type,
+      type: get_post_type_from_taxonomies(attrs.categories),
       file_path: path,
       title: attrs.title,
       content: content,
       slug: attrs.slug,
       date: attrs.date,
+      summary: Map.get(attrs, :summary, nil),
       is_published: Map.get(attrs, :published, false),
       # for now, when a post is pushed to the repository, only "categories" are known
       taxonomies: attrs.categories
@@ -72,25 +73,30 @@ defmodule LiveMarkdown.Content.Repository do
   # Data helpers
   #
 
+  # No taxonomy or a contains the root taxonomy: it's a page
+  defp get_post_type_from_taxonomies([]), do: :page
+  defp get_post_type_from_taxonomies([%{slug: "/"}]), do: :page
+  defp get_post_type_from_taxonomies(_), do: :post
+
   defp save_content_and_broadcast!(
-         %Post{id: nil, file_path: path, taxonomies: taxonomies, slug: slug} = model
+         %Post{id: nil, file_path: path, taxonomies: taxonomies} = model
        ) do
     model = %{model | id: get_path_id(path)}
-    save_taxonomies(taxonomies, slug)
+    save_taxonomies(taxonomies, model)
     Cache.save_post(model)
     Endpoint.broadcast!("content", "post_created", model)
   end
 
-  defp save_content_and_broadcast!(%Post{slug: slug, taxonomies: taxonomies} = model) do
-    save_taxonomies(taxonomies, slug)
+  defp save_content_and_broadcast!(%Post{taxonomies: taxonomies, slug: slug} = model) do
+    save_taxonomies(taxonomies, model)
     Cache.save_post(model)
     Endpoint.broadcast!("content", "post_updated", model)
     Endpoint.broadcast!("post_" <> slug, "post_updated", model)
   end
 
-  defp save_taxonomies([%Taxonomy{} = _ | _] = taxonomies, post_slug) do
+  defp save_taxonomies([%Taxonomy{} = _ | _] = taxonomies, %Post{} = post) do
     taxonomies
-    |> Enum.map(&Cache.save_taxonomy_with_post(&1, post_slug))
+    |> Enum.map(&Cache.save_taxonomy_with_post(&1, post))
   end
 
   defp get_path_id(path) do

@@ -6,8 +6,9 @@ defmodule LiveMarkdown.Post do
   @foreign_key_type :binary_id
   embedded_schema do
     field :type, Ecto.Enum, values: [:post, :page], default: :post
-    field :content, :string
     field :title, :string
+    field :summary, :string
+    field :content, :string
     field :slug, :string
     field :date, :utc_datetime
     field :file_path, :string
@@ -20,8 +21,9 @@ defmodule LiveMarkdown.Post do
     model
     |> cast(params, [
       :type,
-      :content,
       :title,
+      :summary,
+      :content,
       :slug,
       :date,
       :file_path,

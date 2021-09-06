@@ -56,14 +56,16 @@ defmodule LiveMarkdown.Content.FileParser do
     with {:ok, raw_content} <- File.read(path),
          {:ok, attrs, body} <- parse_contents(path, raw_content),
          {:ok, attrs} <- validate_attrs(attrs),
-         {:ok, html_content, _} <- convert_markdown_body(body) do
+         {:ok, body_html, _} <- markdown_to_html(body),
+         {:ok, summary_html, _} <- maybe_summary_to_html(attrs) do
       attrs =
         attrs
         |> extract_and_put_slug(path)
         |> extract_and_put_categories(path)
         |> parse_and_put_date!()
+        |> Map.put(:summary, summary_html)
 
-      Repository.push_post(path, attrs, html_content)
+      Repository.push_post(path, attrs, body_html)
       Logger.info("Pushed converted Markdown: #{path}")
     else
       {:error, error} ->
@@ -98,7 +100,12 @@ defmodule LiveMarkdown.Content.FileParser do
 
   defp validate_attrs(_), do: {:error, "attrs must contain :title and :date"}
 
-  defp convert_markdown_body(body), do: body |> Earmark.as_html()
+  defp maybe_summary_to_html(%{summary: summary}) when is_binary(summary) and summary != "",
+    do: summary |> markdown_to_html()
+
+  defp maybe_summary_to_html(_), do: {:ok, nil, :ignore}
+
+  defp markdown_to_html(content), do: content |> Earmark.as_html(escape: false)
 
   defp extract_and_put_slug(attrs, path),
     do: Map.put(attrs, :slug, path |> remove_root_path() |> extract_slug_from_path())
