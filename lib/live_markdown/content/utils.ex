@@ -17,16 +17,16 @@ defmodule LiveMarkdown.Content.Utils do
 
   ## Examples
 
-      iex> LiveMarkdown.Content.Utils.get_categories_from_path("/blog/art/3d-models/post.md")
+      iex> LiveMarkdown.Content.Utils.extract_categories_from_path("/blog/art/3d-models/post.md")
       [%{category: "Blog", slug: "/blog"}, %{category: "Art", slug: "/blog/art"}, %{category: "3D Models", slug: "/blog/art/3d-models"}]
 
-      iex> LiveMarkdown.Content.Utils.get_categories_from_path("/blog/post.md")
+      iex> LiveMarkdown.Content.Utils.extract_categories_from_path("/blog/post.md")
       [%{category: "Blog", slug: "/blog"}]
 
-      iex> LiveMarkdown.Content.Utils.get_categories_from_path("/post.md")
+      iex> LiveMarkdown.Content.Utils.extract_categories_from_path("/post.md")
       [%{category: "", slug: "/"}]
   """
-  def get_categories_from_path(full_path) do
+  def extract_categories_from_path(full_path) do
     full_path
     |> String.replace(Path.basename(full_path), "")
     |> do_extract_categories()
@@ -36,7 +36,7 @@ defmodule LiveMarkdown.Content.Utils do
   defp do_extract_categories("/"), do: [%{category: "", slug: "/"}]
   # Path with category and possibly, hierarchy
   defp do_extract_categories(path) do
-    final_slug = get_slug_from_path(path)
+    final_slug = extract_slug_from_path(path)
     slug_parts = final_slug |> String.split("/")
 
     path
@@ -49,7 +49,7 @@ defmodule LiveMarkdown.Content.Utils do
         |> Enum.take(pos + 2)
         |> Enum.join("/")
 
-      category = part |> get_taxonomy_title()
+      category = part |> capitalize_as_taxonomy_title()
 
       %{category: category, slug: slug}
     end)
@@ -58,13 +58,13 @@ defmodule LiveMarkdown.Content.Utils do
   @doc """
   ## Examples
 
-      iex> LiveMarkdown.Content.Utils.get_slug_from_path("/blog/art/3d/post.md")
+      iex> LiveMarkdown.Content.Utils.extract_slug_from_path("/blog/art/3d/post.md")
       "/blog/art/3d/post"
 
-      iex> LiveMarkdown.Content.Utils.get_slug_from_path("/blog/My new Project.md")
+      iex> LiveMarkdown.Content.Utils.extract_slug_from_path("/blog/My new Project.md")
       "/blog/my-new-project"
   """
-  def get_slug_from_path(path) do
+  def extract_slug_from_path(path) do
     path
     |> String.replace(Path.extname(path), "")
     |> Slug.slugify(ignore: "/")
@@ -75,17 +75,17 @@ defmodule LiveMarkdown.Content.Utils do
 
   ## Examples
 
-      iex> LiveMarkdown.Content.Utils.get_title_from_path("/blog/art/3d/post-about-art.md")
+      iex> LiveMarkdown.Content.Utils.extract_title_from_path("/blog/art/3d/post-about-art.md")
       "Post about art"
 
-      iex> LiveMarkdown.Content.Utils.get_title_from_path("/blog/My new Project.md")
+      iex> LiveMarkdown.Content.Utils.extract_title_from_path("/blog/My new Project.md")
       "My new Project"
   """
-  def get_title_from_path(path) do
+  def extract_title_from_path(path) do
     path
     |> Path.basename()
     |> String.replace(Path.extname(path), "")
-    |> get_title()
+    |> capitalize_as_title()
   end
 
   @doc """
@@ -93,19 +93,19 @@ defmodule LiveMarkdown.Content.Utils do
 
   ## Examples
 
-      iex> LiveMarkdown.Content.Utils.get_title("post-about-art")
+      iex> LiveMarkdown.Content.Utils.capitalize_as_title("post-about-art")
       "Post about art"
 
-      iex> LiveMarkdown.Content.Utils.get_title("My new Project")
+      iex> LiveMarkdown.Content.Utils.capitalize_as_title("My new Project")
       "My new Project"
 
-      iex> LiveMarkdown.Content.Utils.get_title("2d 3D 4d-art: this is bugged, 3d should've been preserved as 3d not separate strings")
+      iex> LiveMarkdown.Content.Utils.capitalize_as_title("2d 3D 4d-art: this is bugged, 3d should've been preserved as 3d not separate strings")
       "2d 3D 4d art: this is bugged, 3d should've been preserved as 3d not separate strings"
 
-      iex> LiveMarkdown.Content.Utils.get_title("Some Startup plans to expand quantum Platform of the Platforms with $500M investment")
+      iex> LiveMarkdown.Content.Utils.capitalize_as_title("Some Startup plans to expand quantum Platform of the Platforms with $500M investment")
       "Some Startup plans to expand quantum Platform of the Platforms with $500M investment"
   """
-  def get_title(source) do
+  def capitalize_as_title(source) do
     source
     |> prepare_string_for_title()
     |> Enum.with_index()
@@ -124,19 +124,19 @@ defmodule LiveMarkdown.Content.Utils do
 
   ## Examples
 
-      iex> LiveMarkdown.Content.Utils.get_taxonomy_title("post-about-art")
+      iex> LiveMarkdown.Content.Utils.capitalize_as_taxonomy_title("post-about-art")
       "Post About Art"
 
-      iex> LiveMarkdown.Content.Utils.get_taxonomy_title("3d-models")
+      iex> LiveMarkdown.Content.Utils.capitalize_as_taxonomy_title("3d-models")
       "3D Models"
 
-      iex> LiveMarkdown.Content.Utils.get_taxonomy_title("Products: wood-chairs")
+      iex> LiveMarkdown.Content.Utils.capitalize_as_taxonomy_title("Products: wood-chairs")
       "Products: Wood Chairs"
 
-      iex> LiveMarkdown.Content.Utils.get_taxonomy_title("products-above-$300mm")
+      iex> LiveMarkdown.Content.Utils.capitalize_as_taxonomy_title("products-above-$300mm")
       "Products Above $300MM"
   """
-  def get_taxonomy_title(source) do
+  def capitalize_as_taxonomy_title(source) do
     source
     |> prepare_string_for_title()
     |> Enum.map(&String.capitalize/1)

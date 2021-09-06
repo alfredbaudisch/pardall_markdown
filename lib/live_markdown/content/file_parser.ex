@@ -37,7 +37,7 @@ defmodule LiveMarkdown.Content.FileParser do
     path_index_contents =
       for child <- File.ls!(parent_path),
           path = Path.join(parent_path, child) do
-        %{path: path, slug: path |> remove_root_path() |> get_slug_from_path()}
+        %{path: path, slug: path |> remove_root_path() |> extract_slug_from_path()}
       end
 
     Cache.save_path(parent_path, path_index_contents)
@@ -103,7 +103,7 @@ defmodule LiveMarkdown.Content.FileParser do
   defp convert_markdown_body(body), do: body |> Earmark.as_html()
 
   defp put_slug(attrs, path),
-    do: Map.put(attrs, :slug, path |> remove_root_path() |> get_slug_from_path())
+    do: Map.put(attrs, :slug, path |> remove_root_path() |> extract_slug_from_path())
 
   defp parse_and_put_date!(%{date: date} = attrs) do
     date =
