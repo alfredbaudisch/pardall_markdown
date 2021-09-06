@@ -12,18 +12,19 @@ defmodule LiveMarkdown.Content.Utils do
 
   @doc """
   Splits a path into a hierarchy of categories, containing both readable category names
-  and slugs for all categories in the hierarchy.
+  and slugs for all categories in the hierarchy. The categories list is indexed from the
+  topmost to the lowermost in the hiearchy, example: Games > PC > RPG.
 
   ## Examples
 
-    iex> LiveMarkdown.Content.Utils.get_categories_from_path("/blog/art/3d-models/post.md")
-    [%{category: "Blog", slug: "/blog"}, %{category: "Art", slug: "/blog/art"}, %{category: "3D Models", slug: "/blog/art/3d-models"}]
+      iex> LiveMarkdown.Content.Utils.get_categories_from_path("/blog/art/3d-models/post.md")
+      [%{category: "Blog", slug: "/blog"}, %{category: "Art", slug: "/blog/art"}, %{category: "3D Models", slug: "/blog/art/3d-models"}]
 
-    iex> LiveMarkdown.Content.Utils.get_categories_from_path("/blog/post.md")
-    [%{category: "Blog", slug: "/blog"}]
+      iex> LiveMarkdown.Content.Utils.get_categories_from_path("/blog/post.md")
+      [%{category: "Blog", slug: "/blog"}]
 
-    iex> LiveMarkdown.Content.Utils.get_categories_from_path("/post.md")
-    [%{category: "", slug: "/"}]
+      iex> LiveMarkdown.Content.Utils.get_categories_from_path("/post.md")
+      [%{category: "", slug: "/"}]
   """
   def get_categories_from_path(full_path) do
     full_path
@@ -48,7 +49,7 @@ defmodule LiveMarkdown.Content.Utils do
         |> Enum.take(pos + 2)
         |> Enum.join("/")
 
-      category = part |> get_taxonomy_name()
+      category = part |> get_taxonomy_title()
 
       %{category: category, slug: slug}
     end)
@@ -57,11 +58,11 @@ defmodule LiveMarkdown.Content.Utils do
   @doc """
   ## Examples
 
-    iex> LiveMarkdown.Content.Utils.get_slug_from_path("/blog/art/3d/post.md")
-    "/blog/art/3d/post"
+      iex> LiveMarkdown.Content.Utils.get_slug_from_path("/blog/art/3d/post.md")
+      "/blog/art/3d/post"
 
-    iex> LiveMarkdown.Content.Utils.get_slug_from_path("/blog/My new Project.md")
-    "/blog/my-new-project"
+      iex> LiveMarkdown.Content.Utils.get_slug_from_path("/blog/My new Project.md")
+      "/blog/my-new-project"
   """
   def get_slug_from_path(path) do
     path
@@ -74,11 +75,11 @@ defmodule LiveMarkdown.Content.Utils do
 
   ## Examples
 
-    iex> LiveMarkdown.Content.Utils.get_title_from_path("/blog/art/3d/post-about-art.md")
-    "Post about art"
+      iex> LiveMarkdown.Content.Utils.get_title_from_path("/blog/art/3d/post-about-art.md")
+      "Post about art"
 
-    iex> LiveMarkdown.Content.Utils.get_title_from_path("/blog/My new Project.md")
-    "My new Project"
+      iex> LiveMarkdown.Content.Utils.get_title_from_path("/blog/My new Project.md")
+      "My new Project"
   """
   def get_title_from_path(path) do
     path
@@ -88,21 +89,21 @@ defmodule LiveMarkdown.Content.Utils do
   end
 
   @doc """
-  Transforms a source string into a post or taxonomy title.
+  Transforms a source string into a post title.
 
   ## Examples
 
-    iex> LiveMarkdown.Content.Utils.get_title("post-about-art")
-    "Post about art"
+      iex> LiveMarkdown.Content.Utils.get_title("post-about-art")
+      "Post about art"
 
-    iex> LiveMarkdown.Content.Utils.get_title("My new Project")
-    "My new Project"
+      iex> LiveMarkdown.Content.Utils.get_title("My new Project")
+      "My new Project"
 
-    iex> LiveMarkdown.Content.Utils.get_title("2d 3D 4d-art: this is bugged, 3d should've been preserved as 3d not separate strings")
-    "2d 3D 4d art: this is bugged, 3d should've been preserved as 3d not separate strings"
+      iex> LiveMarkdown.Content.Utils.get_title("2d 3D 4d-art: this is bugged, 3d should've been preserved as 3d not separate strings")
+      "2d 3D 4d art: this is bugged, 3d should've been preserved as 3d not separate strings"
 
-    iex> LiveMarkdown.Content.Utils.get_title("Some Startup plans to expand quantum Platform of the Platforms with $500M investment")
-    "Some Startup plans to expand quantum Platform of the Platforms with $500M investment"
+      iex> LiveMarkdown.Content.Utils.get_title("Some Startup plans to expand quantum Platform of the Platforms with $500M investment")
+      "Some Startup plans to expand quantum Platform of the Platforms with $500M investment"
   """
   def get_title(source) do
     source
@@ -118,12 +119,29 @@ defmodule LiveMarkdown.Content.Utils do
     |> Enum.join(" ")
   end
 
-  def get_taxonomy_name(source) do
+  @doc """
+  Transforms a source string into a taxonomy title.
+
+  ## Examples
+
+      iex> LiveMarkdown.Content.Utils.get_taxonomy_title("post-about-art")
+      "Post About Art"
+
+      iex> LiveMarkdown.Content.Utils.get_taxonomy_title("3d-models")
+      "3D Models"
+
+      iex> LiveMarkdown.Content.Utils.get_taxonomy_title("Products: wood-chairs")
+      "Products: Wood Chairs"
+
+      iex> LiveMarkdown.Content.Utils.get_taxonomy_title("products-above-$300mm")
+      "Products Above $300MM"
+  """
+  def get_taxonomy_title(source) do
     source
     |> prepare_string_for_title()
     |> Enum.map(&String.capitalize/1)
     |> Enum.map(fn part ->
-      if String.match?(part, ~r/^[0-9]/) do
+      if String.match?(part, ~r/^([0-9]|\$)/) do
         part |> String.upcase()
       else
         part
