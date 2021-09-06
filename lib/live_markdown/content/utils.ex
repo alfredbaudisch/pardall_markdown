@@ -11,13 +11,13 @@ defmodule LiveMarkdown.Content.Utils do
   def remove_root_path(path), do: path |> String.replace(root_path(), "")
 
   @doc """
-  Split a path into a hierarchy of categories, containing both readable category names
+  Splits a path into a hierarchy of categories, containing both readable category names
   and slugs for all categories in the hierarchy.
 
   ## Examples
 
-    iex> LiveMarkdown.Content.Utils.get_categories_from_path("/blog/art/3d/post.md")
-    [%{category: "Blog", slug: "/blog"}, %{category: "Art", slug: "/blog/art"}, %{category: "3d", slug: "/blog/art/3d"}]
+    iex> LiveMarkdown.Content.Utils.get_categories_from_path("/blog/art/3d-models/post.md")
+    [%{category: "Blog", slug: "/blog"}, %{category: "Art", slug: "/blog/art"}, %{category: "3D Models", slug: "/blog/art/3d-models"}]
 
     iex> LiveMarkdown.Content.Utils.get_categories_from_path("/blog/post.md")
     [%{category: "Blog", slug: "/blog"}]
@@ -26,11 +26,9 @@ defmodule LiveMarkdown.Content.Utils do
     [%{category: "", slug: "/"}]
   """
   def get_categories_from_path(full_path) do
-    path =
-      full_path
-      |> String.replace(Path.basename(full_path), "")
-
-    do_extract_categories(path)
+    full_path
+    |> String.replace(Path.basename(full_path), "")
+    |> do_extract_categories()
   end
 
   # Root / Page
@@ -50,7 +48,7 @@ defmodule LiveMarkdown.Content.Utils do
         |> Enum.take(pos + 2)
         |> Enum.join("/")
 
-      category = part |> get_title()
+      category = part |> get_taxonomy_name()
 
       %{category: category, slug: slug}
     end)
@@ -77,10 +75,10 @@ defmodule LiveMarkdown.Content.Utils do
   ## Examples
 
     iex> LiveMarkdown.Content.Utils.get_title_from_path("/blog/art/3d/post-about-art.md")
-    "Post About Art"
+    "Post about art"
 
     iex> LiveMarkdown.Content.Utils.get_title_from_path("/blog/My new Project.md")
-    "My New Project"
+    "My new Project"
   """
   def get_title_from_path(path) do
     path
@@ -90,20 +88,55 @@ defmodule LiveMarkdown.Content.Utils do
   end
 
   @doc """
-  Transform a source string into a post or taxonomy title.
+  Transforms a source string into a post or taxonomy title.
 
   ## Examples
 
     iex> LiveMarkdown.Content.Utils.get_title("post-about-art")
-    "Post About Art"
+    "Post about art"
 
     iex> LiveMarkdown.Content.Utils.get_title("My new Project")
-    "My New Project"
+    "My new Project"
+
+    iex> LiveMarkdown.Content.Utils.get_title("2d 3D 4d-art: this is bugged, 3d should've been preserved as 3d not separate strings")
+    "2d 3D 4d art: this is bugged, 3d should've been preserved as 3d not separate strings"
+
+    iex> LiveMarkdown.Content.Utils.get_title("Some Startup plans to expand quantum Platform of the Platforms with $500M investment")
+    "Some Startup plans to expand quantum Platform of the Platforms with $500M investment"
   """
   def get_title(source) do
     source
+    |> prepare_string_for_title()
+    |> Enum.with_index()
+    |> Enum.map(fn
+      {part, 0} ->
+        part |> String.capitalize()
+
+      {part, _} ->
+        part
+    end)
+    |> Enum.join(" ")
+  end
+
+  def get_taxonomy_name(source) do
+    source
+    |> prepare_string_for_title()
+    |> Enum.map(&String.capitalize/1)
+    |> Enum.map(fn part ->
+      if String.match?(part, ~r/^[0-9]/) do
+        part |> String.upcase()
+      else
+        part
+      end
+    end)
+    |> Enum.join(" ")
+  end
+
+  defp prepare_string_for_title(source) do
+    source
+    |> String.trim()
     |> String.replace("-", " ")
     |> String.replace("_", " ")
-    |> Recase.to_title()
+    |> String.split(" ")
   end
 end
