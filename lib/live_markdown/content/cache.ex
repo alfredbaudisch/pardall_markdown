@@ -37,15 +37,19 @@ defmodule LiveMarkdown.Content.Cache do
   end
 
   def save_taxonomy_with_post(
-        %Taxonomy{slug: slug, children_slugs: children} = taxonomy,
-        post_slug
+        %Taxonomy{slug: slug, children: children} = taxonomy,
+        %Post{} = post
       ) do
+    do_update = fn taxonomy, children ->
+      {:ok, Item.new_taxonomy(%{taxonomy | children: children ++ [Map.put(post, :content, nil)]})}
+    end
+
     ConCache.update(@cache_name, get_slug_key(slug), fn
       nil ->
-        {:ok, Item.new_taxonomy(%{taxonomy | children_slugs: children ++ [post_slug]})}
+        do_update.(taxonomy, children)
 
-      %{type: :taxonomy, value: %{children_slugs: children} = taxonomy} ->
-        {:ok, Item.new_taxonomy(%{taxonomy | children_slugs: children ++ [post_slug]})}
+      %{type: :taxonomy, value: %{children: children} = taxonomy} ->
+        do_update.(taxonomy, children)
     end)
   end
 
