@@ -20,7 +20,10 @@ defmodule LiveMarkdown.Content.Cache do
 
   def save(%Content{slug: slug, file_path: path} = value) do
     key = get_key(slug)
-    Logger.info("[Content.Cache] saved #{inspect(key)}, #{inspect(value)}")
+
+    Logger.info("Saved #{inspect(key)}")
+    Logger.debug("#{inspect(key)} contents: #{inspect(value)}")
+
     ConCache.put(@cache_name, key, value)
     ConCache.put(@index_cache_name, get_path_key(path), key)
   end

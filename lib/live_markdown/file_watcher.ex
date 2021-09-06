@@ -21,7 +21,7 @@ defmodule LiveMarkdown.FileWatcher do
   end
 
   def handle_info({:file_event, _, {path, events} = data}, state) do
-    Logger.info("[FileWatcher] #{inspect(data)}")
+    Logger.info("Received file event: #{inspect(data)}")
     Receiver.event(path, events)
     {:noreply, state}
   end

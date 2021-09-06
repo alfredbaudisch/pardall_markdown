@@ -28,7 +28,7 @@ defmodule LiveMarkdown.Content.Repository do
 
   def get_by_slug!(slug) do
     get_by_slug(slug) ||
-      raise LiveMarkdown.NotFoundError, "post with slug=#{slug} not found"
+      raise LiveMarkdown.NotFoundError, "Post not found: #{slug}"
   end
 
   def push(path, %{slug: slug} = attrs, content, type \\ :post) do
@@ -51,11 +51,16 @@ defmodule LiveMarkdown.Content.Repository do
   end
 
   def delete_path(path) do
-    posts = Cache.delete_path(path)
-    Endpoint.broadcast!("content", "post_events", posts)
+    case Cache.delete_path(path) do
+      [_p | _] = posts ->
+        Endpoint.broadcast!("content", "post_events", posts)
 
-    for {slug, :deleted} <- posts do
-      Endpoint.broadcast!("post_" <> slug, "post_deleted", true)
+        for {slug, :deleted} <- posts do
+          Endpoint.broadcast!("post_" <> slug, "post_deleted", true)
+        end
+
+      _ ->
+        []
     end
   end
 
