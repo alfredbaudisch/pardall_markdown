@@ -8,6 +8,7 @@ defmodule LiveMarkdownWeb.Router do
     plug :put_root_layout, {LiveMarkdownWeb.LayoutView, :root}
     plug :protect_from_forgery
     plug :put_secure_browser_headers
+    plug(LiveMarkdownWeb.PlugRedirectTrailingSlash, :with)
   end
 
   pipeline :api do
