@@ -1,0 +1,11 @@
+<h1><%= @post.name %></h1>
+
+<section class="row">
+  <ul>
+  <%= for post <- @post.children do %>
+    <li>
+      <%= live_redirect post.title, to: post.slug %> (<%= Date.to_iso8601(post.date) %>) <%= raw post.summary %>
+    </li>
+  <% end %>
+  </ul>
+</section>

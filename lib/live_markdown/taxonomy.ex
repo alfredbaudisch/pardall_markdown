@@ -9,12 +9,13 @@ defmodule LiveMarkdown.Taxonomy do
 
     # Why string instead of Enum? So that we can allow the usage of custom taxonomies in the future
     field :type, :string, default: "category"
-    field :children_slugs, {:array, :string}, default: []
+    embeds_many :children, LiveMarkdown.Post
   end
 
   def changeset(model, params) do
     model
-    |> cast(params, [:name, :slug, :type, :children_slugs])
+    |> cast(params, [:name, :slug, :type])
     |> validate_required([:name, :slug, :type])
+    |> cast_embed(:children)
   end
 end

@@ -1,4 +1,4 @@
-defmodule LiveMarkdownWeb.Live.SinglePost do
+defmodule LiveMarkdownWeb.Live.Content do
   use LiveMarkdownWeb, :live_view
   alias LiveMarkdown.{Post, Taxonomy}
 
@@ -16,6 +16,12 @@ defmodule LiveMarkdownWeb.Live.SinglePost do
     {:ok, socket |> assign(:post, post) |> assign_page_title(post)}
   end
 
+  def render(%{post: %Post{}} = assigns),
+    do: Phoenix.View.render(LiveMarkdownWeb.ContentView, "single_post.html", assigns)
+
+  def render(%{post: %Taxonomy{}} = assigns),
+    do: Phoenix.View.render(LiveMarkdownWeb.ContentView, "single_taxonomy.html", assigns)
+
   def handle_info(%{event: "post_updated", payload: content}, socket) do
     {:noreply, socket |> assign(:post, content) |> assign_page_title(content)}
   end
@@ -28,4 +34,7 @@ defmodule LiveMarkdownWeb.Live.SinglePost do
 
   defp assign_page_title(socket, %Post{title: title}),
     do: socket |> assign(:page_title, compose_page_title(title))
+
+  defp assign_page_title(socket, %Taxonomy{name: name}),
+    do: socket |> assign(:page_title, compose_page_title(name))
 end
