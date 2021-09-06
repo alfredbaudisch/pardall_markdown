@@ -12,6 +12,7 @@ defmodule LiveMarkdown.Content do
     field :date, :utc_datetime
     field :file_path, :string
     field :is_published, :boolean, default: false
+    embeds_many :categories, LiveMarkdown.Category
     timestamps(autogenerate: {DateTime, :utc_now, 1})
   end
 
@@ -19,5 +20,6 @@ defmodule LiveMarkdown.Content do
     model
     |> cast(params, [:type, :content, :title, :slug, :date, :file_path, :is_published])
     |> validate_required([:type, :title, :slug, :date, :file_path])
+    |> cast_embed(:categories)
   end
 end

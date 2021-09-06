@@ -18,13 +18,13 @@ defmodule LiveMarkdown.Content.Utils do
   ## Examples
 
       iex> LiveMarkdown.Content.Utils.extract_categories_from_path("/blog/art/3d-models/post.md")
-      [%{category: "Blog", slug: "/blog"}, %{category: "Art", slug: "/blog/art"}, %{category: "3D Models", slug: "/blog/art/3d-models"}]
+      [%{name: "Blog", slug: "/blog"}, %{name: "Art", slug: "/blog/art"}, %{name: "3D Models", slug: "/blog/art/3d-models"}]
 
       iex> LiveMarkdown.Content.Utils.extract_categories_from_path("/blog/post.md")
-      [%{category: "Blog", slug: "/blog"}]
+      [%{name: "Blog", slug: "/blog"}]
 
       iex> LiveMarkdown.Content.Utils.extract_categories_from_path("/post.md")
-      [%{category: "", slug: "/"}]
+      [%{name: "", slug: "/"}]
   """
   def extract_categories_from_path(full_path) do
     full_path
@@ -33,7 +33,7 @@ defmodule LiveMarkdown.Content.Utils do
   end
 
   # Root / Page
-  defp do_extract_categories("/"), do: [%{category: "", slug: "/"}]
+  defp do_extract_categories("/"), do: [%{name: "", slug: "/"}]
   # Path with category and possibly, hierarchy
   defp do_extract_categories(path) do
     final_slug = extract_slug_from_path(path)
@@ -49,9 +49,9 @@ defmodule LiveMarkdown.Content.Utils do
         |> Enum.take(pos + 2)
         |> Enum.join("/")
 
-      category = part |> capitalize_as_taxonomy_title()
+      category = part |> capitalize_as_taxonomy_name()
 
-      %{category: category, slug: slug}
+      %{name: category, slug: slug}
     end)
   end
 
@@ -124,19 +124,19 @@ defmodule LiveMarkdown.Content.Utils do
 
   ## Examples
 
-      iex> LiveMarkdown.Content.Utils.capitalize_as_taxonomy_title("post-about-art")
+      iex> LiveMarkdown.Content.Utils.capitalize_as_taxonomy_name("post-about-art")
       "Post About Art"
 
-      iex> LiveMarkdown.Content.Utils.capitalize_as_taxonomy_title("3d-models")
+      iex> LiveMarkdown.Content.Utils.capitalize_as_taxonomy_name("3d-models")
       "3D Models"
 
-      iex> LiveMarkdown.Content.Utils.capitalize_as_taxonomy_title("Products: wood-chairs")
+      iex> LiveMarkdown.Content.Utils.capitalize_as_taxonomy_name("Products: wood-chairs")
       "Products: Wood Chairs"
 
-      iex> LiveMarkdown.Content.Utils.capitalize_as_taxonomy_title("products-above-$300mm")
+      iex> LiveMarkdown.Content.Utils.capitalize_as_taxonomy_name("products-above-$300mm")
       "Products Above $300MM"
   """
-  def capitalize_as_taxonomy_title(source) do
+  def capitalize_as_taxonomy_name(source) do
     source
     |> prepare_string_for_title()
     |> Enum.map(&String.capitalize/1)

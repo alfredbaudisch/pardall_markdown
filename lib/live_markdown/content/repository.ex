@@ -42,7 +42,8 @@ defmodule LiveMarkdown.Content.Repository do
       content: content,
       slug: attrs.slug,
       date: attrs.date,
-      is_published: Map.get(attrs, :published, false)
+      is_published: Map.get(attrs, :published, false),
+      categories: attrs.categories
     })
     |> put_timestamps(model)
     |> Ecto.Changeset.apply_changes()

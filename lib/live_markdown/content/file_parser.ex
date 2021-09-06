@@ -61,6 +61,7 @@ defmodule LiveMarkdown.Content.FileParser do
       attrs =
         attrs
         |> put_slug(path)
+        |> put_categories(path)
         |> parse_and_put_date!()
 
       Repository.push(path, attrs, html_content)
@@ -104,6 +105,9 @@ defmodule LiveMarkdown.Content.FileParser do
 
   defp put_slug(attrs, path),
     do: Map.put(attrs, :slug, path |> remove_root_path() |> extract_slug_from_path())
+
+  defp put_categories(attrs, path),
+    do: Map.put(attrs, :categories, path |> remove_root_path() |> extract_categories_from_path())
 
   defp parse_and_put_date!(%{date: date} = attrs) do
     date =
