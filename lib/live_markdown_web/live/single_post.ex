@@ -1,6 +1,6 @@
-defmodule LiveMarkdownWeb.Live.SlugPage do
+defmodule LiveMarkdownWeb.Live.SinglePost do
   use LiveMarkdownWeb, :live_view
-  alias LiveMarkdown.Post
+  alias LiveMarkdown.{Post, Taxonomy}
 
   def mount(%{"slug" => slug}, _session, socket) do
     slug =

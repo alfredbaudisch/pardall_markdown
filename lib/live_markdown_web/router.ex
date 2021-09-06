@@ -34,7 +34,7 @@ defmodule LiveMarkdownWeb.Router do
     pipe_through :browser
 
     live "/", Live.Index, :index
-    live "/*slug", Live.SlugPage, :show, as: :posts
+    live "/*slug", Live.SinglePost, :show, as: :posts
   end
 
   # Other scopes may use custom stacks.

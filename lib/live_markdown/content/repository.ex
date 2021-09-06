@@ -30,7 +30,7 @@ defmodule LiveMarkdown.Content.Repository do
     case get_by_slug(slug) do
       nil -> raise LiveMarkdown.NotFoundError, "Page not found: #{slug}"
       %Post{} = post -> post
-      %Taxonomy{} = taxonomy -> raise RuntimeError, "taxonomy archive not implemented"
+      %Taxonomy{} = taxonomy -> taxonomy
     end
   end
 
