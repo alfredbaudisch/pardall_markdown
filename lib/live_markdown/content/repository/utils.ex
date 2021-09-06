@@ -1,8 +1,8 @@
 defmodule LiveMarkdown.Content.Repository.Utils do
-  alias LiveMarkdown.Content
+  alias LiveMarkdown.Post
   alias Ecto.Changeset
 
-  def put_timestamps(changeset, %Content{inserted_at: nil}) do
+  def put_timestamps(changeset, %Post{inserted_at: nil}) do
     now = NaiveDateTime.utc_now()
 
     changeset

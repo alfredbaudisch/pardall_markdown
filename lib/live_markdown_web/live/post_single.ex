@@ -1,6 +1,6 @@
 defmodule LiveMarkdownWeb.Live.PostSingle do
   use LiveMarkdownWeb, :live_view
-  alias LiveMarkdown.Content
+  alias LiveMarkdown.Post
 
   def mount(%{"slug" => slug}, _session, socket) do
     slug =
@@ -26,6 +26,6 @@ defmodule LiveMarkdownWeb.Live.PostSingle do
 
   defp slug_params_to_slug(slug), do: "/" <> Enum.join(slug, "/")
 
-  defp assign_page_title(socket, %Content{title: title}),
+  defp assign_page_title(socket, %Post{title: title}),
     do: socket |> assign(:page_title, compose_page_title(title))
 end

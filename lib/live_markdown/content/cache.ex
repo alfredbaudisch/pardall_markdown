@@ -1,6 +1,7 @@
 defmodule LiveMarkdown.Content.Cache do
   require Logger
-  alias LiveMarkdown.Content
+  alias LiveMarkdown.{Post, Taxonomy}
+  alias __MODULE__.Item
 
   @cache_name Application.compile_env(:live_markdown, [LiveMarkdown.Content, :cache_name])
   @index_cache_name Application.compile_env(:live_markdown, [
@@ -9,27 +10,43 @@ defmodule LiveMarkdown.Content.Cache do
                     ])
 
   def get_by_slug(slug) do
-    ConCache.get(@cache_name, get_key(slug))
+    case ConCache.get(@cache_name, get_slug_key(slug)) do
+      %Item{value: value} -> value
+      nil -> nil
+    end
   end
 
-  def get_all do
+  def get_all_posts do
     ConCache.ets(@cache_name)
     |> :ets.tab2list()
-    |> Enum.map(fn {_, value} -> value end)
+    |> Enum.reject(fn {_, %Item{type: type}} -> type == :taxonomy end)
+    |> Enum.map(fn {_, %Item{value: value}} -> value end)
   end
 
-  def save(%Content{slug: slug, file_path: path} = value) do
-    key = get_key(slug)
+  def save(%Post{slug: slug, file_path: path} = value) do
+    key = get_slug_key(slug)
+    ConCache.put(@cache_name, key, Item.new_post(value))
+    ConCache.put(@index_cache_name, get_path_key(path), key)
 
     Logger.info("Saved #{inspect(key)}")
     Logger.debug("#{inspect(key)} contents: #{inspect(value)}")
-
-    ConCache.put(@cache_name, key, value)
-    ConCache.put(@index_cache_name, get_path_key(path), key)
   end
 
   def save_path(path, contents) do
     ConCache.put(@index_cache_name, get_path_key(path), contents)
+  end
+
+  def upsert_taxonomy_with_post(
+        %Taxonomy{slug: slug, children_slugs: children} = taxonomy,
+        post_slug
+      ) do
+    ConCache.update(@cache_name, get_slug_key(slug), fn
+      nil ->
+        {:ok, Item.new_taxonomy(%{taxonomy | children_slugs: children ++ [post_slug]})}
+
+      %{type: :taxonomy, value: %{children_slugs: children} = taxonomy} ->
+        {:ok, Item.new_taxonomy(%{taxonomy | children_slugs: children ++ [post_slug]})}
+    end)
   end
 
   @doc """
@@ -59,7 +76,7 @@ defmodule LiveMarkdown.Content.Cache do
   end
 
   def delete_slug(slug) do
-    ConCache.delete(@cache_name, get_key(slug))
+    ConCache.delete(@cache_name, get_slug_key(slug))
   end
 
   def delete_all do
@@ -70,6 +87,6 @@ defmodule LiveMarkdown.Content.Cache do
     |> :ets.delete_all_objects()
   end
 
-  defp get_key(slug), do: {:slug, slug}
+  defp get_slug_key(slug), do: {:slug, slug}
   defp get_path_key(path), do: {:path, path}
 end

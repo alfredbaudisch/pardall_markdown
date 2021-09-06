@@ -1,5 +1,5 @@
 defmodule LiveMarkdown.Content.Repository do
-  alias LiveMarkdown.Content
+  alias LiveMarkdown.{Post, Taxonomy}
   alias LiveMarkdown.Content.Cache
   alias LiveMarkdownWeb.Endpoint
   import LiveMarkdown.Content.Repository.Utils
@@ -14,12 +14,12 @@ defmodule LiveMarkdown.Content.Repository do
   # CRUD interface
   #
 
-  def get_all do
-    Cache.get_all()
+  def get_all_posts do
+    Cache.get_all_posts()
   end
 
   def get_all_published do
-    get_all()
+    get_all_posts()
     |> filter_by_is_published()
     |> sort_by_published_date()
   end
@@ -32,10 +32,10 @@ defmodule LiveMarkdown.Content.Repository do
   end
 
   def push(path, %{slug: slug} = attrs, content, type \\ :post) do
-    model = get_by_slug(slug) || %Content{}
+    model = get_by_slug(slug) || %Post{}
 
     model
-    |> Content.changeset(%{
+    |> Post.changeset(%{
       type: type,
       file_path: path,
       title: attrs.title,
@@ -43,7 +43,8 @@ defmodule LiveMarkdown.Content.Repository do
       slug: attrs.slug,
       date: attrs.date,
       is_published: Map.get(attrs, :published, false),
-      categories: attrs.categories
+      # for now, when a post is pushed to the repository, only "categories" are known
+      taxonomies: attrs.categories
     })
     |> put_timestamps(model)
     |> Ecto.Changeset.apply_changes()
@@ -68,16 +69,25 @@ defmodule LiveMarkdown.Content.Repository do
   # Data helpers
   #
 
-  defp save_content_and_broadcast!(%Content{id: nil, file_path: path} = model) do
+  defp save_content_and_broadcast!(
+         %Post{id: nil, file_path: path, taxonomies: taxonomies, slug: slug} = model
+       ) do
     model = %{model | id: get_path_id(path)}
+    save_taxonomies(taxonomies, slug)
     Cache.save(model)
     Endpoint.broadcast!("content", "post_created", model)
   end
 
-  defp save_content_and_broadcast!(%Content{slug: slug} = model) do
+  defp save_content_and_broadcast!(%Post{slug: slug} = model) do
     Cache.save(model)
     Endpoint.broadcast!("content", "post_updated", model)
     Endpoint.broadcast!("post_" <> slug, "post_updated", model)
+  end
+
+  defp save_taxonomies([%Taxonomy{} = _ | _] = taxonomies, post_slug) do
+    taxonomies
+    |> Enum.map(&Cache.upsert_taxonomy_with_post(&1, post_slug))
+    |> IO.inspect()
   end
 
   defp get_path_id(path) do

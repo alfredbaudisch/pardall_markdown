@@ -9,7 +9,7 @@
 
 <h2>Categories</h2>
 <ul>
-<%= for category <- @post.categories do %>
+<%= for category <- @post.taxonomies do %>
     <li><a href={category.slug}><%= category.name %></a></li>
 <% end %>
 </ul>
