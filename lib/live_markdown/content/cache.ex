@@ -23,7 +23,7 @@ defmodule LiveMarkdown.Content.Cache do
     |> Enum.map(fn {_, %Item{value: value}} -> value end)
   end
 
-  def save(%Post{slug: slug, file_path: path} = value) do
+  def save_post(%Post{slug: slug, file_path: path} = value) do
     key = get_slug_key(slug)
     ConCache.put(@cache_name, key, Item.new_post(value))
     ConCache.put(@index_cache_name, get_path_key(path), key)
@@ -36,7 +36,7 @@ defmodule LiveMarkdown.Content.Cache do
     ConCache.put(@index_cache_name, get_path_key(path), contents)
   end
 
-  def upsert_taxonomy_with_post(
+  def save_taxonomy_with_post(
         %Taxonomy{slug: slug, children_slugs: children} = taxonomy,
         post_slug
       ) do

@@ -31,7 +31,7 @@ defmodule LiveMarkdown.Content.Repository do
       raise LiveMarkdown.NotFoundError, "Post not found: #{slug}"
   end
 
-  def push(path, %{slug: slug} = attrs, content, type \\ :post) do
+  def push_post(path, %{slug: slug} = attrs, content, type \\ :post) do
     model = get_by_slug(slug) || %Post{}
 
     model
@@ -74,20 +74,20 @@ defmodule LiveMarkdown.Content.Repository do
        ) do
     model = %{model | id: get_path_id(path)}
     save_taxonomies(taxonomies, slug)
-    Cache.save(model)
+    Cache.save_post(model)
     Endpoint.broadcast!("content", "post_created", model)
   end
 
-  defp save_content_and_broadcast!(%Post{slug: slug} = model) do
-    Cache.save(model)
+  defp save_content_and_broadcast!(%Post{slug: slug, taxonomies: taxonomies} = model) do
+    save_taxonomies(taxonomies, slug)
+    Cache.save_post(model)
     Endpoint.broadcast!("content", "post_updated", model)
     Endpoint.broadcast!("post_" <> slug, "post_updated", model)
   end
 
   defp save_taxonomies([%Taxonomy{} = _ | _] = taxonomies, post_slug) do
     taxonomies
-    |> Enum.map(&Cache.upsert_taxonomy_with_post(&1, post_slug))
-    |> IO.inspect()
+    |> Enum.map(&Cache.save_taxonomy_with_post(&1, post_slug))
   end
 
   defp get_path_id(path) do

@@ -63,7 +63,7 @@ defmodule LiveMarkdown.Content.FileParser do
         |> extract_and_put_categories(path)
         |> parse_and_put_date!()
 
-      Repository.push(path, attrs, html_content)
+      Repository.push_post(path, attrs, html_content)
       Logger.info("Pushed converted Markdown: #{path}")
     else
       {:error, error} ->
