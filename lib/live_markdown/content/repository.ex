@@ -27,8 +27,11 @@ defmodule LiveMarkdown.Content.Repository do
   def get_by_slug(slug), do: Cache.get_by_slug(slug)
 
   def get_by_slug!(slug) do
-    get_by_slug(slug) ||
-      raise LiveMarkdown.NotFoundError, "Post not found: #{slug}"
+    case get_by_slug(slug) do
+      nil -> raise LiveMarkdown.NotFoundError, "Page not found: #{slug}"
+      %Post{} = post -> post
+      %Taxonomy{} = taxonomy -> raise RuntimeError, "taxonomy archive not implemented"
+    end
   end
 
   def push_post(path, %{slug: slug} = attrs, content, type \\ :post) do

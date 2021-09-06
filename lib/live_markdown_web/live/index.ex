@@ -1,4 +1,4 @@
-defmodule LiveMarkdownWeb.PageLive do
+defmodule LiveMarkdownWeb.Live.Index do
   use LiveMarkdownWeb, :live_view
 
   @impl true

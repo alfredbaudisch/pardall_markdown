@@ -1,4 +1,4 @@
-defmodule LiveMarkdownWeb.Live.PostSingle do
+defmodule LiveMarkdownWeb.Live.SlugPage do
   use LiveMarkdownWeb, :live_view
   alias LiveMarkdown.Post
 
@@ -7,11 +7,11 @@ defmodule LiveMarkdownWeb.Live.PostSingle do
       slug
       |> slug_params_to_slug()
 
+    post = Repository.get_by_slug!(slug)
+
     if connected?(socket) do
       Endpoint.subscribe("post_" <> slug)
     end
-
-    post = Repository.get_by_slug!(slug)
 
     {:ok, socket |> assign(:post, post) |> assign_page_title(post)}
   end
