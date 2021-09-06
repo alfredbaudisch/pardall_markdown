@@ -1,16 +1,17 @@
 defmodule LiveMarkdown.Content.FileParser do
   require Logger
-  alias LiveMarkdown.Content.{Repository, Utils, Cache}
+  alias LiveMarkdown.Content.{Repository, Cache}
+  import LiveMarkdown.Content.Utils
 
   def load_all! do
-    Utils.root_path()
+    root_path()
     |> extract_folder!()
   end
 
   def extract!(path) do
     # I don't like nested if's in Elixir, but there's no better
     # way to do this in this specific case
-    if not Utils.is_path_from_static_assets?(path) do
+    if not is_path_from_static_assets?(path) do
       if File.exists?(path) do
         if File.dir?(path),
           do: extract_folder!(path),
@@ -22,7 +23,7 @@ defmodule LiveMarkdown.Content.FileParser do
   end
 
   defp extract_folder_if_valid!(path),
-    do: if(not Utils.is_path_from_static_assets?(path), do: extract_folder!(path))
+    do: if(not is_path_from_static_assets?(path), do: extract_folder!(path))
 
   defp extract_folder!(parent_path) do
     for child <- File.ls!(parent_path),
@@ -36,7 +37,7 @@ defmodule LiveMarkdown.Content.FileParser do
     path_index_contents =
       for child <- File.ls!(parent_path),
           path = Path.join(parent_path, child) do
-        %{path: path, slug: Utils.get_slug_from_path(path)}
+        %{path: path, slug: path |> remove_root_path() |> get_slug_from_path()}
       end
 
     Cache.save_path(parent_path, path_index_contents)
@@ -101,7 +102,8 @@ defmodule LiveMarkdown.Content.FileParser do
 
   defp convert_markdown_body(body), do: body |> Earmark.as_html()
 
-  defp put_slug(attrs, path), do: Map.put(attrs, :slug, Utils.get_slug_from_path(path))
+  defp put_slug(attrs, path),
+    do: Map.put(attrs, :slug, path |> remove_root_path() |> get_slug_from_path())
 
   defp parse_and_put_date!(%{date: date} = attrs) do
     date =

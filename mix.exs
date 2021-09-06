@@ -51,7 +51,8 @@ defmodule LiveMarkdown.MixProject do
       {:earmark, "~> 1.4"},
       {:esbuild, "~> 0.2", runtime: Mix.env() == :dev},
       {:slugify, "~> 1.3"},
-      {:con_cache, "~> 0.13"}
+      {:con_cache, "~> 0.13"},
+      {:recase, "~> 0.5"}
     ]
   end
 
