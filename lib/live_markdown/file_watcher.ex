@@ -47,13 +47,13 @@ defmodule LiveMarkdown.FileWatcher do
   end
 
   def handle_info(:reload_all, %{pending_events: pending, processing_events: processing} = state) do
-    Logger.warn("Started reloading content...")
+    Logger.info("Started reloading content...")
 
     Repository.init()
     FileParser.load_all!()
     schedule_next_recheck()
 
-    Logger.warn("Content reload finished.")
+    Logger.info("Content reload finished.")
 
     {:noreply,
      state
