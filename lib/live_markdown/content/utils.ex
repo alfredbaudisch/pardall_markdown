@@ -23,26 +23,26 @@ defmodule LiveMarkdown.Content.Utils do
 
       iex> LiveMarkdown.Content.Utils.extract_categories_from_path("/blog/art/3d-models/post.md")
       [
-        %{name: "Blog", slug: "/blog", level: 1, parents: ["/"]},
+        %{name: "Blog", slug: "/blog", level: 0, parents: ["/"]},
         %{
           name: "Art",
           slug: "/blog/art",
-          level: 2,
+          level: 1,
           parents: ["/", "/blog"]
         },
         %{
           name: "3D Models",
           slug: "/blog/art/3d-models",
-          level: 3,
+          level: 2,
           parents: ["/", "/blog", "/blog/art"]
         }
       ]
 
       iex> LiveMarkdown.Content.Utils.extract_categories_from_path("/blog/post.md")
-      [%{name: "Blog", slug: "/blog", level: 1, parents: ["/"]}]
+      [%{name: "Blog", slug: "/blog", level: 0, parents: ["/"]}]
 
       iex> LiveMarkdown.Content.Utils.extract_categories_from_path("/post.md")
-      [%{name: "", slug: "/", level: 0, parents: ["/"]}]
+      [%{name: "Home", slug: "/", level: 0, parents: ["/"]}]
   """
   def extract_categories_from_path(full_path) do
     full_path
@@ -51,7 +51,7 @@ defmodule LiveMarkdown.Content.Utils do
   end
 
   # Root / Page
-  defp do_extract_categories("/"), do: [%{name: "", slug: "/", level: 0, parents: ["/"]}]
+  defp do_extract_categories("/"), do: [%{name: "Home", slug: "/", level: 0, parents: ["/"]}]
   # Path with category and possibly, hierarchy
   defp do_extract_categories(path) do
     final_slug = extract_slug_from_path(path)
@@ -78,7 +78,7 @@ defmodule LiveMarkdown.Content.Utils do
 
       category = part |> capitalize_as_taxonomy_name()
 
-      %{name: category, slug: slug, level: pos + 1, parents: parents}
+      %{name: category, slug: slug, level: pos, parents: parents}
     end)
   end
 
