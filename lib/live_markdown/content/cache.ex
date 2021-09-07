@@ -20,55 +20,138 @@ defmodule LiveMarkdown.Content.Cache do
   def get_all_posts do
     ConCache.ets(@cache_name)
     |> :ets.tab2list()
-    |> Enum.reject(fn {_, %Item{type: type}} -> type == :taxonomy end)
+    |> Enum.reject(fn {_, %Item{type: type}} -> type == :link end)
     |> Enum.map(fn {_, %Item{value: value}} -> value end)
   end
 
   def get_all_taxonomies do
     ConCache.ets(@cache_name)
     |> :ets.tab2list()
-    |> Enum.reject(fn {_, %Item{type: type}} -> type != :taxonomy end)
+    |> Enum.reject(fn {_, %Item{type: type}} -> type != :link end)
     |> Enum.map(fn {_, %Item{value: value}} -> value end)
   end
 
   def get_taxonomy_tree(sort_by \\ :title) when sort_by in [:title, :date] do
-    ConCache.get(@index_cache_name, taxonomy_tree_key(sort_by))
+    get = fn -> ConCache.get(@index_cache_name, taxonomy_tree_key(sort_by)) end
+
+    case get.() do
+      nil ->
+        build_taxonomy_tree()
+        get.()
+
+      tree ->
+        tree
+    end
   end
 
-  def get_taxonomy_tree_with_joined_posts(sort_by \\ :title) when sort_by in [:title, :date] do
-    ConCache.get(@index_cache_name, taxonomy_tree_joined_posts_key(sort_by))
+  def get_content_tree(sort_by \\ :title) when sort_by in [:title, :date] do
+    get = fn -> ConCache.get(@index_cache_name, content_tree_key(sort_by)) end
+
+    case get.() do
+      nil ->
+        build_content_tree()
+        get.()
+
+      tree ->
+        tree
+    end
   end
 
-  def save_post(%Post{slug: slug, file_path: path} = value) do
+  def save_post(%Post{} = post) do
+    save_post_pure(post)
+    save_post_taxonomies(post)
+  end
+
+  def save_post_pure(%Post{slug: slug, file_path: path} = post) do
     key = slug_key(slug)
-    ConCache.put(@cache_name, key, Item.new_post(value))
+    ConCache.put(@cache_name, key, Item.new_post(post))
     ConCache.put(@index_cache_name, path_key(path), key)
 
     Logger.info("Saved #{inspect(key)}")
-    Logger.debug("#{inspect(key)} contents: #{inspect(value)}")
+    Logger.debug("#{inspect(key)} contents: #{inspect(post)}")
   end
 
   def save_path(path, contents) do
     ConCache.put(@index_cache_name, path_key(path), contents)
   end
 
-  def save_taxonomy_with_post(
+  def upsert_taxonomy_appending_post(
         %Link{slug: slug, children: children} = taxonomy,
         %Post{} = post
       ) do
     do_update = fn taxonomy, children ->
-      {:ok, Item.new_taxonomy(%{taxonomy | children: children ++ [Map.put(post, :content, nil)]})}
+      {:ok, Item.new_link(%{taxonomy | children: children ++ [Map.put(post, :content, nil)]})}
     end
 
     ConCache.update(@cache_name, slug_key(slug), fn
       nil ->
         do_update.(taxonomy, children)
 
-      %{type: :taxonomy, value: %{children: children} = taxonomy} ->
+      %Item{type: :link, value: %{children: children} = taxonomy} ->
         do_update.(taxonomy, children)
     end)
+  end
 
-    build_taxonomy_tree_with_joined_posts()
+  # TODO: For the initial purpose of this project, this solution is ok,
+  # but eventually let's implement it with a "real" tree or linked list.
+  def build_taxonomy_tree do
+    tree =
+      get_all_taxonomies()
+      |> sort_by_slug()
+      |> Enum.map(fn %Link{children: posts, slug: slug} = taxonomy ->
+        posts =
+          posts
+          |> Enum.filter(fn
+            %Post{taxonomies: [_t | _] = post_taxonomies} ->
+              # The last taxonomy of a post is its parent taxonomy.
+              # I.e. a post in *Blog > Art > 3D* has 3 taxonomies:
+              # Blog, Blog > Art and Blog > Art > 3D,
+              # where its parent is the last one.
+              List.last(post_taxonomies).slug == slug
+
+            _ ->
+              true
+          end)
+          |> filter_by_is_published()
+
+        taxonomy
+        |> Map.put(:children, posts)
+      end)
+
+    tree_with_posts_by_date =
+      tree
+      |> Enum.map(fn %Link{children: posts} = taxonomy ->
+        taxonomy
+        |> Map.put(:children, posts |> sort_by_published_date())
+      end)
+
+    tree_with_posts_by_title =
+      tree
+      |> Enum.map(fn %Link{children: posts} = taxonomy ->
+        taxonomy
+        |> Map.put(:children, posts |> sort_by_title())
+      end)
+
+    ConCache.put(@index_cache_name, taxonomy_tree_key(:date), tree_with_posts_by_date)
+    ConCache.put(@index_cache_name, taxonomy_tree_key(:title), tree_with_posts_by_title)
+    %{date: tree_with_posts_by_date, title: tree_with_posts_by_title}
+  end
+
+  def find_and_save_siblings do
+  end
+
+  # Posts are extracted from the `children` field of a taxonomy
+  # and added to the taxonomies list as a Link, while keeping
+  # the correct nesting under their parent taxonomy.
+  def build_content_tree do
+    %{date: tree_with_posts_by_date, title: tree_with_posts_by_title} = build_taxonomy_tree()
+
+    by_date = do_build_content_tree(tree_with_posts_by_date)
+    by_title = do_build_content_tree(tree_with_posts_by_title)
+
+    ConCache.put(@index_cache_name, content_tree_key(:date), by_date)
+    ConCache.put(@index_cache_name, content_tree_key(:title), by_title)
+    %{date: by_date, title: by_title}
   end
 
   @doc """
@@ -113,66 +196,12 @@ defmodule LiveMarkdown.Content.Cache do
   # Internal
   #
 
-  # TODO: For the initial purpose of this project, this solution is ok,
-  # but eventually let's implement it with a "real" tree or linked list.
-  defp build_taxonomy_tree do
-    tree =
-      get_all_taxonomies()
-      |> sort_by_slug()
-      |> Enum.map(fn %Link{children: posts, slug: slug} = taxonomy ->
-        posts =
-          posts
-          |> Enum.filter(fn
-            %Post{taxonomies: [_t | _] = post_taxonomies} ->
-              # The last taxonomy of a post is its parent taxonomy.
-              # I.e. a post in *Blog > Art > 3D* has 3 taxonomies:
-              # Blog, Blog > Art and Blog > Art > 3D,
-              # where its parent is the last one.
-              List.last(post_taxonomies).slug == slug
-
-            _ ->
-              true
-          end)
-          |> filter_by_is_published()
-
-        taxonomy
-        |> Map.put(:children, posts)
-      end)
-
-    tree_with_posts_by_date =
-      tree
-      |> Enum.map(fn %Link{children: posts} = taxonomy ->
-        taxonomy
-        |> Map.put(:children, posts |> sort_by_published_date())
-      end)
-
-    tree_with_posts_by_title =
-      tree
-      |> Enum.map(fn %Link{children: posts} = taxonomy ->
-        taxonomy
-        |> Map.put(:children, posts |> sort_by_title())
-      end)
-
-    ConCache.put(@index_cache_name, taxonomy_tree_key(:date), tree_with_posts_by_date)
-    ConCache.put(@index_cache_name, taxonomy_tree_key(:title), tree_with_posts_by_title)
-    %{date: tree_with_posts_by_date, title: tree_with_posts_by_title}
+  defp save_post_taxonomies(%Post{taxonomies: taxonomies} = post) do
+    taxonomies
+    |> Enum.map(&upsert_taxonomy_appending_post(&1, post))
   end
 
-  # Posts are extracted from the `children` field of a taxonomy
-  # and added to the taxonomies list, while keeping the correct
-  # nesting under their parent taxonomy.
-  defp build_taxonomy_tree_with_joined_posts do
-    %{date: tree_with_posts_by_date, title: tree_with_posts_by_title} = build_taxonomy_tree()
-
-    by_date = do_build_taxonomy_tree_with_joined_posts(tree_with_posts_by_date)
-    by_title = do_build_taxonomy_tree_with_joined_posts(tree_with_posts_by_title)
-
-    ConCache.put(@index_cache_name, taxonomy_tree_joined_posts_key(:date), by_date)
-    ConCache.put(@index_cache_name, taxonomy_tree_joined_posts_key(:title), by_title)
-    %{date: by_date, title: by_title}
-  end
-
-  defp do_build_taxonomy_tree_with_joined_posts(tree) do
+  defp do_build_content_tree(tree) do
     tree
     |> Enum.reduce([], fn %Link{children: posts, parents: parents} = taxonomy, all ->
       all
@@ -201,6 +230,6 @@ defmodule LiveMarkdown.Content.Cache do
   defp path_key(path), do: {:path, path}
   defp taxonomy_tree_key(sort_posts_by), do: {:taxonomy_tree, sort_posts_by}
 
-  defp taxonomy_tree_joined_posts_key(sort_posts_by),
+  defp content_tree_key(sort_posts_by),
     do: {:taxonomy_tree_joined_posts, sort_posts_by}
 end
