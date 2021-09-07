@@ -34,6 +34,10 @@ defmodule LiveMarkdownWeb.ConnCase do
   end
 
   setup _tags do
+    Application.ensure_all_started(:live_markdown)
+    # wait the Markdown content to be parsed and built
+    Process.sleep(100)
+
     {:ok, conn: Phoenix.ConnTest.build_conn()}
   end
 end

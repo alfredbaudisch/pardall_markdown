@@ -113,6 +113,8 @@ defmodule LiveMarkdown.Content.Cache do
   # Internal
   #
 
+  # TODO: For the initial purpose of this project, this solution is ok,
+  # but eventually let's implement it with a "real" tree or linked list.
   defp build_taxonomy_tree do
     tree =
       get_all_taxonomies()

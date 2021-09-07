@@ -19,6 +19,9 @@ defmodule LiveMarkdown.Content.Utils do
   as well as all parent categories slugs recursively, where `level: 0` is
   for root pages (i.e. no category).
 
+  TODO: For the initial purpose of this project, this solution is ok,
+  but eventually let's implement it with a "real" tree or linked list.
+
   ## Examples
 
       iex> LiveMarkdown.Content.Utils.extract_categories_from_path("/blog/art/3d-models/post.md")

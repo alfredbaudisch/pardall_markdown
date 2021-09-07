@@ -9,3 +9,4 @@
 
 This post has 3 categories in hierarchy (Blog - Art - 3D).
 
+![](../../../static/logo.png)
