@@ -23,7 +23,8 @@ config :live_markdown, LiveMarkdown.Content,
   static_assets_folder_name: "static",
   cache_name: :content_cache,
   index_cache_name: :content_index_cache,
-  site_name: "LiveMarkdown"
+  site_name: "LiveMarkdown",
+  check_pending_file_events_interval: 5_000
 
 # Configures Elixir's Logger
 config :logger, :console,

@@ -73,4 +73,20 @@ defmodule LiveMarkdown.Content.Receiver do
       do: FileParser.extract!(path)
 
   def event(_path, _events), do: {:ok, :ignore}
+
+  def is_event_valid?([event, :isdir]) when event in [:moved_from, :moved_to], do: true
+
+  def is_event_valid?(event)
+      when event in [
+             [:moved_from],
+             [:moved_to],
+             [:modified, :closed]
+           ],
+      do: true
+
+  @doc """
+  Returns whether a file event should be processed or not. Check
+  the description of `LiveMarkdown.Content.Receiver` for more details.
+  """
+  def is_event_valid?(_), do: false
 end
