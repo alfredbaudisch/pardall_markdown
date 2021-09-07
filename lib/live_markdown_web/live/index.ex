@@ -7,7 +7,12 @@ defmodule LiveMarkdownWeb.Live.Index do
       Endpoint.subscribe("content")
     end
 
-    {:ok, assign(socket, posts: Repository.get_all_published()) |> assign_page_title()}
+    {:ok,
+     assign(socket,
+       posts: Repository.get_all_published(),
+       taxonomy_tree: Repository.get_taxonomy_tree()
+     )
+     |> assign_page_title()}
   end
 
   @impl true

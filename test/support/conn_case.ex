@@ -26,6 +26,8 @@ defmodule LiveMarkdownWeb.ConnCase do
 
       alias LiveMarkdownWeb.Router.Helpers, as: Routes
 
+      import LiveMarkdownWeb.ContentHelpers
+
       # The default endpoint for testing
       @endpoint LiveMarkdownWeb.Endpoint
     end
