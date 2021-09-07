@@ -1,6 +1,6 @@
 defmodule LiveMarkdownWeb.Live.Content do
   use LiveMarkdownWeb, :live_view
-  alias LiveMarkdown.{Post, Taxonomy}
+  alias LiveMarkdown.{Post, Link}
 
   def mount(%{"slug" => slug}, _session, socket) do
     slug =
@@ -19,7 +19,7 @@ defmodule LiveMarkdownWeb.Live.Content do
   def render(%{content: %Post{}} = assigns),
     do: Phoenix.View.render(LiveMarkdownWeb.ContentView, "single_post.html", assigns)
 
-  def render(%{content: %Taxonomy{}} = assigns),
+  def render(%{content: %Link{}} = assigns),
     do: Phoenix.View.render(LiveMarkdownWeb.ContentView, "single_taxonomy.html", assigns)
 
   def handle_info(%{event: "post_updated", payload: content}, socket) do
@@ -35,6 +35,6 @@ defmodule LiveMarkdownWeb.Live.Content do
   defp assign_page_title(socket, %Post{title: title}),
     do: socket |> assign(:page_title, compose_page_title(title))
 
-  defp assign_page_title(socket, %Taxonomy{name: name}),
-    do: socket |> assign(:page_title, compose_page_title(name))
+  defp assign_page_title(socket, %Link{title: title}),
+    do: socket |> assign(:page_title, compose_page_title(title))
 end

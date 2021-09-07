@@ -10,6 +10,6 @@
 <h2>Categories</h2>
 <ul>
 <%= for category <- @content.taxonomies do %>
-    <li><%= live_redirect category.name, to: category.slug %></li>
+    <li><%= live_redirect category.title, to: category.slug %></li>
 <% end %>
 </ul>

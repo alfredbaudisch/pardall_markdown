@@ -1,11 +1,11 @@
-defmodule LiveMarkdown.Taxonomy do
+defmodule LiveMarkdown.Link do
   use Ecto.Schema
   import Ecto.Changeset
 
   @primary_key {:slug, :binary, autogenerate: false}
   @foreign_key_type :slug
   embedded_schema do
-    field :name, :string
+    field :title, :string
 
     # Why string instead of Enum? So that we can allow the usage of custom taxonomies in the future
     field :type, :string, default: "category"
@@ -16,8 +16,8 @@ defmodule LiveMarkdown.Taxonomy do
 
   def changeset(model, params) do
     model
-    |> cast(params, [:name, :slug, :type, :level, :parents])
-    |> validate_required([:name, :slug, :type, :level, :parents])
+    |> cast(params, [:title, :slug, :type, :level, :parents])
+    |> validate_required([:title, :slug, :type, :level, :parents])
     |> cast_embed(:children)
   end
 end

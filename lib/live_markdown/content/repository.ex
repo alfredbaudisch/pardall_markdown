@@ -1,5 +1,5 @@
 defmodule LiveMarkdown.Content.Repository do
-  alias LiveMarkdown.{Post, Taxonomy}
+  alias LiveMarkdown.{Post, Link}
   alias LiveMarkdown.Content.Cache
   alias LiveMarkdownWeb.Endpoint
   import LiveMarkdown.Content.Repository.Utils
@@ -104,7 +104,7 @@ defmodule LiveMarkdown.Content.Repository do
 
   defp save_taxonomies([], _), do: []
 
-  defp save_taxonomies([%Taxonomy{} = _ | _] = taxonomies, %Post{} = post) do
+  defp save_taxonomies([%Link{} = _ | _] = taxonomies, %Post{} = post) do
     taxonomies
     |> Enum.map(&Cache.save_taxonomy_with_post(&1, post))
   end

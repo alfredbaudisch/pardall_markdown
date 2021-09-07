@@ -1,6 +1,6 @@
 defmodule LiveMarkdown.Content.Cache do
   require Logger
-  alias LiveMarkdown.{Post, Taxonomy}
+  alias LiveMarkdown.{Post, Link}
   alias __MODULE__.Item
   import LiveMarkdown.Content.Repository.Filters
 
@@ -53,7 +53,7 @@ defmodule LiveMarkdown.Content.Cache do
   end
 
   def save_taxonomy_with_post(
-        %Taxonomy{slug: slug, children: children} = taxonomy,
+        %Link{slug: slug, children: children} = taxonomy,
         %Post{} = post
       ) do
     do_update = fn taxonomy, children ->
@@ -119,7 +119,7 @@ defmodule LiveMarkdown.Content.Cache do
     tree =
       get_all_taxonomies()
       |> sort_by_slug()
-      |> Enum.map(fn %Taxonomy{children: posts, slug: slug} = taxonomy ->
+      |> Enum.map(fn %Link{children: posts, slug: slug} = taxonomy ->
         posts =
           posts
           |> Enum.filter(fn
@@ -141,14 +141,14 @@ defmodule LiveMarkdown.Content.Cache do
 
     tree_with_posts_by_date =
       tree
-      |> Enum.map(fn %Taxonomy{children: posts} = taxonomy ->
+      |> Enum.map(fn %Link{children: posts} = taxonomy ->
         taxonomy
         |> Map.put(:children, posts |> sort_by_published_date())
       end)
 
     tree_with_posts_by_title =
       tree
-      |> Enum.map(fn %Taxonomy{children: posts} = taxonomy ->
+      |> Enum.map(fn %Link{children: posts} = taxonomy ->
         taxonomy
         |> Map.put(:children, posts |> sort_by_title())
       end)
@@ -174,15 +174,15 @@ defmodule LiveMarkdown.Content.Cache do
 
   defp do_build_taxonomy_tree_with_joined_posts(tree) do
     tree
-    |> Enum.reduce([], fn %Taxonomy{children: posts, parents: parents} = taxonomy, all ->
+    |> Enum.reduce([], fn %Link{children: posts, parents: parents} = taxonomy, all ->
       all
       |> Kernel.++([Map.put(taxonomy, :children, [])])
       |> Kernel.++(
         posts
         |> Enum.map(fn post ->
-          %Taxonomy{
+          %Link{
             slug: post.slug,
-            name: post.title,
+            title: post.title,
             level: level_for_joined_post(taxonomy.slug, taxonomy.level),
             parents: parents,
             type: "post"
