@@ -13,6 +13,7 @@ defmodule LiveMarkdown.Post do
     field :date, :utc_datetime
     field :file_path, :string
     field :is_published, :boolean, default: false
+    field :metadata, :map
     embeds_many :taxonomies, LiveMarkdown.Link
   end
 
@@ -26,7 +27,8 @@ defmodule LiveMarkdown.Post do
       :slug,
       :date,
       :file_path,
-      :is_published
+      :is_published,
+      :metadata
     ])
     |> validate_required([:type, :title, :slug, :date, :file_path])
     |> cast_embed(:taxonomies)

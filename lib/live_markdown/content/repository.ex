@@ -55,7 +55,8 @@ defmodule LiveMarkdown.Content.Repository do
       summary: Map.get(attrs, :summary, nil),
       is_published: Map.get(attrs, :published, false),
       # for now, when a post is pushed to the repository, only "categories" are known
-      taxonomies: attrs.categories
+      taxonomies: attrs.categories,
+      metadata: attrs |> remove_default_attributes()
     })
     |> Ecto.Changeset.apply_changes()
     |> save_content_and_broadcast!()
@@ -109,5 +110,10 @@ defmodule LiveMarkdown.Content.Repository do
 
   defp get_path_id(path) do
     :crypto.hash(:sha, path) |> Base.encode16() |> String.downcase()
+  end
+
+  defp remove_default_attributes(attrs) do
+    attrs
+    |> Map.drop([:title, :slug, :date, :summary, :published, :categories])
   end
 end
