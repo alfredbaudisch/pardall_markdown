@@ -14,7 +14,6 @@ defmodule LiveMarkdown.Post do
     field :file_path, :string
     field :is_published, :boolean, default: false
     embeds_many :taxonomies, LiveMarkdown.Link
-    timestamps(autogenerate: {DateTime, :utc_now, 1})
   end
 
   def changeset(model, params) do

@@ -2,7 +2,6 @@ defmodule LiveMarkdown.Content.Repository do
   alias LiveMarkdown.{Post, Link}
   alias LiveMarkdown.Content.Cache
   alias LiveMarkdownWeb.Endpoint
-  import LiveMarkdown.Content.Repository.Utils
   import LiveMarkdown.Content.Repository.Filters
   require Logger
 
@@ -58,7 +57,6 @@ defmodule LiveMarkdown.Content.Repository do
       # for now, when a post is pushed to the repository, only "categories" are known
       taxonomies: attrs.categories
     })
-    |> put_timestamps(model)
     |> Ecto.Changeset.apply_changes()
     |> save_content_and_broadcast!()
   end
