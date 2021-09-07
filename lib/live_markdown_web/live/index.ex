@@ -10,7 +10,7 @@ defmodule LiveMarkdownWeb.Live.Index do
     {:ok,
      assign(socket,
        posts: Repository.get_all_published(),
-       taxonomy_tree: Repository.get_taxonomy_tree()
+       taxonomy_tree: Repository.get_taxonomy_tree_with_joined_posts()
      )
      |> assign_page_title()}
   end

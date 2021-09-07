@@ -22,8 +22,12 @@ defmodule LiveMarkdown.Content.Repository do
     Cache.get_all_taxonomies()
   end
 
-  def get_taxonomy_tree do
-    Cache.get_taxonomy_tree()
+  def get_taxonomy_tree(sort_by \\ :title) do
+    Cache.get_taxonomy_tree(sort_by)
+  end
+
+  def get_taxonomy_tree_with_joined_posts(sort_by \\ :title) do
+    Cache.get_taxonomy_tree_with_joined_posts(sort_by)
   end
 
   def get_all_published do
@@ -35,11 +39,7 @@ defmodule LiveMarkdown.Content.Repository do
   def get_by_slug(slug), do: Cache.get_by_slug(slug)
 
   def get_by_slug!(slug) do
-    case get_by_slug(slug) do
-      nil -> raise LiveMarkdown.NotFoundError, "Page not found: #{slug}"
-      %Post{} = post -> post
-      %Taxonomy{} = taxonomy -> taxonomy
-    end
+    get_by_slug(slug) || raise LiveMarkdown.NotFoundError, "Page not found: #{slug}"
   end
 
   def push_post(path, %{slug: slug} = attrs, content, _type \\ :post) do
@@ -101,6 +101,8 @@ defmodule LiveMarkdown.Content.Repository do
     Endpoint.broadcast!("content", "post_updated", model)
     Endpoint.broadcast!("post_" <> slug, "post_updated", model)
   end
+
+  defp save_taxonomies([], _), do: []
 
   defp save_taxonomies([%Taxonomy{} = _ | _] = taxonomies, %Post{} = post) do
     taxonomies

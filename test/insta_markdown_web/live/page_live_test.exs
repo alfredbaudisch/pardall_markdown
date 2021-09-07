@@ -6,7 +6,7 @@ defmodule LiveMarkdownWeb.PageLiveTest do
 
   setup do
     Application.ensure_all_started(:live_markdown)
-    # wait the content to be parsed and built
+    # wait the Markdown content to be parsed and built
     Process.sleep(50)
   end
 
@@ -24,7 +24,7 @@ defmodule LiveMarkdownWeb.PageLiveTest do
 
   test "taxonomy tree is generated correctly", %{conn: _conn} do
     tree = Repository.get_taxonomy_tree()
-    generated = generate_taxonomy_tree(tree)
+    generated = taxonomy_tree_list(tree)
 
     expected =
       ~s"""
