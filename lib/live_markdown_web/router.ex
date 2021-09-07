@@ -8,6 +8,7 @@ defmodule LiveMarkdownWeb.Router do
     plug :put_root_layout, {LiveMarkdownWeb.LayoutView, :root}
     plug :protect_from_forgery
     plug :put_secure_browser_headers
+    plug(LiveMarkdownWeb.PlugRedirectTrailingSlash, :with)
   end
 
   pipeline :api do
@@ -33,8 +34,8 @@ defmodule LiveMarkdownWeb.Router do
   scope "/", LiveMarkdownWeb do
     pipe_through :browser
 
-    live "/", PageLive, :index
-    live "/*slug", Live.PostSingle, :show, as: :posts
+    live "/", Live.Index, :index
+    live "/*slug", Live.Content, :show, as: :content
   end
 
   # Other scopes may use custom stacks.

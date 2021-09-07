@@ -1,4 +1,4 @@
-defmodule LiveMarkdownWeb.PageLive do
+defmodule LiveMarkdownWeb.Live.Index do
   use LiveMarkdownWeb, :live_view
 
   @impl true
@@ -7,7 +7,12 @@ defmodule LiveMarkdownWeb.PageLive do
       Endpoint.subscribe("content")
     end
 
-    {:ok, assign(socket, posts: Repository.get_all_published()) |> assign_page_title()}
+    {:ok,
+     assign(socket,
+       posts: Repository.get_all_published(),
+       taxonomy_tree: Repository.get_taxonomy_tree_with_joined_posts()
+     )
+     |> assign_page_title()}
   end
 
   @impl true

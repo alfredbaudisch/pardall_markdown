@@ -1,0 +1,15 @@
+<%= if(not @content.is_published) do %>
+<p class="alert alert-danger" role="alert">
+    This post is still a draft, its contents may change at any time
+</p>
+<% end %>
+
+<h1><%= @content.title %></h1>
+<%= raw(@content.content) %>
+
+<h2>Categories</h2>
+<ul>
+<%= for category <- @content.taxonomies do %>
+    <li><%= live_redirect category.name, to: category.slug %></li>
+<% end %>
+</ul>

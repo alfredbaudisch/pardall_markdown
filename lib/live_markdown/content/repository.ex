@@ -1,5 +1,5 @@
 defmodule LiveMarkdown.Content.Repository do
-  alias LiveMarkdown.Content
+  alias LiveMarkdown.{Post, Taxonomy}
   alias LiveMarkdown.Content.Cache
   alias LiveMarkdownWeb.Endpoint
   import LiveMarkdown.Content.Repository.Utils
@@ -14,12 +14,24 @@ defmodule LiveMarkdown.Content.Repository do
   # CRUD interface
   #
 
-  def get_all do
-    Cache.get_all()
+  def get_all_posts do
+    Cache.get_all_posts()
+  end
+
+  def get_all_taxonomies do
+    Cache.get_all_taxonomies()
+  end
+
+  def get_taxonomy_tree(sort_by \\ :title) do
+    Cache.get_taxonomy_tree(sort_by)
+  end
+
+  def get_taxonomy_tree_with_joined_posts(sort_by \\ :title) do
+    Cache.get_taxonomy_tree_with_joined_posts(sort_by)
   end
 
   def get_all_published do
-    get_all()
+    get_all_posts()
     |> filter_by_is_published()
     |> sort_by_published_date()
   end
@@ -27,23 +39,24 @@ defmodule LiveMarkdown.Content.Repository do
   def get_by_slug(slug), do: Cache.get_by_slug(slug)
 
   def get_by_slug!(slug) do
-    get_by_slug(slug) ||
-      raise LiveMarkdown.NotFoundError, "post with slug=#{slug} not found"
+    get_by_slug(slug) || raise LiveMarkdown.NotFoundError, "Page not found: #{slug}"
   end
 
-  def push(path, %{slug: slug} = attrs, content, type \\ :post) do
-    model = get_by_slug(slug) || %Content{}
+  def push_post(path, %{slug: slug} = attrs, content, _type \\ :post) do
+    model = get_by_slug(slug) || %Post{}
 
     model
-    |> Content.changeset(%{
-      type: type,
+    |> Post.changeset(%{
+      type: get_post_type_from_taxonomies(attrs.categories),
       file_path: path,
       title: attrs.title,
       content: content,
       slug: attrs.slug,
       date: attrs.date,
+      summary: Map.get(attrs, :summary, nil),
       is_published: Map.get(attrs, :published, false),
-      categories: attrs.categories
+      # for now, when a post is pushed to the repository, only "categories" are known
+      taxonomies: attrs.categories
     })
     |> put_timestamps(model)
     |> Ecto.Changeset.apply_changes()
@@ -51,11 +64,16 @@ defmodule LiveMarkdown.Content.Repository do
   end
 
   def delete_path(path) do
-    posts = Cache.delete_path(path)
-    Endpoint.broadcast!("content", "post_events", posts)
+    case Cache.delete_path(path) do
+      [_p | _] = posts ->
+        Endpoint.broadcast!("content", "post_events", posts)
 
-    for {slug, :deleted} <- posts do
-      Endpoint.broadcast!("post_" <> slug, "post_deleted", true)
+        for {slug, :deleted} <- posts do
+          Endpoint.broadcast!("post_" <> slug, "post_deleted", true)
+        end
+
+      _ ->
+        []
     end
   end
 
@@ -63,16 +81,32 @@ defmodule LiveMarkdown.Content.Repository do
   # Data helpers
   #
 
-  defp save_content_and_broadcast!(%Content{id: nil, file_path: path} = model) do
+  # No taxonomy or a contains the root taxonomy: it's a page
+  defp get_post_type_from_taxonomies([]), do: :page
+  defp get_post_type_from_taxonomies([%{slug: "/"}]), do: :page
+  defp get_post_type_from_taxonomies(_), do: :post
+
+  defp save_content_and_broadcast!(
+         %Post{id: nil, file_path: path, taxonomies: taxonomies} = model
+       ) do
     model = %{model | id: get_path_id(path)}
-    Cache.save(model)
+    save_taxonomies(taxonomies, model)
+    Cache.save_post(model)
     Endpoint.broadcast!("content", "post_created", model)
   end
 
-  defp save_content_and_broadcast!(%Content{slug: slug} = model) do
-    Cache.save(model)
+  defp save_content_and_broadcast!(%Post{taxonomies: taxonomies, slug: slug} = model) do
+    save_taxonomies(taxonomies, model)
+    Cache.save_post(model)
     Endpoint.broadcast!("content", "post_updated", model)
     Endpoint.broadcast!("post_" <> slug, "post_updated", model)
+  end
+
+  defp save_taxonomies([], _), do: []
+
+  defp save_taxonomies([%Taxonomy{} = _ | _] = taxonomies, %Post{} = post) do
+    taxonomies
+    |> Enum.map(&Cache.save_taxonomy_with_post(&1, post))
   end
 
   defp get_path_id(path) do

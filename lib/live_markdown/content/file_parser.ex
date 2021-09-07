@@ -9,8 +9,7 @@ defmodule LiveMarkdown.Content.FileParser do
   end
 
   def extract!(path) do
-    # I don't like nested if's in Elixir, but there's no better
-    # way to do this in this specific case
+    # Static assets are not parsed nor indexed
     if not is_path_from_static_assets?(path) do
       if File.exists?(path) do
         if File.dir?(path),
@@ -49,7 +48,7 @@ defmodule LiveMarkdown.Content.FileParser do
         parse!(path)
 
       _ ->
-        Logger.warn("[Content.ParseFile] Received file #{path}, but no need to parse")
+        Logger.warn("Ignored file #{path}")
     end
   end
 
@@ -57,23 +56,23 @@ defmodule LiveMarkdown.Content.FileParser do
     with {:ok, raw_content} <- File.read(path),
          {:ok, attrs, body} <- parse_contents(path, raw_content),
          {:ok, attrs} <- validate_attrs(attrs),
-         {:ok, html_content, _} <- convert_markdown_body(body) do
+         {:ok, body_html, _} <- markdown_to_html(body),
+         {:ok, summary_html, _} <- maybe_summary_to_html(attrs) do
       attrs =
         attrs
-        |> put_slug(path)
-        |> put_categories(path)
+        |> extract_and_put_slug(path)
+        |> extract_and_put_categories(path)
         |> parse_and_put_date!()
+        |> Map.put(:summary, summary_html)
 
-      Repository.push(path, attrs, html_content)
-      Logger.info("[Content.ParseFile] Pushed converted Markdown: #{path}")
+      Repository.push_post(path, attrs, body_html)
+      Logger.info("Pushed converted Markdown: #{path}")
     else
       {:error, error} ->
-        Logger.error("[Content.ParseFile] Could not parse file #{path}: #{inspect(error)}")
+        Logger.error("Could not parse file #{path}: #{inspect(error)}")
 
       {:error, _, error} ->
-        Logger.error(
-          "[Content.ParseFile] Could not render Markdown file #{path}: #{inspect(error)}"
-        )
+        Logger.error("Could not render Markdown file #{path}: #{inspect(error)}")
     end
   end
 
@@ -101,12 +100,17 @@ defmodule LiveMarkdown.Content.FileParser do
 
   defp validate_attrs(_), do: {:error, "attrs must contain :title and :date"}
 
-  defp convert_markdown_body(body), do: body |> Earmark.as_html()
+  defp maybe_summary_to_html(%{summary: summary}) when is_binary(summary) and summary != "",
+    do: summary |> markdown_to_html()
 
-  defp put_slug(attrs, path),
+  defp maybe_summary_to_html(_), do: {:ok, nil, :ignore}
+
+  defp markdown_to_html(content), do: content |> Earmark.as_html(escape: false)
+
+  defp extract_and_put_slug(attrs, path),
     do: Map.put(attrs, :slug, path |> remove_root_path() |> extract_slug_from_path())
 
-  defp put_categories(attrs, path),
+  defp extract_and_put_categories(attrs, path),
     do: Map.put(attrs, :categories, path |> remove_root_path() |> extract_categories_from_path())
 
   defp parse_and_put_date!(%{date: date} = attrs) do

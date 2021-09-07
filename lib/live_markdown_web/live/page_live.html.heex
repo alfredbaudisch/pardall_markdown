@@ -1,9 +1,0 @@
-<section class="row">
-  <ul>
-  <%= for post <- @posts do %>
-    <li>
-      <%= live_redirect post.title, to: post.slug %> (<%= Date.to_iso8601(post.date) %>)
-    </li>
-  <% end %>
-  </ul>
-</section>

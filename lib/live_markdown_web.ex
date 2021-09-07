@@ -95,6 +95,7 @@ defmodule LiveMarkdownWeb do
       alias LiveMarkdownWeb.Router.Helpers, as: Routes
 
       import LiveMarkdownWeb.Utils
+      import LiveMarkdownWeb.ContentHelpers
     end
   end
 
