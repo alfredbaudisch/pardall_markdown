@@ -7,23 +7,23 @@ defmodule LiveMarkdownWeb.Live.Content do
       slug
       |> slug_params_to_slug()
 
-    post = Repository.get_by_slug!(slug)
+    content = Repository.get_by_slug!(slug)
 
     if connected?(socket) do
-      Endpoint.subscribe("post_" <> slug)
+      Endpoint.subscribe("content_" <> slug)
     end
 
-    {:ok, socket |> assign(:post, post) |> assign_page_title(post)}
+    {:ok, socket |> assign(:content, content) |> assign_page_title(content)}
   end
 
-  def render(%{post: %Post{}} = assigns),
+  def render(%{content: %Post{}} = assigns),
     do: Phoenix.View.render(LiveMarkdownWeb.ContentView, "single_post.html", assigns)
 
-  def render(%{post: %Taxonomy{}} = assigns),
+  def render(%{content: %Taxonomy{}} = assigns),
     do: Phoenix.View.render(LiveMarkdownWeb.ContentView, "single_taxonomy.html", assigns)
 
   def handle_info(%{event: "post_updated", payload: content}, socket) do
-    {:noreply, socket |> assign(:post, content) |> assign_page_title(content)}
+    {:noreply, socket |> assign(:content, content) |> assign_page_title(content)}
   end
 
   def handle_info(%{event: "post_deleted", payload: _}, socket) do

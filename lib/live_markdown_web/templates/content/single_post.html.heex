@@ -1,15 +1,15 @@
-<%= if(not @post.is_published) do %>
+<%= if(not @content.is_published) do %>
 <p class="alert alert-danger" role="alert">
     This post is still a draft, its contents may change at any time
 </p>
 <% end %>
 
-<h1><%= @post.title %></h1>
-<%= raw(@post.content) %>
+<h1><%= @content.title %></h1>
+<%= raw(@content.content) %>
 
 <h2>Categories</h2>
 <ul>
-<%= for category <- @post.taxonomies do %>
-    <li><a href={category.slug}><%= category.name %></a></li>
+<%= for category <- @content.taxonomies do %>
+    <li><%= live_redirect category.name, to: category.slug %></li>
 <% end %>
 </ul>
