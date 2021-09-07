@@ -2,6 +2,7 @@ defmodule LiveMarkdown.Content.Cache do
   require Logger
   alias LiveMarkdown.{Post, Taxonomy}
   alias __MODULE__.Item
+  import LiveMarkdown.Content.Repository.Filters
 
   @cache_name Application.compile_env(:live_markdown, [LiveMarkdown.Content, :cache_name])
   @index_cache_name Application.compile_env(:live_markdown, [
@@ -21,6 +22,17 @@ defmodule LiveMarkdown.Content.Cache do
     |> :ets.tab2list()
     |> Enum.reject(fn {_, %Item{type: type}} -> type == :taxonomy end)
     |> Enum.map(fn {_, %Item{value: value}} -> value end)
+  end
+
+  def get_all_taxonomies do
+    ConCache.ets(@cache_name)
+    |> :ets.tab2list()
+    |> Enum.reject(fn {_, %Item{type: type}} -> type != :taxonomy end)
+    |> Enum.map(fn {_, %Item{value: value}} -> value end)
+  end
+
+  def get_taxonomy_tree do
+    ConCache.get(@index_cache_name, get_taxonomy_tree_key())
   end
 
   def save_post(%Post{slug: slug, file_path: path} = value) do
@@ -51,6 +63,8 @@ defmodule LiveMarkdown.Content.Cache do
       %{type: :taxonomy, value: %{children: children} = taxonomy} ->
         do_update.(taxonomy, children)
     end)
+
+    build_and_save_taxonomy_tree()
   end
 
   @doc """
@@ -91,6 +105,33 @@ defmodule LiveMarkdown.Content.Cache do
     |> :ets.delete_all_objects()
   end
 
+  #
+  # Internal
+  #
+
+  defp build_and_save_taxonomy_tree do
+    tree =
+      get_all_taxonomies()
+      |> Enum.map(fn %Taxonomy{children: posts, slug: slug} = taxonomy ->
+        posts =
+          posts
+          |> Enum.filter(fn
+            %Post{taxonomies: [_t | _] = post_tax} ->
+              List.last(post_tax).slug == slug
+
+            _ ->
+              true
+          end)
+
+        taxonomy
+        |> Map.put(:children, posts)
+      end)
+      |> sort_by_slug()
+
+    ConCache.put(@index_cache_name, get_taxonomy_tree_key(), tree)
+  end
+
   defp get_slug_key(slug), do: {:slug, slug}
   defp get_path_key(path), do: {:path, path}
+  defp get_taxonomy_tree_key, do: :taxonomy_tree
 end

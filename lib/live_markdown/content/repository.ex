@@ -18,6 +18,14 @@ defmodule LiveMarkdown.Content.Repository do
     Cache.get_all_posts()
   end
 
+  def get_all_taxonomies do
+    Cache.get_all_taxonomies()
+  end
+
+  def get_taxonomy_tree do
+    Cache.get_taxonomy_tree()
+  end
+
   def get_all_published do
     get_all_posts()
     |> filter_by_is_published()

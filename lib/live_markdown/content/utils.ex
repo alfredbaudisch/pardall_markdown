@@ -11,20 +11,38 @@ defmodule LiveMarkdown.Content.Utils do
   def remove_root_path(path), do: path |> String.replace(root_path(), "")
 
   @doc """
-  Splits a path into a hierarchy of categories, containing both readable category names
+  Splits a path into a tree of categories, containing both readable category names
   and slugs for all categories in the hierarchy. The categories list is indexed from the
   topmost to the lowermost in the hiearchy, example: Games > PC > RPG.
+
+  Also returns the level in the tree in which the category can be found,
+  as well as all parent categories slugs recursively, where `level: 0` is
+  for root pages (i.e. no category).
 
   ## Examples
 
       iex> LiveMarkdown.Content.Utils.extract_categories_from_path("/blog/art/3d-models/post.md")
-      [%{name: "Blog", slug: "/blog"}, %{name: "Art", slug: "/blog/art"}, %{name: "3D Models", slug: "/blog/art/3d-models"}]
+      [
+        %{name: "Blog", slug: "/blog", level: 1, parents: ["/"]},
+        %{
+          name: "Art",
+          slug: "/blog/art",
+          level: 2,
+          parents: ["/", "/blog"]
+        },
+        %{
+          name: "3D Models",
+          slug: "/blog/art/3d-models",
+          level: 3,
+          parents: ["/", "/blog", "/blog/art"]
+        }
+      ]
 
       iex> LiveMarkdown.Content.Utils.extract_categories_from_path("/blog/post.md")
-      [%{name: "Blog", slug: "/blog"}]
+      [%{name: "Blog", slug: "/blog", level: 1, parents: ["/"]}]
 
       iex> LiveMarkdown.Content.Utils.extract_categories_from_path("/post.md")
-      [%{name: "", slug: "/"}]
+      [%{name: "", slug: "/", level: 0, parents: ["/"]}]
   """
   def extract_categories_from_path(full_path) do
     full_path
@@ -33,7 +51,7 @@ defmodule LiveMarkdown.Content.Utils do
   end
 
   # Root / Page
-  defp do_extract_categories("/"), do: [%{name: "", slug: "/"}]
+  defp do_extract_categories("/"), do: [%{name: "", slug: "/", level: 0, parents: ["/"]}]
   # Path with category and possibly, hierarchy
   defp do_extract_categories(path) do
     final_slug = extract_slug_from_path(path)
@@ -49,9 +67,18 @@ defmodule LiveMarkdown.Content.Utils do
         |> Enum.take(pos + 2)
         |> Enum.join("/")
 
+      parents =
+        for idx <- 0..pos do
+          slug_parts |> Enum.take(idx + 1) |> Enum.join("/")
+        end
+        |> Enum.map(fn
+          "" -> "/"
+          parent -> parent
+        end)
+
       category = part |> capitalize_as_taxonomy_name()
 
-      %{name: category, slug: slug}
+      %{name: category, slug: slug, level: pos + 1, parents: parents}
     end)
   end
 
