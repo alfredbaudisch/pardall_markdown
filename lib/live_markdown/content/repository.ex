@@ -72,10 +72,9 @@ defmodule LiveMarkdown.Content.Repository do
         end).()
   end
 
-  def rebuild_indexes! do
+  def rebuild_indexes do
     Cache.build_taxonomy_tree()
     Cache.build_content_tree()
-    # 2. find and save post siblings
   end
 
   #
