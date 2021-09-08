@@ -31,8 +31,8 @@ defmodule LiveMarkdown.Content.Cache do
     |> Enum.map(fn {_, %Link{} = link} -> link end)
   end
 
-  def get_taxonomy_tree(sort_by \\ :date) when sort_by in [:date] do
-    get = fn -> ConCache.get(@index_cache_name, taxonomy_tree_key(sort_by)) end
+  def get_taxonomy_tree() do
+    get = fn -> ConCache.get(@index_cache_name, taxonomy_tree_key()) end
 
     case get.() do
       nil ->
@@ -44,8 +44,8 @@ defmodule LiveMarkdown.Content.Cache do
     end
   end
 
-  def get_content_tree(sort_by \\ :date) when sort_by in [:date] do
-    get = fn -> ConCache.get(@index_cache_name, content_tree_key(sort_by)) end
+  def get_content_tree() do
+    get = fn -> ConCache.get(@index_cache_name, content_tree_key()) end
 
     case get.() do
       nil ->
@@ -80,7 +80,7 @@ defmodule LiveMarkdown.Content.Cache do
 
   def build_taxonomy_tree() do
     tree = do_build_taxonomy_tree()
-    ConCache.put(@index_cache_name, taxonomy_tree_key(:date), tree)
+    ConCache.put(@index_cache_name, taxonomy_tree_key(), tree)
     tree
   end
 
@@ -107,7 +107,7 @@ defmodule LiveMarkdown.Content.Cache do
     # orders for the same post set. Generate only once, respecting the post set
     # ordering configuration.
 
-    ConCache.put(@index_cache_name, content_tree_key(:date), tree)
+    ConCache.put(@index_cache_name, content_tree_key(), tree)
     tree
   end
 
@@ -140,16 +140,14 @@ defmodule LiveMarkdown.Content.Cache do
 
   defp upsert_taxonomy_appending_post(
          %Link{slug: slug} = taxonomy,
-         %Post{type: :index, priority: priority, title: post_title} = post
+         %Post{type: :index, position: position, title: post_title} = post
        ) do
     do_update = fn taxonomy ->
       {:ok,
-       %{
+       %Link{
          taxonomy
          | index_post: post,
-           priority: priority,
-           sort_by: index_sort_by_from_post(post),
-           sort_order: index_sort_order_from_post(post),
+           position: position,
            title: post_title
        }}
     end
@@ -210,7 +208,7 @@ defmodule LiveMarkdown.Content.Cache do
     end)
     |> Enum.map(fn %Link{children: posts} = taxonomy ->
       taxonomy
-      |> Map.put(:children, posts |> sort_by_published_date())
+      |> Map.put(:children, posts |> sort_posts_by_closest_sorting_method(taxonomy))
     end)
   end
 
@@ -231,7 +229,7 @@ defmodule LiveMarkdown.Content.Cache do
             level: joined_post_level(taxonomy.slug, taxonomy.level),
             parents: parents,
             type: :post,
-            priority: post.priority
+            position: post.position
           }
         end)
       )
@@ -266,11 +264,46 @@ defmodule LiveMarkdown.Content.Cache do
   defp joined_post_level(_, parent_level), do: parent_level + 1
 
   defp slug_key(slug), do: {:slug, slug}
-  defp taxonomy_tree_key(sort_posts_by), do: {:taxonomy_tree, sort_posts_by}
-  defp content_tree_key(sort_posts_by), do: {:content_tree, sort_posts_by}
+  defp taxonomy_tree_key, do: :taxonomy_tree
+  defp content_tree_key, do: :content_tree
 
-  defp index_sort_by_from_post(%Post{metadata: %{sort_by: sort_by}}), do: sort_by
-  defp index_sort_by_from_post(_), do: Link.default_sort_by()
-  defp index_sort_order_from_post(%Post{metadata: %{sort_order: sort_order}}), do: sort_order
-  defp index_sort_order_from_post(_), do: Link.default_sort_order()
+  defp sort_posts_by_closest_sorting_method(posts, %Link{
+         type: :taxonomy,
+         index_post: %Post{metadata: %{sort_by: sort_by, sort_order: sort_order}}
+       }) do
+    posts
+    |> sort_by_custom(sort_by, sort_order)
+  end
+
+  defp sort_posts_by_closest_sorting_method(
+         [%Post{taxonomies: taxonomies} | _] = posts,
+         %Link{level: max_level}
+       ) do
+    {:sort_by, sort_by, :sort_order, sort_order} =
+      taxonomies
+      |> Enum.reject(fn %Link{level: level} -> level > max_level end)
+      |> Enum.reverse()
+      |> find_sorting_method_from_taxonomies()
+
+    posts
+    |> sort_by_custom(sort_by, sort_order)
+  end
+
+  defp sort_posts_by_closest_sorting_method([] = posts, _), do: posts
+
+  defp find_sorting_method_from_taxonomies([
+         %Link{
+           type: :taxonomy,
+           index_post: %Post{metadata: %{sort_by: sort_by, sort_order: sort_order}}
+         }
+         | _
+       ]) do
+    {:sort_by, sort_by, :sort_order, sort_order}
+  end
+
+  defp find_sorting_method_from_taxonomies([_ | tail]),
+    do: find_sorting_method_from_taxonomies(tail)
+
+  defp find_sorting_method_from_taxonomies([]),
+    do: {:sort_by, Link.default_sort_by(), :sort_order, Link.default_sort_order()}
 end

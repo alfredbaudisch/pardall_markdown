@@ -26,8 +26,8 @@ Ready to run in production? Please [check our deployment guides](https://hexdocs
 - Additional custom fields (saved into `%Post{}.metadata`)
 
 ## Multiple sorting types
-- title, date, slug, priority
-- Per folder sorting (i.e. a blog can sort by date, while a documentation by priority)
+- title, date, slug, position
+- Per folder sorting (i.e. a blog can sort by date, while a documentation by position)
 
 ## Taxonomy and Content Trees
 

@@ -13,7 +13,7 @@ defmodule LiveMarkdown.Post do
     field :file_path, :string
     field :is_published, :boolean, default: false
     field :metadata, :map
-    field :priority, :integer, default: 0
+    field :position, :integer, default: 0
     embeds_many :taxonomies, LiveMarkdown.Link
     embeds_one :link, LiveMarkdown.Link
   end
@@ -30,7 +30,7 @@ defmodule LiveMarkdown.Post do
       :file_path,
       :is_published,
       :metadata,
-      :priority
+      :position
     ])
     |> validate_required([:type, :title, :slug, :date, :file_path])
     |> cast_embed(:taxonomies)

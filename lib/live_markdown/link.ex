@@ -10,7 +10,7 @@ defmodule LiveMarkdown.Link do
     field :custom_type, :string, default: nil
     field :level, :integer, default: 1
     field :parents, {:array, :string}, default: ["/"]
-    field :priority, :integer, default: 0
+    field :position, :integer, default: 0
     embeds_one :previous, __MODULE__
     embeds_one :next, __MODULE__
     embeds_many :children, LiveMarkdown.Post
@@ -18,9 +18,6 @@ defmodule LiveMarkdown.Link do
     #
     # Taxonomy specific fields
     #
-    # how to sort children posts
-    field :sort_by, Ecto.Enum, values: [:title, :date, :slug, :priority], default: :date
-    field :sort_order, Ecto.Enum, values: [:asc, :desc], default: :desc
     # the taxonomy own post/custom index page
     embeds_one :index_post, LiveMarkdown.Post
   end
@@ -34,9 +31,7 @@ defmodule LiveMarkdown.Link do
       :level,
       :parents,
       :custom_type,
-      :sort_by,
-      :sort_order,
-      :priority
+      :position
     ])
     |> validate_required([:title, :slug, :type, :level, :parents])
     |> cast_embed(:children)
@@ -44,6 +39,11 @@ defmodule LiveMarkdown.Link do
     |> cast_embed(:next)
     |> cast_embed(:index_post)
   end
+
+  def is_sort_by_valid?(sort_by) when sort_by in [:title, :date, :slug, :position], do: true
+  def is_sort_by_valid?(_), do: false
+  def is_sort_order_valid?(sort_order) when sort_order in [:asc, :desc], do: true
+  def is_sort_order_valid?(_), do: false
 
   def default_sort_by, do: :date
   def default_sort_order, do: :desc

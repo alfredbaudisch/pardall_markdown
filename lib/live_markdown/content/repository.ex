@@ -22,12 +22,12 @@ defmodule LiveMarkdown.Content.Repository do
     Cache.get_all_links(type)
   end
 
-  def get_taxonomy_tree(sort_by \\ :date) do
-    Cache.get_taxonomy_tree(sort_by)
+  def get_taxonomy_tree() do
+    Cache.get_taxonomy_tree()
   end
 
-  def get_content_tree(sort_by \\ :date) do
-    Cache.get_content_tree(sort_by)
+  def get_content_tree() do
+    Cache.get_content_tree()
   end
 
   def get_all_published do
@@ -53,6 +53,7 @@ defmodule LiveMarkdown.Content.Repository do
       content: content,
       slug: attrs.slug,
       date: attrs.date,
+      position: attrs.position,
       summary: Map.get(attrs, :summary, nil),
       is_published: Map.get(attrs, :published, false),
       # for now, when a post is pushed to the repository, only "categories" are known
@@ -99,6 +100,15 @@ defmodule LiveMarkdown.Content.Repository do
 
   defp remove_default_attributes(attrs) do
     attrs
-    |> Map.drop([:title, :slug, :date, :summary, :published, :categories, :is_index])
+    |> Map.drop([
+      :title,
+      :slug,
+      :date,
+      :summary,
+      :published,
+      :categories,
+      :is_index,
+      :position
+    ])
   end
 end

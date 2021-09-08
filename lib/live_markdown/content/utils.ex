@@ -17,20 +17,6 @@ defmodule LiveMarkdown.Content.Utils do
   def taxonomy_index_file, do: @taxonomy_index_file
   def is_index_file?(path), do: Path.basename(path) == taxonomy_index_file()
 
-  def is_date?(date) do
-    case Date.from_iso8601(date) do
-      {:ok, _} -> true
-      _ -> false
-    end
-  end
-
-  def is_datetime?(date) do
-    case DateTime.from_iso8601(date) do
-      {:ok, _, _} -> true
-      _ -> false
-    end
-  end
-
   @doc """
   Splits a path into a tree of categories, containing both readable category names
   and slugs for all categories in the hierarchy. The categories list is indexed from the
@@ -211,4 +197,21 @@ defmodule LiveMarkdown.Content.Utils do
     |> String.replace("_", " ")
     |> String.split(" ")
   end
+
+  def is_date?(date) do
+    case Date.from_iso8601(date) do
+      {:ok, _} -> true
+      _ -> false
+    end
+  end
+
+  def is_datetime?(date) do
+    case DateTime.from_iso8601(date) do
+      {:ok, _, _} -> true
+      _ -> false
+    end
+  end
+
+  def maybe_to_atom(val) when is_binary(val), do: String.to_atom(val)
+  def maybe_to_atom(val) when is_atom(val), do: val
 end

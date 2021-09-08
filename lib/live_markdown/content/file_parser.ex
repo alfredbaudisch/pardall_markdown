@@ -1,6 +1,7 @@
 defmodule LiveMarkdown.Content.FileParser do
   require Logger
   alias LiveMarkdown.Content.Repository
+  alias LiveMarkdown.Link
   import LiveMarkdown.Content.Utils
 
   def load_all! do
@@ -45,6 +46,7 @@ defmodule LiveMarkdown.Content.FileParser do
 
     with {:ok, raw_content} <- File.read(path),
          {:ok, attrs, body} <- parse_contents(path, raw_content),
+         {:ok, attrs} <- validate_attrs(attrs, is_index?),
          {:ok, body_html, _} <- markdown_to_html(body),
          {:ok, summary_html, _} <- maybe_summary_to_html(attrs),
          {:ok, date} <- parse_or_get_date(attrs, path) do
@@ -53,6 +55,7 @@ defmodule LiveMarkdown.Content.FileParser do
         |> extract_and_put_slug(path)
         |> extract_and_put_categories(path)
         |> maybe_put_title(path, is_index?)
+        |> maybe_put_position()
         |> Map.put(:summary, summary_html)
         |> Map.put(:date, date)
         |> Map.put(:is_index, is_index?)
@@ -91,6 +94,38 @@ defmodule LiveMarkdown.Content.FileParser do
     end
   end
 
+  defp validate_attrs(attrs, true = _is_index?) do
+    sort_order = Map.get(attrs, :sort_order)
+    sort_by = Map.get(attrs, :sort_by)
+
+    invalid =
+      {:error, "when providing sorting options, provide both :sort_order and :sort_by, or none"}
+
+    cond do
+      (not is_nil(sort_order) and is_nil(sort_by)) or
+          (is_nil(sort_order) and not is_nil(sort_by)) ->
+        invalid
+
+      not is_nil(sort_order) and not is_nil(sort_by) ->
+        sort_by = maybe_to_atom(sort_by)
+        sort_order = maybe_to_atom(sort_order)
+
+        if Link.is_sort_by_valid?(sort_by) and Link.is_sort_order_valid?(sort_order) do
+          {:ok,
+           attrs
+           |> Map.put(:sort_order, sort_order)
+           |> Map.put(:sort_by, sort_by)}
+        else
+          invalid
+        end
+
+      true ->
+        {:ok, attrs}
+    end
+  end
+
+  defp validate_attrs(attrs, _is_index?), do: {:ok, attrs}
+
   defp maybe_summary_to_html(%{summary: summary}) when is_binary(summary) and summary != "",
     do: summary |> markdown_to_html()
 
@@ -120,6 +155,14 @@ defmodule LiveMarkdown.Content.FileParser do
   defp maybe_put_title(attrs, path, false),
     do: Map.put(attrs, :title, extract_title_from_path(path))
 
+  defp maybe_put_position(%{position: position} = attrs) when is_binary(position),
+    do: Map.put(attrs, :position, String.to_integer(position))
+
+  defp maybe_put_position(%{position: position} = attrs) when is_number(position),
+    do: attrs
+
+  defp maybe_put_position(attrs), do: Map.put(attrs, :position, 0)
+
   # Date provided in the markdown file, try to parse it
   defp parse_or_get_date(%{date: date}, _path) when is_binary(date) and date != "" do
     cond do
@@ -132,7 +175,7 @@ defmodule LiveMarkdown.Content.FileParser do
         {:ok, datetime}
 
       true ->
-        {:error, "Post :date must be in a valid Elixir date format, received: #{date}"}
+        {:error, ":date must be a ISO datetime or date: #{date}"}
     end
   end
 
