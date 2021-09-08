@@ -62,10 +62,9 @@ defmodule LiveMarkdown.Content.Cache do
     save_post_taxonomies(post)
   end
 
-  def save_post_pure(%Post{slug: slug, file_path: path} = post) do
+  def save_post_pure(%Post{slug: slug} = post) do
     key = slug_key(slug)
     ConCache.put(@cache_name, key, Item.new_post(post))
-    ConCache.put(@index_cache_name, path_key(path), key)
   end
 
   def update_post_field(slug, field, value) do
@@ -73,10 +72,6 @@ defmodule LiveMarkdown.Content.Cache do
       nil -> nil
       %Post{} = post -> post |> Map.put(field, value) |> save_post_pure()
     end
-  end
-
-  def save_path(path, contents) do
-    ConCache.put(@index_cache_name, path_key(path), contents)
   end
 
   def upsert_taxonomy_appending_post(
@@ -151,6 +146,8 @@ defmodule LiveMarkdown.Content.Cache do
     by_title = do_build_content_tree(tree_with_posts_by_title)
 
     # Embed each post `%Link{}` into their individual `%Post{}` entities
+    # Notice: this currently breaks the logic of sorting by title or by date,
+    # since the links from "by_date" are inserted into the posts.
     Enum.each(by_date, fn
       %Link{type: "post", slug: slug} = link ->
         update_post_field(slug, :link, link)
@@ -166,32 +163,6 @@ defmodule LiveMarkdown.Content.Cache do
     ConCache.put(@index_cache_name, content_tree_key(:date), by_date)
     ConCache.put(@index_cache_name, content_tree_key(:title), by_title)
     %{date: by_date, title: by_title}
-  end
-
-  @doc """
-  Recursively delete a path from cache.
-  Returns a map indexed by the deleted paths' slugs and value `:deleted`.
-  """
-  def delete_path(path, results \\ %{}) do
-    key = path_key(path)
-    path_contents = ConCache.get(@index_cache_name, key)
-    ConCache.delete(@index_cache_name, key)
-
-    case path_contents do
-      {:slug, slug} ->
-        delete_slug(slug)
-        Map.put(results, slug, :deleted)
-
-      [%{path: _} | _] = posts ->
-        Enum.reduce(posts, results, fn %{path: p, slug: s}, inner_results ->
-          inner_results
-          |> Map.put(s, :deleted)
-          |> Map.merge(delete_path(p, inner_results))
-        end)
-
-      _ ->
-        results
-    end
   end
 
   def delete_slug(slug) do
@@ -256,7 +227,6 @@ defmodule LiveMarkdown.Content.Cache do
   defp level_for_joined_post(_, parent_level), do: parent_level + 1
 
   defp slug_key(slug), do: {:slug, slug}
-  defp path_key(path), do: {:path, path}
   defp taxonomy_tree_key(sort_posts_by), do: {:taxonomy_tree, sort_posts_by}
 
   defp content_tree_key(sort_posts_by),

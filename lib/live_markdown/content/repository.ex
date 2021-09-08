@@ -64,20 +64,6 @@ defmodule LiveMarkdown.Content.Repository do
     Logger.info("Saved post #{slug}")
   end
 
-  def delete_path(path) do
-    case Cache.delete_path(path) do
-      [_p | _] = posts ->
-        Endpoint.broadcast!("content", "post_events", posts)
-
-        for {slug, :deleted} <- posts do
-          Endpoint.broadcast!("post_" <> slug, "post_deleted", true)
-        end
-
-      _ ->
-        []
-    end
-  end
-
   def rebuild_indexes! do
     Cache.build_content_tree()
     # 2. find and save post siblings
@@ -87,7 +73,8 @@ defmodule LiveMarkdown.Content.Repository do
   # Data helpers
   #
 
-  # No taxonomy or a contains the root taxonomy: it's a page
+  # No taxonomy or a post contains only a taxonomy in the root:
+  # the post is then considered a page, ex: /about, /contact
   defp get_post_type_from_taxonomies([]), do: :page
   defp get_post_type_from_taxonomies([%{slug: "/"}]), do: :page
   defp get_post_type_from_taxonomies(_), do: :post
