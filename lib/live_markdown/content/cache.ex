@@ -151,7 +151,7 @@ defmodule LiveMarkdown.Content.Cache do
     get_all_links()
     |> sort_by_slug()
     |> (fn
-          [_home | tree] when not with_home -> tree
+          [%Link{slug: "/"} | tree] when not with_home -> tree
           tree -> tree
         end).()
     |> Enum.map(fn %Link{children: posts, slug: slug} = taxonomy ->
@@ -201,8 +201,11 @@ defmodule LiveMarkdown.Content.Cache do
       )
     end)
     |> (fn
-          [_home | tree] when not with_home -> tree
-          tree -> tree
+          [%Link{slug: "/"} | tree] when not with_home ->
+            tree
+
+          tree ->
+            tree
         end).()
     |> build_tree_navigation()
   end

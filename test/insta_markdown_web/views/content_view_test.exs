@@ -5,6 +5,7 @@ defmodule LiveMarkdownWeb.ContentViewTest do
 
   test "taxonomy tree is generated correctly" do
     tree = Repository.get_taxonomy_tree()
+    assert List.first(tree).title == "Blog"
     generated = taxonomy_tree_list(tree)
 
     expected =
