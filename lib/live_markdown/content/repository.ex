@@ -42,12 +42,12 @@ defmodule LiveMarkdown.Content.Repository do
     get_by_slug(slug) || raise LiveMarkdown.NotFoundError, "Page not found: #{slug}"
   end
 
-  def push_post(path, %{slug: slug} = attrs, content, _type \\ :post) do
+  def push_post(path, %{slug: slug, is_index: is_index?} = attrs, content, _type \\ :post) do
     model = get_by_slug(slug) || %Post{}
 
     model
     |> Post.changeset(%{
-      type: get_post_type_from_taxonomies(attrs.categories),
+      type: get_post_type_from_taxonomies(attrs.categories, is_index?),
       file_path: path,
       title: attrs.title,
       content: content,
@@ -83,9 +83,11 @@ defmodule LiveMarkdown.Content.Repository do
 
   # No taxonomy or a post contains only a taxonomy in the root:
   # the post is then considered a page, ex: /about, /contact
-  defp get_post_type_from_taxonomies([]), do: :page
-  defp get_post_type_from_taxonomies([%{slug: "/"}]), do: :page
-  defp get_post_type_from_taxonomies(_), do: :post
+  defp get_post_type_from_taxonomies(categories, is_index?)
+  defp get_post_type_from_taxonomies(_, true), do: :index
+  defp get_post_type_from_taxonomies([], _), do: :page
+  defp get_post_type_from_taxonomies([%{slug: "/"}], _), do: :page
+  defp get_post_type_from_taxonomies(_, _), do: :post
 
   defp save_post(%Post{} = model), do: Cache.save_post(model)
 
@@ -97,6 +99,6 @@ defmodule LiveMarkdown.Content.Repository do
 
   defp remove_default_attributes(attrs) do
     attrs
-    |> Map.drop([:title, :slug, :date, :summary, :published, :categories])
+    |> Map.drop([:title, :slug, :date, :summary, :published, :categories, :is_index])
   end
 end

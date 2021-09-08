@@ -5,7 +5,7 @@ defmodule LiveMarkdown.Post do
   @primary_key {:slug, :string, autogenerate: false}
   @foreign_key_type :string
   embedded_schema do
-    field :type, Ecto.Enum, values: [:post, :page], default: :post
+    field :type, Ecto.Enum, values: [:post, :page, :index], default: :post
     field :title, :string
     field :summary, :string
     field :content, :string
@@ -13,6 +13,7 @@ defmodule LiveMarkdown.Post do
     field :file_path, :string
     field :is_published, :boolean, default: false
     field :metadata, :map
+    field :priority, :integer, default: 0
     embeds_many :taxonomies, LiveMarkdown.Link
     embeds_one :link, LiveMarkdown.Link
   end
@@ -28,7 +29,8 @@ defmodule LiveMarkdown.Post do
       :date,
       :file_path,
       :is_published,
-      :metadata
+      :metadata,
+      :priority
     ])
     |> validate_required([:type, :title, :slug, :date, :file_path])
     |> cast_embed(:taxonomies)

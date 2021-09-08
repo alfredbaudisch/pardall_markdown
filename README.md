@@ -20,6 +20,11 @@ Ready to run in production? Please [check our deployment guides](https://hexdocs
 - Source: https://github.com/phoenixframework/phoenix
 
 # Stuff to add here
+## Post metadata/attributes
+- Custom title and date
+- :published
+- Additional custom fields (saved into `%Post{}.metadata`)
+
 ## Taxonomy and Content Trees
 
 ## File watcher back pressure
