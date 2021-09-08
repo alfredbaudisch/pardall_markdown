@@ -20,6 +20,8 @@ Ready to run in production? Please [check our deployment guides](https://hexdocs
 - Source: https://github.com/phoenixframework/phoenix
 
 # Stuff to add here
+## Taxonomy and Content Trees
+
 ## Does it require a database?
 No.
 
