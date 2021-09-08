@@ -16,7 +16,7 @@ defmodule LiveMarkdown.FileWatcher do
     {:ok, watcher_pid} = FileSystem.start_link(args)
     FileSystem.subscribe(watcher_pid)
     schedule_next_reload_all()
-    {:ok, %{watcher_pid: watcher_pid, pending_events: 0, processing_events: 0}}
+    {:ok, %{watcher_pid: watcher_pid, pending_events: 1, processing_events: 1}}
   end
 
   def handle_info({:file_event, _, {_path, event} = data}, %{pending_events: pending} = state) do
@@ -46,22 +46,47 @@ defmodule LiveMarkdown.FileWatcher do
     {:noreply, put_in(state[:processing_events], pending)}
   end
 
+  # The ideal scenario is to NEVER reach this stage:
+  # the whole content should be built before the next
+  # `@recheck_interval` happens.
+  def handle_info(
+        :check_pending_events,
+        %{pending_events: pending, processing_events: processing} = state
+      )
+      when pending > 0 and processing > 0 do
+    Logger.warn(
+      "Content reloader is already busy processing #{processing} event(s) (for a total of #{pending} pending event(s)). Will re-schedule. If this happens frequently, consider increasing the interval :recheck_pending_file_events_interval."
+    )
+
+    schedule_next_recheck()
+    {:noreply, state}
+  end
+
   def handle_info(:check_pending_events, state) do
     schedule_next_recheck()
     {:noreply, state}
   end
 
-  def handle_info(:reload_all, %{pending_events: pending, processing_events: processing} = state) do
+  def handle_info(:reload_all, %{processing_events: processing} = state) do
     Logger.info("Started reloading content...")
 
-    LiveMarkdown.reload_all()
-    schedule_next_recheck()
+    gen_pid = self()
 
+    Task.start(fn ->
+      LiveMarkdown.reload_all()
+      send(gen_pid, {:notify_finished_processing, processing})
+    end)
+
+    schedule_next_recheck()
+    {:noreply, state}
+  end
+
+  def handle_info({:notify_finished_processing, amount}, %{pending_events: pending} = state) do
     Logger.info("Content reload finished.")
 
     {:noreply,
      state
-     |> Map.put(:pending_events, max(pending - processing, 0))
+     |> Map.put(:pending_events, max(pending - amount, 0))
      |> Map.put(:processing_events, 0)}
   end
 

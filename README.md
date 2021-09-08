@@ -32,6 +32,9 @@ Ready to run in production? Please [check our deployment guides](https://hexdocs
 ## Taxonomy and Content Trees
 
 ## File watcher back pressure
+- Overkill? Yes.
+- Content reloader is already busy processing #{processing} event(s) (for a total of #{pending} pending event(s)). Will re-schedule. If this happens frequently, consider increasing the interval :recheck_pending_file_events_interval.
+
 ## Post sets
 ## Does it require a database?
 No.
