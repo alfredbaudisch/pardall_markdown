@@ -73,13 +73,18 @@ defmodule LiveMarkdown.Content.FileParser do
         {:error, "could not find separator --- in #{inspect(path)}"}
 
       [code, body] ->
-        case Code.eval_string(code, []) do
-          {%{} = attrs, _} ->
-            {:ok, attrs, body}
+        try do
+          case Code.eval_string(code, []) do
+            {%{} = attrs, _} ->
+              {:ok, attrs, body}
 
-          {other, _} ->
-            {:error,
-             "expected attributes for #{inspect(path)} to return a map, got: #{inspect(other)}"}
+            {other, _} ->
+              {:error,
+               "expected attributes for #{inspect(path)} to return a map, got: #{inspect(other)}"}
+          end
+        rescue
+          e in SyntaxError ->
+            {:error, e}
         end
     end
   end
