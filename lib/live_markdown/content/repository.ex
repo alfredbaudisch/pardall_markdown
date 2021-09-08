@@ -2,7 +2,7 @@ defmodule LiveMarkdown.Content.Repository do
   alias LiveMarkdown.Post
   alias LiveMarkdown.Content.Cache
   alias LiveMarkdownWeb.Endpoint
-  import LiveMarkdown.Content.Repository.Filters
+  import LiveMarkdown.Content.Filters
   require Logger
   alias Ecto.Changeset
 

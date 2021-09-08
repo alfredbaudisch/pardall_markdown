@@ -22,6 +22,8 @@ Ready to run in production? Please [check our deployment guides](https://hexdocs
 # Stuff to add here
 ## Taxonomy and Content Trees
 
+## File watcher back pressure
+## Post sets
 ## Does it require a database?
 No.
 

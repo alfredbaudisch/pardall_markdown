@@ -1,6 +1,6 @@
 defmodule LiveMarkdown.FileWatcher do
   use GenServer
-  alias LiveMarkdown.Content.{Receiver, Repository, FileParser}
+  alias LiveMarkdown.Content.Receiver
   require Logger
 
   @recheck_interval Application.compile_env!(:live_markdown, [

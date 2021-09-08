@@ -1,7 +1,7 @@
 defmodule LiveMarkdown.Content.Cache do
   require Logger
   alias LiveMarkdown.{Post, Link}
-  import LiveMarkdown.Content.Repository.Filters
+  import LiveMarkdown.Content.Filters
 
   @cache_name Application.compile_env!(:live_markdown, [LiveMarkdown.Content, :cache_name])
   @index_cache_name Application.compile_env!(:live_markdown, [
@@ -193,7 +193,7 @@ defmodule LiveMarkdown.Content.Cache do
           %Link{
             slug: post.slug,
             title: post.title,
-            level: level_for_joined_post(taxonomy.slug, taxonomy.level),
+            level: joined_post_level(taxonomy.slug, taxonomy.level),
             parents: parents,
             type: :post
           }
@@ -224,14 +224,12 @@ defmodule LiveMarkdown.Content.Cache do
     end)
   end
 
-  defp level_for_joined_post(parent_slug, parent_level) when parent_slug == "/",
+  defp joined_post_level(parent_slug, parent_level) when parent_slug == "/",
     do: parent_level
 
-  defp level_for_joined_post(_, parent_level), do: parent_level + 1
+  defp joined_post_level(_, parent_level), do: parent_level + 1
 
   defp slug_key(slug), do: {:slug, slug}
   defp taxonomy_tree_key(sort_posts_by), do: {:taxonomy_tree, sort_posts_by}
-
-  defp content_tree_key(sort_posts_by),
-    do: {:content_tree, sort_posts_by}
+  defp content_tree_key(sort_posts_by), do: {:content_tree, sort_posts_by}
 end

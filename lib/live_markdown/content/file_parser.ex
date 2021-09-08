@@ -41,17 +41,18 @@ defmodule LiveMarkdown.Content.FileParser do
 
   defp parse!(path) do
     Logger.info("Parsing file #{path}...")
+    is_index? = is_index_file?(path)
 
     with {:ok, raw_content} <- File.read(path),
          {:ok, attrs, body} <- parse_contents(path, raw_content),
-         {:ok, attrs} <- validate_attrs(attrs),
          {:ok, body_html, _} <- markdown_to_html(body),
          {:ok, summary_html, _} <- maybe_summary_to_html(attrs),
-         {:ok, date} <- parse_date(attrs) do
+         {:ok, date} <- parse_or_get_date(attrs, path) do
       attrs =
         attrs
         |> extract_and_put_slug(path)
         |> extract_and_put_categories(path)
+        |> maybe_put_title(path, is_index?)
         |> Map.put(:summary, summary_html)
         |> Map.put(:date, date)
 
@@ -89,12 +90,6 @@ defmodule LiveMarkdown.Content.FileParser do
     end
   end
 
-  defp validate_attrs(%{title: title, date: date} = attrs)
-       when is_binary(title) and is_binary(date) and title != "" and date != "",
-       do: {:ok, attrs}
-
-  defp validate_attrs(_), do: {:error, "attrs must contain valid :title and :date strings"}
-
   defp maybe_summary_to_html(%{summary: summary}) when is_binary(summary) and summary != "",
     do: summary |> markdown_to_html()
 
@@ -108,7 +103,20 @@ defmodule LiveMarkdown.Content.FileParser do
   defp extract_and_put_categories(attrs, path),
     do: Map.put(attrs, :categories, path |> remove_root_path() |> extract_categories_from_path())
 
-  defp parse_date(%{date: date}) do
+  defp maybe_put_title(attrs, path, is_index?)
+
+  defp maybe_put_title(%{title: title} = attrs, _path, _) when is_binary(title) and title != "",
+    do: attrs
+
+  defp maybe_put_title(%{categories: [%{title: title} | _]} = attrs, _path, true),
+    do: Map.put(attrs, :title, title)
+
+  defp maybe_put_title(attrs, path, false),
+    do: Map.put(attrs, :title, extract_title_from_path(path))
+
+  defp maybe_put_title(attrs, _, _), do: attrs
+
+  defp parse_or_get_date(%{date: date}, _path) when is_binary(date) and date != "" do
     cond do
       is_date?(date) ->
         {:ok, date} = date |> Date.from_iso8601()
@@ -121,5 +129,12 @@ defmodule LiveMarkdown.Content.FileParser do
       true ->
         {:error, "Post :date must be in a valid Elixir date format, received: #{date}"}
     end
+  end
+
+  defp parse_or_get_date(_, path) do
+    {:ok, %File.Stat{ctime: {{a, b, c}, {d, e, f}}}} = File.lstat(path)
+
+    NaiveDateTime.new!(a, b, c, d, e, f)
+    |> DateTime.from_naive("Etc/UTC")
   end
 end

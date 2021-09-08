@@ -1,4 +1,5 @@
 defmodule LiveMarkdown.Content.Utils do
+  @taxonomy_index_file "_index.md"
   @root_path Application.compile_env!(:live_markdown, [LiveMarkdown.Content, :root_path])
   @static_assets_folder_name Application.compile_env!(:live_markdown, [
                                LiveMarkdown.Content,
@@ -12,6 +13,9 @@ defmodule LiveMarkdown.Content.Utils do
   def is_path_from_static_assets?(path), do: String.starts_with?(path, static_assets_path())
 
   def remove_root_path(path), do: path |> String.replace(root_path(), "")
+
+  def taxonomy_index_file, do: @taxonomy_index_file
+  def is_index_file?(path), do: Path.basename(path) == taxonomy_index_file()
 
   def is_date?(date) do
     case Date.from_iso8601(date) do
