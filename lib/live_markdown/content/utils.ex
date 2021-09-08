@@ -1,6 +1,6 @@
 defmodule LiveMarkdown.Content.Utils do
-  @root_path Application.compile_env(:live_markdown, [LiveMarkdown.Content, :root_path])
-  @static_assets_folder_name Application.compile_env(:live_markdown, [
+  @root_path Application.compile_env!(:live_markdown, [LiveMarkdown.Content, :root_path])
+  @static_assets_folder_name Application.compile_env!(:live_markdown, [
                                LiveMarkdown.Content,
                                :static_assets_folder_name
                              ])

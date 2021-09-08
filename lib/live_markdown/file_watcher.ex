@@ -3,6 +3,11 @@ defmodule LiveMarkdown.FileWatcher do
   alias LiveMarkdown.Content.{Receiver, Repository, FileParser}
   require Logger
 
+  @recheck_interval Application.compile_env!(:live_markdown, [
+                      LiveMarkdown.Content,
+                      :recheck_pending_file_events_interval
+                    ])
+
   def start_link(args) do
     GenServer.start_link(__MODULE__, args)
   end
@@ -63,14 +68,8 @@ defmodule LiveMarkdown.FileWatcher do
   end
 
   defp schedule_next_recheck,
-    do: Process.send_after(self(), :check_pending_events, recheck_interval())
+    do: Process.send_after(self(), :check_pending_events, @recheck_interval)
 
   defp schedule_next_reload_all,
     do: Process.send_after(self(), :reload_all, 10)
-
-  defp recheck_interval,
-    do:
-      Application.get_env(:live_markdown, LiveMarkdown.Content)[
-        :check_pending_file_events_interval
-      ]
 end

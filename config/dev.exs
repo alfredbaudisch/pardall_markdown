@@ -62,7 +62,7 @@ config :live_markdown, LiveMarkdownWeb.Endpoint,
 
 # Do not include metadata nor timestamps in development logs
 config :logger, :console,
-  format: "[$level][$metadata] $message\n",
+  format: "$time [$level][$metadata] $message\n",
   metadata: [:mfa]
 
 # Set a higher stacktrace during development. Avoid configuring such

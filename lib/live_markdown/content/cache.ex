@@ -4,8 +4,8 @@ defmodule LiveMarkdown.Content.Cache do
   alias __MODULE__.Item
   import LiveMarkdown.Content.Repository.Filters
 
-  @cache_name Application.compile_env(:live_markdown, [LiveMarkdown.Content, :cache_name])
-  @index_cache_name Application.compile_env(:live_markdown, [
+  @cache_name Application.compile_env!(:live_markdown, [LiveMarkdown.Content, :cache_name])
+  @index_cache_name Application.compile_env!(:live_markdown, [
                       LiveMarkdown.Content,
                       :index_cache_name
                     ])
@@ -91,8 +91,8 @@ defmodule LiveMarkdown.Content.Cache do
     end)
   end
 
-  def build_taxonomy_tree(with_home \\ false) do
-    tree = do_build_taxonomy_tree(with_home)
+  def build_taxonomy_tree() do
+    tree = do_build_taxonomy_tree()
     ConCache.put(@index_cache_name, taxonomy_tree_key(:date), tree)
     tree
   end
@@ -147,7 +147,7 @@ defmodule LiveMarkdown.Content.Cache do
 
   # TODO: For the initial purpose of this project, this solution is ok,
   # but eventually let's implement it with a "real" tree or linked list.
-  defp do_build_taxonomy_tree(with_home) do
+  defp do_build_taxonomy_tree(with_home \\ false) do
     get_all_taxonomies()
     |> sort_by_slug()
     |> (fn
