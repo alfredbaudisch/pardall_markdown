@@ -73,8 +73,18 @@ defmodule LiveMarkdown.FileWatcher do
     gen_pid = self()
 
     Task.start(fn ->
-      LiveMarkdown.reload_all()
-      send(gen_pid, {:notify_finished_processing, processing})
+      notify = fn amount -> send(gen_pid, {:notify_finished_processing, amount}) end
+
+      try do
+        LiveMarkdown.reload_all()
+        Logger.info("Content reload finished.")
+        notify.(processing)
+      rescue
+        e ->
+          notify.(0)
+          Logger.error("Could not reload content.")
+          reraise e, __STACKTRACE__
+      end
     end)
 
     schedule_next_recheck()
@@ -82,8 +92,6 @@ defmodule LiveMarkdown.FileWatcher do
   end
 
   def handle_info({:notify_finished_processing, amount}, %{pending_events: pending} = state) do
-    Logger.info("Content reload finished.")
-
     {:noreply,
      state
      |> Map.put(:pending_events, max(pending - amount, 0))
