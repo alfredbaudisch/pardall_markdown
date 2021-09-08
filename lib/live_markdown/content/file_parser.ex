@@ -1,6 +1,6 @@
 defmodule LiveMarkdown.Content.FileParser do
   require Logger
-  alias LiveMarkdown.Content.{Repository, Cache}
+  alias LiveMarkdown.Content.Repository
   import LiveMarkdown.Content.Utils
 
   def load_all! do

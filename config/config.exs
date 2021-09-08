@@ -24,7 +24,8 @@ config :live_markdown, LiveMarkdown.Content,
   cache_name: :content_cache,
   index_cache_name: :content_index_cache,
   site_name: "LiveMarkdown",
-  check_pending_file_events_interval: 5_000
+  check_pending_file_events_interval: 10_000,
+  content_tree_display_home: false
 
 # Configures Elixir's Logger
 config :logger, :console,
