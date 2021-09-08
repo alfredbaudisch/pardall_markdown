@@ -13,12 +13,12 @@ defmodule LiveMarkdown.Content.Repository do
   # CRUD interface
   #
 
-  def get_all_posts do
-    Cache.get_all_posts()
+  def get_all_posts(type \\ :all) do
+    Cache.get_all_posts(type)
   end
 
-  def get_all_taxonomies do
-    Cache.get_all_taxonomies()
+  def get_all_links(type \\ :all) do
+    Cache.get_all_links(type)
   end
 
   def get_taxonomy_tree(sort_by \\ :date) do

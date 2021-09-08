@@ -6,9 +6,8 @@ defmodule LiveMarkdown.Link do
   @foreign_key_type :slug
   embedded_schema do
     field :title, :string
-
-    # Why string instead of Enum? So that we can allow the usage of custom taxonomies in the future
-    field :type, :string, default: "category"
+    field :type, Ecto.Enum, values: [:post, :taxonomy], default: :taxonomy
+    field :custom_type, :string, default: nil
     field :level, :integer, default: 1
     field :parents, {:array, :string}, default: ["/"]
     embeds_one :previous, __MODULE__
@@ -18,7 +17,7 @@ defmodule LiveMarkdown.Link do
 
   def changeset(model, params) do
     model
-    |> cast(params, [:title, :slug, :type, :level, :parents])
+    |> cast(params, [:title, :slug, :type, :level, :parents, :custom_type])
     |> validate_required([:title, :slug, :type, :level, :parents])
     |> cast_embed(:children)
     |> cast_embed(:previous)

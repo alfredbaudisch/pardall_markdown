@@ -1,7 +1,6 @@
 defmodule LiveMarkdown.Content.Cache do
   require Logger
   alias LiveMarkdown.{Post, Link}
-  alias __MODULE__.Item
   import LiveMarkdown.Content.Repository.Filters
 
   @cache_name Application.compile_env!(:live_markdown, [LiveMarkdown.Content, :cache_name])
@@ -10,25 +9,26 @@ defmodule LiveMarkdown.Content.Cache do
                       :index_cache_name
                     ])
 
-  def get_by_slug(slug) do
-    case ConCache.get(@cache_name, slug_key(slug)) do
-      %Item{value: value} -> value
-      nil -> nil
-    end
-  end
+  def get_by_slug(slug), do: ConCache.get(@cache_name, slug_key(slug))
 
-  def get_all_posts do
+  def get_all_posts(type \\ :all) do
     ConCache.ets(@cache_name)
     |> :ets.tab2list()
-    |> Enum.reject(fn {_, %Item{type: type}} -> type == :link end)
-    |> Enum.map(fn {_, %Item{value: value}} -> value end)
+    |> Enum.filter(fn
+      {_, %Post{type: p_type}} -> type == :all or p_type == type
+      _ -> false
+    end)
+    |> Enum.map(fn {_, %Post{} = post} -> post end)
   end
 
-  def get_all_taxonomies do
+  def get_all_links(type \\ :all) do
     ConCache.ets(@cache_name)
     |> :ets.tab2list()
-    |> Enum.reject(fn {_, %Item{type: type}} -> type != :link end)
-    |> Enum.map(fn {_, %Item{value: value}} -> value end)
+    |> Enum.filter(fn
+      {_, %Link{type: l_type}} -> type == :all or l_type == type
+      _ -> false
+    end)
+    |> Enum.map(fn {_, %Link{} = link} -> link end)
   end
 
   def get_taxonomy_tree(sort_by \\ :date) when sort_by in [:date] do
@@ -64,7 +64,7 @@ defmodule LiveMarkdown.Content.Cache do
 
   def save_post_pure(%Post{slug: slug} = post) do
     key = slug_key(slug)
-    ConCache.put(@cache_name, key, Item.new_post(post))
+    ConCache.put(@cache_name, key, post)
   end
 
   def update_post_field(slug, field, value) do
@@ -79,14 +79,14 @@ defmodule LiveMarkdown.Content.Cache do
         %Post{} = post
       ) do
     do_update = fn taxonomy, children ->
-      {:ok, Item.new_link(%{taxonomy | children: children ++ [Map.put(post, :content, nil)]})}
+      {:ok, %{taxonomy | children: children ++ [Map.put(post, :content, nil)]}}
     end
 
     ConCache.update(@cache_name, slug_key(slug), fn
       nil ->
         do_update.(taxonomy, children)
 
-      %Item{type: :link, value: %{children: children} = taxonomy} ->
+      %Link{children: children} = taxonomy ->
         do_update.(taxonomy, children)
     end)
   end
@@ -109,7 +109,7 @@ defmodule LiveMarkdown.Content.Cache do
     # Notice: this currently breaks the logic of sorting by title or by date,
     # since the links from "by_date" are inserted into the posts.
     Enum.each(tree, fn
-      %Link{type: "post", slug: slug} = link ->
+      %Link{type: :post, slug: slug} = link ->
         update_post_field(slug, :link, link)
 
       _ ->
@@ -148,7 +148,7 @@ defmodule LiveMarkdown.Content.Cache do
   # TODO: For the initial purpose of this project, this solution is ok,
   # but eventually let's implement it with a "real" tree or linked list.
   defp do_build_taxonomy_tree(with_home \\ false) do
-    get_all_taxonomies()
+    get_all_links()
     |> sort_by_slug()
     |> (fn
           [_home | tree] when not with_home -> tree
@@ -195,7 +195,7 @@ defmodule LiveMarkdown.Content.Cache do
             title: post.title,
             level: level_for_joined_post(taxonomy.slug, taxonomy.level),
             parents: parents,
-            type: "post"
+            type: :post
           }
         end)
       )
