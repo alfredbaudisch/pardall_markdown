@@ -40,20 +40,23 @@ defmodule LiveMarkdown.Content.FileParser do
   end
 
   defp parse!(path) do
+    Logger.info("Parsing file #{path}...")
+
     with {:ok, raw_content} <- File.read(path),
          {:ok, attrs, body} <- parse_contents(path, raw_content),
          {:ok, attrs} <- validate_attrs(attrs),
          {:ok, body_html, _} <- markdown_to_html(body),
-         {:ok, summary_html, _} <- maybe_summary_to_html(attrs) do
+         {:ok, summary_html, _} <- maybe_summary_to_html(attrs),
+         {:ok, date} <- parse_date(attrs) do
       attrs =
         attrs
         |> extract_and_put_slug(path)
         |> extract_and_put_categories(path)
-        |> parse_and_put_date!()
         |> Map.put(:summary, summary_html)
+        |> Map.put(:date, date)
 
-      Repository.push_post(path, attrs, body_html)
       Logger.info("Pushed converted Markdown: #{path}")
+      Repository.push_post(path, attrs, body_html)
     else
       {:error, error} ->
         Logger.error("Could not parse file #{path}: #{inspect(error)}")
@@ -82,10 +85,10 @@ defmodule LiveMarkdown.Content.FileParser do
   end
 
   defp validate_attrs(%{title: title, date: date} = attrs)
-       when is_binary(title) and not is_nil(date) and title != "",
+       when is_binary(title) and is_binary(date) and title != "" and date != "",
        do: {:ok, attrs}
 
-  defp validate_attrs(_), do: {:error, "attrs must contain :title and :date"}
+  defp validate_attrs(_), do: {:error, "attrs must contain valid :title and :date strings"}
 
   defp maybe_summary_to_html(%{summary: summary}) when is_binary(summary) and summary != "",
     do: summary |> markdown_to_html()
@@ -100,15 +103,18 @@ defmodule LiveMarkdown.Content.FileParser do
   defp extract_and_put_categories(attrs, path),
     do: Map.put(attrs, :categories, path |> remove_root_path() |> extract_categories_from_path())
 
-  defp parse_and_put_date!(%{date: date} = attrs) do
-    date =
-      case date do
-        %Date{} = dt -> DateTime.new!(dt, ~T[00:00:00])
-        %NaiveDateTime{} = dt -> DateTime.from_naive!(dt, "Etc/UTC")
-        %DateTime{} = dt -> dt
-        _ -> raise "Post :date must be in a valid Elixir date format, received: #{date}"
-      end
+  defp parse_date(%{date: date}) do
+    cond do
+      is_date?(date) ->
+        {:ok, date} = date |> Date.from_iso8601()
+        DateTime.new(date, ~T[00:00:00], "Etc/UTC")
 
-    Map.put(attrs, :date, date)
+      is_datetime?(date) ->
+        {:ok, datetime, _} = date |> DateTime.from_iso8601()
+        {:ok, datetime}
+
+      true ->
+        {:error, "Post :date must be in a valid Elixir date format, received: #{date}"}
+    end
   end
 end

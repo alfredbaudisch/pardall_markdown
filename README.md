@@ -18,3 +18,15 @@ Ready to run in production? Please [check our deployment guides](https://hexdocs
 - Docs: https://hexdocs.pm/phoenix
 - Forum: https://elixirforum.com/c/phoenix-forum
 - Source: https://github.com/phoenixframework/phoenix
+
+# Stuff to add here
+## Does it require a database?
+No.
+
+## Why does it use Ecto?
+- Eventually to add a database layer, if needed?
+- Being used for Post validation
+
+# TODO: Licenses
+- Dashbit Nimblepublisher
+- This project's license

@@ -1,6 +1,6 @@
 %{
     title: "A post in the root is a page",
-    date: ~D[2021-09-06],
+    date: "2021-09-06",
     published: true
 }
 ---

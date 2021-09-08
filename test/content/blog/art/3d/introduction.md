@@ -1,6 +1,6 @@
 %{
     title: "Introduction",
-    date: ~D[2021-08-26],
+    date: "2021-08-27",
     published: true
 }
 ---

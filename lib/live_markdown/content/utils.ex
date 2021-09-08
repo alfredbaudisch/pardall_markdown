@@ -13,6 +13,20 @@ defmodule LiveMarkdown.Content.Utils do
 
   def remove_root_path(path), do: path |> String.replace(root_path(), "")
 
+  def is_date?(date) do
+    case Date.from_iso8601(date) do
+      {:ok, _} -> true
+      _ -> false
+    end
+  end
+
+  def is_datetime?(date) do
+    case DateTime.from_iso8601(date) do
+      {:ok, _, _} -> true
+      _ -> false
+    end
+  end
+
   @doc """
   Splits a path into a tree of categories, containing both readable category names
   and slugs for all categories in the hierarchy. The categories list is indexed from the

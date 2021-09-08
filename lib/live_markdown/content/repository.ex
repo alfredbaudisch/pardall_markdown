@@ -4,6 +4,7 @@ defmodule LiveMarkdown.Content.Repository do
   alias LiveMarkdownWeb.Endpoint
   import LiveMarkdown.Content.Repository.Filters
   require Logger
+  alias Ecto.Changeset
 
   def init do
     Cache.delete_all()
@@ -58,10 +59,17 @@ defmodule LiveMarkdown.Content.Repository do
       taxonomies: attrs.categories,
       metadata: attrs |> remove_default_attributes()
     })
-    |> Ecto.Changeset.apply_changes()
-    |> save_post()
+    |> (fn
+          %Changeset{valid?: true} = changeset ->
+            changeset
+            |> Changeset.apply_changes()
+            |> save_post()
 
-    Logger.info("Saved post #{slug}")
+            Logger.info("Saved post #{slug}")
+
+          changeset ->
+            Logger.error("Could not save post #{slug}, errors: #{inspect(changeset.errors)}")
+        end).()
   end
 
   def rebuild_indexes! do
