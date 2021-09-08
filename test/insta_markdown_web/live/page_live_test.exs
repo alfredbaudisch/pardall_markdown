@@ -10,9 +10,9 @@ defmodule LiveMarkdownWeb.PageLiveTest do
   end
 
   test "open 3 folders deep post", %{conn: conn} do
-    {:ok, page_live, disconnected_html} = live(conn, "/blog/art/3d/nested-post/")
-    assert disconnected_html =~ "This post has 3 categories in hierarchy (Blog - Art - 3D)."
-    assert render(page_live) =~ "This post has 3 categories in hierarchy (Blog - Art - 3D)."
+    {:ok, page_live, disconnected_html} = live(conn, "/blog/dailies/2d/dachshund-painting/")
+    assert disconnected_html =~ "This post has 3 categories in hierarchy (Blog - Dailies - 2D)."
+    assert render(page_live) =~ "This post has 3 categories in hierarchy (Blog - Dailies - 2D)."
 
     assert render(page_live)
            |> Floki.parse_document!()

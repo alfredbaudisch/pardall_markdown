@@ -14,11 +14,25 @@ defmodule LiveMarkdownWeb.ContentViewTest do
          <a data-phx-link="redirect" data-phx-link-state="push" href="/blog">Blog</a>
          <ul>
             <li>
-               <a data-phx-link="redirect" data-phx-link-state="push" href="/blog/art">Art</a>
+               <a data-phx-link="redirect" data-phx-link-state="push" href="/blog/dailies">Dailies</a>
                <ul>
-                  <li><a data-phx-link="redirect" data-phx-link-state="push" href="/blog/art/3d">3D</a></li>
+                  <li><a data-phx-link="redirect" data-phx-link-state="push" href="/blog/dailies/2d">2D</a></li>
+                  <li>
+                     <a data-phx-link="redirect" data-phx-link-state="push" href="/blog/dailies/3d">3D</a>
+                     <ul>
+                        <li><a data-phx-link="redirect" data-phx-link-state="push" href="/blog/dailies/3d/blender">Blender</a>
+                     </ul>
+                  </li>
                </ul>
             </li>
+         </ul>
+      </li>
+      <li>
+         <a data-phx-link="redirect" data-phx-link-state="push" href="/docs">Docs</a>
+         <ul>
+            <li><a data-phx-link="redirect" data-phx-link-state="push" href="/docs/advanced-topics">Advanced Topics</a></li>
+            <li><a data-phx-link="redirect" data-phx-link-state="push" href="/docs/getting-started">Getting Started</a></li>
+            <li><a data-phx-link="redirect" data-phx-link-state="push" href="/docs/setup">Setup</a></li>
          </ul>
       </li>
       </ul>
@@ -33,12 +47,7 @@ defmodule LiveMarkdownWeb.ContentViewTest do
 
     assert Enum.count(Floki.find(fragment, "li")) == Enum.count(tree)
 
-    # /blog/art/3d
-    assert Enum.count(Floki.find(fragment, "ul")) == 3
-
-    # /blog/art/3d - link 3 levels deep
-    assert fragment
-           |> Floki.find("ul > li > ul > li > ul > li > a")
-           |> Floki.text() == "3D"
+    # /blog/dailies/3d
+    assert Enum.count(Floki.find(fragment, "ul")) == 5
   end
 end
