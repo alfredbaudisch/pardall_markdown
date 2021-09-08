@@ -2,14 +2,13 @@ defmodule LiveMarkdown.Post do
   use Ecto.Schema
   import Ecto.Changeset
 
-  @primary_key {:id, :binary_id, autogenerate: true}
-  @foreign_key_type :binary_id
+  @primary_key {:slug, :string, autogenerate: false}
+  @foreign_key_type :string
   embedded_schema do
     field :type, Ecto.Enum, values: [:post, :page], default: :post
     field :title, :string
     field :summary, :string
     field :content, :string
-    field :slug, :string
     field :date, :utc_datetime
     field :file_path, :string
     field :is_published, :boolean, default: false

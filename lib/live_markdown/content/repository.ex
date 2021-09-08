@@ -79,27 +79,12 @@ defmodule LiveMarkdown.Content.Repository do
   defp get_post_type_from_taxonomies([%{slug: "/"}]), do: :page
   defp get_post_type_from_taxonomies(_), do: :post
 
-  defp save_post(%Post{id: nil, file_path: path} = model) do
-    model = %{model | id: get_path_id(path)}
-    Cache.save_post(model)
-  end
-
   defp save_post(%Post{} = model), do: Cache.save_post(model)
-
-  defp save_content_and_broadcast!(%Post{id: nil, file_path: path} = model) do
-    model = %{model | id: get_path_id(path)}
-    Cache.save_post(model)
-    Endpoint.broadcast!("content", "post_created", model)
-  end
 
   defp save_content_and_broadcast!(%Post{slug: slug} = model) do
     Cache.save_post(model)
     Endpoint.broadcast!("content", "post_updated", model)
     Endpoint.broadcast!("post_" <> slug, "post_updated", model)
-  end
-
-  defp get_path_id(path) do
-    :crypto.hash(:sha, path) |> Base.encode16() |> String.downcase()
   end
 
   defp remove_default_attributes(attrs) do
