@@ -11,6 +11,8 @@ defmodule LiveMarkdown.Link do
     field :type, :string, default: "category"
     field :level, :integer, default: 1
     field :parents, {:array, :string}, default: ["/"]
+    embeds_one :previous, __MODULE__
+    embeds_one :next, __MODULE__
     embeds_many :children, LiveMarkdown.Post
   end
 
@@ -19,5 +21,7 @@ defmodule LiveMarkdown.Link do
     |> cast(params, [:title, :slug, :type, :level, :parents])
     |> validate_required([:title, :slug, :type, :level, :parents])
     |> cast_embed(:children)
+    |> cast_embed(:previous)
+    |> cast_embed(:next)
   end
 end

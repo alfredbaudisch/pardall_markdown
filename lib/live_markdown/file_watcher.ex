@@ -51,6 +51,7 @@ defmodule LiveMarkdown.FileWatcher do
 
     Repository.init()
     FileParser.load_all!()
+    Repository.rebuild_indexes!()
     schedule_next_recheck()
 
     Logger.info("Content reload finished.")

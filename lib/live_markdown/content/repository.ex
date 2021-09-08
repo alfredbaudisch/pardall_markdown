@@ -1,5 +1,5 @@
 defmodule LiveMarkdown.Content.Repository do
-  alias LiveMarkdown.{Post, Link}
+  alias LiveMarkdown.Post
   alias LiveMarkdown.Content.Cache
   alias LiveMarkdownWeb.Endpoint
   import LiveMarkdown.Content.Repository.Filters
@@ -21,12 +21,12 @@ defmodule LiveMarkdown.Content.Repository do
     Cache.get_all_taxonomies()
   end
 
-  def get_taxonomy_tree(sort_by \\ :title) do
+  def get_taxonomy_tree(sort_by \\ :date) do
     Cache.get_taxonomy_tree(sort_by)
   end
 
-  def get_taxonomy_tree_with_joined_posts(sort_by \\ :title) do
-    Cache.get_taxonomy_tree_with_joined_posts(sort_by)
+  def get_content_tree(sort_by \\ :date) do
+    Cache.get_content_tree(sort_by)
   end
 
   def get_all_published do
@@ -59,53 +59,43 @@ defmodule LiveMarkdown.Content.Repository do
       metadata: attrs |> remove_default_attributes()
     })
     |> Ecto.Changeset.apply_changes()
-    |> save_content_and_broadcast!()
+    |> save_post()
+
+    Logger.info("Saved post #{slug}")
   end
 
-  def delete_path(path) do
-    case Cache.delete_path(path) do
-      [_p | _] = posts ->
-        Endpoint.broadcast!("content", "post_events", posts)
-
-        for {slug, :deleted} <- posts do
-          Endpoint.broadcast!("post_" <> slug, "post_deleted", true)
-        end
-
-      _ ->
-        []
-    end
+  def rebuild_indexes! do
+    Cache.build_content_tree()
+    # 2. find and save post siblings
   end
 
   #
   # Data helpers
   #
 
-  # No taxonomy or a contains the root taxonomy: it's a page
+  # No taxonomy or a post contains only a taxonomy in the root:
+  # the post is then considered a page, ex: /about, /contact
   defp get_post_type_from_taxonomies([]), do: :page
   defp get_post_type_from_taxonomies([%{slug: "/"}]), do: :page
   defp get_post_type_from_taxonomies(_), do: :post
 
-  defp save_content_and_broadcast!(
-         %Post{id: nil, file_path: path, taxonomies: taxonomies} = model
-       ) do
+  defp save_post(%Post{id: nil, file_path: path} = model) do
     model = %{model | id: get_path_id(path)}
-    save_taxonomies(taxonomies, model)
+    Cache.save_post(model)
+  end
+
+  defp save_post(%Post{} = model), do: Cache.save_post(model)
+
+  defp save_content_and_broadcast!(%Post{id: nil, file_path: path} = model) do
+    model = %{model | id: get_path_id(path)}
     Cache.save_post(model)
     Endpoint.broadcast!("content", "post_created", model)
   end
 
-  defp save_content_and_broadcast!(%Post{taxonomies: taxonomies, slug: slug} = model) do
-    save_taxonomies(taxonomies, model)
+  defp save_content_and_broadcast!(%Post{slug: slug} = model) do
     Cache.save_post(model)
     Endpoint.broadcast!("content", "post_updated", model)
     Endpoint.broadcast!("post_" <> slug, "post_updated", model)
-  end
-
-  defp save_taxonomies([], _), do: []
-
-  defp save_taxonomies([%Link{} = _ | _] = taxonomies, %Post{} = post) do
-    taxonomies
-    |> Enum.map(&Cache.save_taxonomy_with_post(&1, post))
   end
 
   defp get_path_id(path) do

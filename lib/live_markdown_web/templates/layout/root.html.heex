@@ -20,9 +20,9 @@
             <% end %>
           </ul>
         </nav>
-        <a href="https://phoenixframework.org/" class="phx-logo">
+        <%= live_redirect to: "/" do %>
           <img src={Routes.static_path(@conn, "/images/phoenix.png")} alt="Phoenix Framework Logo"/>
-        </a>
+        <% end %>
       </section>
     </header>
     <%= @inner_content %>

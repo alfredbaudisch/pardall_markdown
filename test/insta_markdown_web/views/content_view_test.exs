@@ -10,7 +10,6 @@ defmodule LiveMarkdownWeb.ContentViewTest do
     expected =
       ~s"""
       <ul>
-      <li><a data-phx-link="redirect" data-phx-link-state="push" href="/">Home</a></li>
       <li>
          <a data-phx-link="redirect" data-phx-link-state="push" href="/blog">Blog</a>
          <ul>
