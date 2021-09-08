@@ -112,15 +112,13 @@ defmodule LiveMarkdown.Content.FileParser do
 
   # Page is the index page and a custom title wasn't provided,
   # set the main taxonomy name as the page title
-  defp maybe_put_title(%{categories: [%{title: title} | _]} = attrs, _path, true),
-    do: Map.put(attrs, :title, title)
+  defp maybe_put_title(%{categories: categories} = attrs, _path, true),
+    do: Map.put(attrs, :title, List.last(categories)[:title])
 
   # A post and custom title not provided,
   # title-fy the file name
   defp maybe_put_title(attrs, path, false),
     do: Map.put(attrs, :title, extract_title_from_path(path))
-
-  defp maybe_put_title(attrs, _, _), do: attrs
 
   # Date provided in the markdown file, try to parse it
   defp parse_or_get_date(%{date: date}, _path) when is_binary(date) and date != "" do

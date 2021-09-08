@@ -22,7 +22,7 @@ defmodule LiveMarkdown.Link do
     field :sort_by, Ecto.Enum, values: [:title, :date, :slug, :priority], default: :date
     field :sort_order, Ecto.Enum, values: [:asc, :desc], default: :desc
     # the taxonomy own post/custom index page
-    embeds_one :index, LiveMarkdown.Post
+    embeds_one :index_post, LiveMarkdown.Post
   end
 
   def changeset(model, params) do
@@ -42,7 +42,7 @@ defmodule LiveMarkdown.Link do
     |> cast_embed(:children)
     |> cast_embed(:previous)
     |> cast_embed(:next)
-    |> cast_embed(:index)
+    |> cast_embed(:index_post)
   end
 
   def default_sort_by, do: :date

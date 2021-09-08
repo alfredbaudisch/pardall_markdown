@@ -140,15 +140,17 @@ defmodule LiveMarkdown.Content.Cache do
 
   defp upsert_taxonomy_appending_post(
          %Link{slug: slug} = taxonomy,
-         %Post{type: :index} = post
+         %Post{type: :index, priority: priority, title: post_title} = post
        ) do
     do_update = fn taxonomy ->
       {:ok,
        %{
          taxonomy
-         | index: post,
+         | index_post: post,
+           priority: priority,
            sort_by: index_sort_by_from_post(post),
-           sort_order: index_sort_order_from_post(post)
+           sort_order: index_sort_order_from_post(post),
+           title: post_title
        }}
     end
 
@@ -228,7 +230,8 @@ defmodule LiveMarkdown.Content.Cache do
             title: post.title,
             level: joined_post_level(taxonomy.slug, taxonomy.level),
             parents: parents,
-            type: :post
+            type: :post,
+            priority: post.priority
           }
         end)
       )
