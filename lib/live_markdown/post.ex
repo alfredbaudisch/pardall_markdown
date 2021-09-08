@@ -15,7 +15,7 @@ defmodule LiveMarkdown.Post do
     field :is_published, :boolean, default: false
     field :metadata, :map
     embeds_many :taxonomies, LiveMarkdown.Link
-    embeds_many :links, LiveMarkdown.Link
+    embeds_one :link, LiveMarkdown.Link
   end
 
   def changeset(model, params) do
@@ -33,6 +33,6 @@ defmodule LiveMarkdown.Post do
     ])
     |> validate_required([:type, :title, :slug, :date, :file_path])
     |> cast_embed(:taxonomies)
-    |> cast_embed(:links)
+    |> cast_embed(:link)
   end
 end

@@ -66,9 +66,13 @@ defmodule LiveMarkdown.Content.Cache do
     key = slug_key(slug)
     ConCache.put(@cache_name, key, Item.new_post(post))
     ConCache.put(@index_cache_name, path_key(path), key)
+  end
 
-    Logger.info("Saved #{inspect(key)}")
-    Logger.debug("#{inspect(key)} contents: #{inspect(post)}")
+  def update_post_field(slug, field, value) do
+    case get_by_slug(slug) do
+      nil -> nil
+      %Post{} = post -> post |> Map.put(field, value) |> save_post_pure()
+    end
   end
 
   def save_path(path, contents) do
@@ -137,9 +141,6 @@ defmodule LiveMarkdown.Content.Cache do
     %{date: tree_with_posts_by_date, title: tree_with_posts_by_title}
   end
 
-  def find_and_save_siblings do
-  end
-
   # Posts are extracted from the `children` field of a taxonomy
   # and added to the taxonomies list as a Link, while keeping
   # the correct nesting under their parent taxonomy.
@@ -148,6 +149,19 @@ defmodule LiveMarkdown.Content.Cache do
 
     by_date = do_build_content_tree(tree_with_posts_by_date)
     by_title = do_build_content_tree(tree_with_posts_by_title)
+
+    # Embed each post `%Link{}` into their individual `%Post{}` entities
+    Enum.each(by_date, fn
+      %Link{type: "post", slug: slug} = link ->
+        update_post_field(slug, :link, link)
+
+      _ ->
+        :ignore
+    end)
+
+    # TODO: redo this, do not generate separate content trees with different sort
+    # orders for the same post set. Generate only once, respecting the post set
+    # ordering configuration.
 
     ConCache.put(@index_cache_name, content_tree_key(:date), by_date)
     ConCache.put(@index_cache_name, content_tree_key(:title), by_title)
@@ -218,6 +232,21 @@ defmodule LiveMarkdown.Content.Cache do
           }
         end)
       )
+    end)
+    |> build_tree_navigation()
+  end
+
+  defp build_tree_navigation(tree) do
+    tree
+    |> Enum.with_index()
+    |> Enum.map(fn
+      {%Link{} = link, 0} ->
+        Map.put(link, :next, Enum.at(tree, 1))
+
+      {%Link{} = link, pos} ->
+        link
+        |> Map.put(:previous, Enum.at(tree, pos - 1))
+        |> Map.put(:next, Enum.at(tree, pos + 1))
     end)
   end
 

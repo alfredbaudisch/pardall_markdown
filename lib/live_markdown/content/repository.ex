@@ -1,5 +1,5 @@
 defmodule LiveMarkdown.Content.Repository do
-  alias LiveMarkdown.{Post, Link}
+  alias LiveMarkdown.Post
   alias LiveMarkdown.Content.Cache
   alias LiveMarkdownWeb.Endpoint
   import LiveMarkdown.Content.Repository.Filters
@@ -21,11 +21,11 @@ defmodule LiveMarkdown.Content.Repository do
     Cache.get_all_taxonomies()
   end
 
-  def get_taxonomy_tree(sort_by \\ :title) do
+  def get_taxonomy_tree(sort_by \\ :date) do
     Cache.get_taxonomy_tree(sort_by)
   end
 
-  def get_content_tree(sort_by \\ :title) do
+  def get_content_tree(sort_by \\ :date) do
     Cache.get_content_tree(sort_by)
   end
 
@@ -60,6 +60,8 @@ defmodule LiveMarkdown.Content.Repository do
     })
     |> Ecto.Changeset.apply_changes()
     |> save_post()
+
+    Logger.info("Saved post #{slug}")
   end
 
   def delete_path(path) do
