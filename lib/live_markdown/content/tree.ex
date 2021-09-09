@@ -63,10 +63,7 @@ defmodule LiveMarkdown.Content.Tree do
       taxonomy
       |> Map.put(:children, posts)
     end)
-    |> Enum.map(fn %Link{children: posts} = taxonomy ->
-      taxonomy
-      |> Map.put(:children, posts |> sort_posts_by_closest_sorting_method(taxonomy))
-    end)
+    |> sort_taxonomy_tree_posts()
   end
 
   @doc """
@@ -152,43 +149,93 @@ defmodule LiveMarkdown.Content.Tree do
 
   defp joined_post_level(_, parent_level), do: parent_level + 1
 
-  defp sort_posts_by_closest_sorting_method(posts, %Link{
-         type: :taxonomy,
-         index_post: %Post{metadata: %{sort_by: sort_by, sort_order: sort_order}}
-       }) do
+  defp sort_taxonomy_tree_posts(tree) when is_list(tree) do
+    taxonomies_with_sorting = tree |> filter_taxonomies_with_custom_sorting()
+
+    tree
+    |> Enum.map(fn %Link{children: posts} = taxonomy ->
+      taxonomy
+      |> Map.put(
+        :children,
+        posts
+        |> sort_posts_by_closest_sorting_method(taxonomy, taxonomies_with_sorting)
+      )
+    end)
+  end
+
+  defp sort_posts_by_closest_sorting_method(
+         posts,
+         %Link{
+           type: :taxonomy,
+           index_post: %Post{metadata: %{sort_by: sort_by, sort_order: sort_order}}
+         },
+         _taxonomies_with_sorting
+       ) do
     posts
     |> sort_by_custom(sort_by, sort_order)
   end
 
   defp sort_posts_by_closest_sorting_method(
-         [%Post{taxonomies: taxonomies} | _] = posts,
-         %Link{level: max_level}
+         [%Post{taxonomies: post_taxonomies} | _] = posts,
+         %Link{level: max_level, type: :taxonomy},
+         taxonomies_with_sorting
        ) do
     {:sort_by, sort_by, :sort_order, sort_order} =
-      taxonomies
+      post_taxonomies
       |> Enum.reject(fn %Link{level: level} -> level > max_level end)
       |> Enum.reverse()
-      |> find_sorting_method_from_taxonomies()
+      |> find_sorting_method_from_taxonomies(taxonomies_with_sorting)
 
     posts
     |> sort_by_custom(sort_by, sort_order)
   end
 
-  defp sort_posts_by_closest_sorting_method([] = posts, _), do: posts
+  defp sort_posts_by_closest_sorting_method([], _, _), do: []
 
-  defp find_sorting_method_from_taxonomies([
-         %Link{
-           type: :taxonomy,
-           index_post: %Post{metadata: %{sort_by: sort_by, sort_order: sort_order}}
-         }
-         | _
-       ]) do
-    {:sort_by, sort_by, :sort_order, sort_order}
+  defp find_sorting_method_from_taxonomies(post_taxonomies, taxonomies_with_sorting) do
+    # O(n^2)
+    taxonomies_with_sorting
+    |> Enum.find(fn
+      %Link{
+        slug: tax_slug,
+        type: :taxonomy,
+        index_post: %Post{metadata: %{sort_by: sort_by, sort_order: sort_order}}
+      }
+      when not is_nil(sort_by) and not is_nil(sort_order) ->
+        post_taxonomies
+        |> Enum.find(fn %Link{slug: slug} ->
+          tax_slug == slug
+        end)
+
+      _ ->
+        false
+    end)
+    |> case do
+      nil ->
+        {:sort_by, default_sort_by(), :sort_order, default_sort_order()}
+
+      %Link{index_post: %Post{metadata: %{sort_by: sort_by, sort_order: sort_order}}} ->
+        {:sort_by, sort_by, :sort_order, sort_order}
+    end
   end
 
-  defp find_sorting_method_from_taxonomies([_ | tail]),
-    do: find_sorting_method_from_taxonomies(tail)
+  defp filter_taxonomies_with_custom_sorting(taxonomies, filtered \\ [])
 
-  defp find_sorting_method_from_taxonomies([]),
-    do: {:sort_by, default_sort_by(), :sort_order, default_sort_order()}
+  defp filter_taxonomies_with_custom_sorting(
+         [
+           %Link{
+             type: :taxonomy,
+             index_post: %Post{metadata: %{sort_by: sort_by, sort_order: sort_order}}
+           } = taxonomy
+           | tail
+         ],
+         filtered
+       )
+       when not is_nil(sort_by) and not is_nil(sort_order),
+       do: filter_taxonomies_with_custom_sorting(tail, filtered ++ [taxonomy])
+
+  defp filter_taxonomies_with_custom_sorting([_ | tail], filtered),
+    do: filter_taxonomies_with_custom_sorting(tail, filtered)
+
+  defp filter_taxonomies_with_custom_sorting([], filtered), do: filtered
 end
