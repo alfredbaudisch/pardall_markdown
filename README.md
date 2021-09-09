@@ -34,6 +34,7 @@ Ready to run in production? Please [check our deployment guides](https://hexdocs
 - title, date, slug, position
 - Per folder sorting (i.e. a blog can sort by date, while a documentation by position)
 - When sorting by position the sorting order method is forced to :asc
+- sort_by and sort_taxonomies_by
 
 ## Taxonomy and Content Trees
 

@@ -46,7 +46,6 @@ defmodule LiveMarkdown.Content.FileParser do
 
     with {:ok, raw_content} <- File.read(path),
          {:ok, attrs, body} <- parse_contents(path, raw_content),
-         {:ok, attrs} <- validate_attrs(attrs, is_index?),
          {:ok, body_html, _} <- markdown_to_html(body),
          {:ok, summary_html, _} <- maybe_summary_to_html(attrs),
          {:ok, date} <- parse_or_get_date(attrs, path) do
@@ -81,7 +80,20 @@ defmodule LiveMarkdown.Content.FileParser do
         try do
           case Code.eval_string(code, []) do
             {%{} = attrs, _} ->
-              {:ok, attrs, body}
+              {:ok,
+               %{
+                 sort_by: default_sort_by(),
+                 sort_order: default_sort_order(),
+                 sort_taxonomies_by: default_taxonomy_sort_by(),
+                 sort_taxonomies_order: default_taxonomy_sort_order()
+               }
+               |> Map.merge(attrs)
+               |> atomize_keys()
+               |> atomize_value_if_found(:sort_by)
+               |> atomize_value_if_found(:sort_order)
+               |> atomize_value_if_found(:sort_taxonomies_by)
+               |> atomize_value_if_found(:sort_taxonomies_order)
+               |> IO.inspect(), body}
 
             {other, _} ->
               {:error,
@@ -93,46 +105,6 @@ defmodule LiveMarkdown.Content.FileParser do
         end
     end
   end
-
-  defp validate_attrs(attrs, true = _is_index?) do
-    sort_order = Map.get(attrs, :sort_order)
-    sort_by = Map.get(attrs, :sort_by)
-
-    invalid =
-      {:error, "when providing sorting options, provide both :sort_order and :sort_by, or none"}
-
-    cond do
-      (not is_nil(sort_order) and is_nil(sort_by)) or
-          (is_nil(sort_order) and not is_nil(sort_by)) ->
-        invalid
-
-      not is_nil(sort_order) and not is_nil(sort_by) ->
-        sort_by = maybe_to_atom(sort_by)
-        sort_order = maybe_to_atom(sort_order)
-
-        if is_sort_by_valid?(sort_by) and is_sort_order_valid?(sort_order) do
-          {:ok,
-           attrs
-           |> Map.put(:sort_order, sort_order)
-           |> Map.put(:sort_by, sort_by)
-           |> (fn
-                 # Force :asc when by :position
-                 %{sort_by: :position} = attrs ->
-                   Map.put(attrs, :sort_order, :asc)
-
-                 attrs ->
-                   attrs
-               end).()}
-        else
-          invalid
-        end
-
-      true ->
-        {:ok, attrs}
-    end
-  end
-
-  defp validate_attrs(attrs, _is_index?), do: {:ok, attrs}
 
   defp maybe_summary_to_html(%{summary: summary}) when is_binary(summary) and summary != "",
     do: summary |> markdown_to_html()

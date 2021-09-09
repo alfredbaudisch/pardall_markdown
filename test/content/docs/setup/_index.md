@@ -1,6 +1,8 @@
 %{
-    sort_by: "position",
+    sort_by: "date",
     sort_order: "asc",
+    sort_taxonomies_by: "position",
+    sort_taxonomies_order: "asc",
     position: 1
 }
 ---
