@@ -80,26 +80,20 @@ defmodule LiveMarkdown.Content.Cache do
 
   def build_taxonomy_tree() do
     tree = get_all_links() |> Tree.build_taxonomy_tree()
-
-    # TODO: sort taxonomies by their closest sorting method
-
     ConCache.put(@index_cache_name, taxonomy_tree_key(), tree)
     tree
   end
 
-  # Posts are extracted from the `children` field of a taxonomy
-  # and added to the taxonomies list as a Link, while keeping
-  # the correct nesting under their parent taxonomy,
-  # the equivalent of a sitemap.
   def build_content_tree do
     tree =
       get_all_links()
-      |> Tree.build_taxonomy_tree(true)
       |> Tree.build_content_tree()
 
     # Update each post in cache with their related link
-    Enum.each(tree, fn
-      %Link{type: :post, slug: slug} = link ->
+    tree
+    |> Tree.get_all_posts_from_tree()
+    |> Enum.each(fn
+      %Post{link: %Link{type: :post, slug: slug} = link} ->
         update_post_field(slug, :link, link)
 
       _ ->

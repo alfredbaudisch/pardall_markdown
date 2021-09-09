@@ -17,7 +17,7 @@ defmodule LiveMarkdown.Content.Tree do
 
   ## Examples
 
-      iex> LiveMarkdown.Content.Utils.extract_categories_from_path("/blog/art/3d-models/post.md")
+      iex> LiveMarkdown.Content.Tree.extract_categories_from_path("/blog/art/3d-models/post.md")
       [
         %{title: "Blog", slug: "/blog", level: 0, parents: ["/"]},
         %{
@@ -34,10 +34,10 @@ defmodule LiveMarkdown.Content.Tree do
         }
       ]
 
-      iex> LiveMarkdown.Content.Utils.extract_categories_from_path("/blog/post.md")
+      iex> LiveMarkdown.Content.Tree.extract_categories_from_path("/blog/post.md")
       [%{title: "Blog", slug: "/blog", level: 0, parents: ["/"]}]
 
-      iex> LiveMarkdown.Content.Utils.extract_categories_from_path("/post.md")
+      iex> LiveMarkdown.Content.Tree.extract_categories_from_path("/post.md")
       [%{title: "Home", slug: "/", level: 0, parents: ["/"]}]
   """
   def extract_categories_from_path(full_path) do
@@ -78,65 +78,56 @@ defmodule LiveMarkdown.Content.Tree do
     end)
   end
 
-  @doc """
-  Generates a tree of taxonomies, where each taxonomy gets
-  inserted their direct children non-draft posts.
-  - Posts are sorted by their innermost taxonomy sorting method.
-  - Children taxonomy are added after their closest parent taxonomy,
-    they are not nested in its parent taxonomy.
-
-  ## Example
-
-  Consider the following content structure:
-  - Blog
-    - root-post
-    - News
-      - post-1
-      - post-2
-  - Docs
-    - introducion
-
-  The taxonomy tree will be generated as (most fields omitted for readability):
-  ```
-  [
-    %Link{slug: "/blog", title: "Blog", level: 1, children: [
-      %Post{slug: "/blog/root-post"}
-    ]},
-    %Link{slug: "/blog/news", title: "News", level: 2, children: [
-      %Post{slug: "/blog/news/post-1"},
-      %Post{slug: "/blog/news/post-2"}
-    ]},
-    %Link{slug: "/docs", title: "Docs", level: 1, children: [
-      %Post{slug: "/docs/introducion"}
-    ]}
-  ]
-  ```
-  """
   def build_taxonomy_tree(links, with_home \\ false) when is_list(links) do
+    build_content_tree(links, with_posts: false, with_home: with_home)
+  end
+
+  def build_content_tree(links, opts \\ []) when is_list(links) do
+    with_home = Keyword.get(opts, :with_home, false)
+    with_posts = Keyword.get(opts, :with_posts, true)
+
     links
     |> sort_by_slug()
     |> (fn
           [%Link{slug: "/"} | tree] when not with_home -> tree
           tree -> tree
         end).()
-    |> Enum.map(fn %Link{children: posts, slug: slug} = taxonomy ->
-      posts =
-        posts
-        |> Enum.filter(fn
-          %Post{taxonomies: [_t | _] = post_taxonomies} ->
-            # The last taxonomy of a post is its parent taxonomy.
-            # I.e. a post in *Blog > Art > 3D* has 3 taxonomies:
-            # Blog, Blog > Art and Blog > Art > 3D,
-            # where its parent is its innermost taxonomy.
-            List.last(post_taxonomies).slug == slug
+    |> Enum.map(fn
+      %Link{children: posts, slug: slug} = taxonomy when with_posts ->
+        posts =
+          posts
+          |> Enum.filter(fn
+            %Post{taxonomies: [_t | _] = post_taxonomies} ->
+              # The last taxonomy of a post is its parent taxonomy.
+              # I.e. a post in *Blog > Art > 3D* has 3 taxonomies:
+              # Blog, Blog > Art and Blog > Art > 3D,
+              # where its parent is its innermost taxonomy.
+              List.last(post_taxonomies).slug == slug
 
-          _ ->
-            true
-        end)
-        |> filter_by_is_published()
+            _ ->
+              true
+          end)
+          |> filter_by_is_published()
+          |> Enum.map(fn post ->
+            last_tax = List.last(post.taxonomies)
 
-      taxonomy
-      |> Map.put(:children, posts)
+            %{
+              post
+              | link: %Link{
+                  slug: post.slug,
+                  title: post.title,
+                  parents: last_tax.parents ++ [last_tax.slug],
+                  type: :post,
+                  position: post.position
+                }
+            }
+          end)
+
+        taxonomy
+        |> Map.put(:children, posts)
+
+      %Link{} = taxonomy when not with_posts ->
+        taxonomy |> Map.put(:children, [])
     end)
     |> sort_taxonomy_tree_taxonomies()
   end
@@ -313,8 +304,10 @@ defmodule LiveMarkdown.Content.Tree do
         is_nil(Enum.find(links, fn %Link{slug: find_slug} -> child_slug == find_slug end))
       end)
 
+    parent_slugs = parent_slugs ++ [slug]
+
     {:sort_by, sort_by, :sort_order, sort_order} =
-      (parent_slugs ++ [slug])
+      parent_slugs
       |> Enum.reverse()
       |> find_sorting_method_for_taxonomies(taxonomies_with_sorting)
 
@@ -325,7 +318,8 @@ defmodule LiveMarkdown.Content.Tree do
     parent
     |> Map.put(
       :children,
-      posts |> sort_posts_by_closest_sorting_method(parent, taxonomies_with_post_sorting)
+      posts
+      |> sort_posts_by_closest_sorting_method(parent, taxonomies_with_post_sorting)
     )
     |> Map.put(:children_links, children)
   end
@@ -466,72 +460,6 @@ defmodule LiveMarkdown.Content.Tree do
 
   defp get_taxonomies_with_custom_sorting([], filtered), do: filtered
 
-  @doc """
-  Generates a content tree from an input taxonomy tree. The content
-  tree is akin to a sitemap.
-
-  Posts are moved out of the taxonomy `children` field and added to the
-  main list as %Link of the type `:post`, positioned after their
-  innermost parent taxonomy.
-
-  ## Example
-
-  Consider the following content structure:
-  - Blog
-    - root-post
-    - News
-      - post-1
-      - post-2
-  - Docs
-    - introducion
-
-  The content tree will be generated as (most fields omitted for readability):
-  ```
-  [
-    %Link{slug: "/blog", title: "Blog", type: :taxonomy, level: 1},
-    %Link{slug: "/blog/root-post", title: "Root Post", type: :post, level: 2},
-    %Link{slug: "/blog/news", title: "News", type: :taxonomy, level: 2},
-    %Link{slug: "/blog/news/post-1", title: "Post 1", type: :post, level: 3},
-    %Link{slug: "/blog/news/post-2", title: "Post 2", type: :post, level: 3},
-    %Link{slug: "/docs", title: "Docs", type: :taxonomy, level: 1},
-    %Link{slug: "/docs/introducion", title: "Introducion", type: :post, level: 2}
-  ]
-  ```
-  """
-  def build_content_tree(tree) when is_list(tree) do
-    raise "update with the new format with :children_links"
-
-    with_home =
-      Application.get_env(:live_markdown, LiveMarkdown.Content)[:content_tree_display_home]
-
-    tree
-    |> Enum.reduce([], fn %Link{children: posts, parents: parents} = taxonomy, all ->
-      all
-      |> Kernel.++([Map.put(taxonomy, :children, [])])
-      |> Kernel.++(
-        posts
-        |> Enum.map(fn post ->
-          %Link{
-            slug: post.slug,
-            title: post.title,
-            level: joined_post_level(taxonomy.slug, taxonomy.level),
-            parents: parents,
-            type: :post,
-            position: post.position
-          }
-        end)
-      )
-    end)
-    |> (fn
-          [%Link{slug: "/"} | tree] when not with_home ->
-            tree
-
-          tree ->
-            tree
-        end).()
-    |> build_tree_navigation()
-  end
-
   defp build_tree_navigation(tree) do
     tree
     |> Enum.with_index()
@@ -546,8 +474,27 @@ defmodule LiveMarkdown.Content.Tree do
     end)
   end
 
-  defp joined_post_level(parent_slug, parent_level) when parent_slug == "/",
-    do: parent_level
+  def get_all_posts_from_tree(links, all \\ [], previous_level \\ -1)
 
-  defp joined_post_level(_, parent_level), do: parent_level + 1
+  def get_all_posts_from_tree(
+        [%Link{children_links: children, children: posts} | tail],
+        all,
+        -1
+      ) do
+    all = all ++ posts
+    all_children = get_all_posts_from_tree(children)
+    get_all_posts_from_tree(tail, all ++ all_children, 1)
+  end
+
+  def get_all_posts_from_tree(
+        [%Link{children_links: children, children: posts} | tail],
+        all,
+        previous_level
+      ) do
+    all = all ++ posts
+    all_children = get_all_posts_from_tree(children)
+    get_all_posts_from_tree(tail, all ++ all_children, previous_level)
+  end
+
+  def get_all_posts_from_tree([], all, _), do: all
 end
