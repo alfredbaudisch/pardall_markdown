@@ -14,6 +14,7 @@ defmodule LiveMarkdown.Link do
     embeds_one :previous, __MODULE__
     embeds_one :next, __MODULE__
     embeds_many :children, LiveMarkdown.Post
+    embeds_many :children_links, LiveMarkdown.Link
 
     #
     # Taxonomy specific fields
@@ -35,6 +36,7 @@ defmodule LiveMarkdown.Link do
     ])
     |> validate_required([:title, :slug, :type, :level, :parents])
     |> cast_embed(:children)
+    |> cast_embed(:children_links)
     |> cast_embed(:previous)
     |> cast_embed(:next)
     |> cast_embed(:index_post)

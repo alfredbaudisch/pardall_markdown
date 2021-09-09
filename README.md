@@ -45,6 +45,8 @@ Ready to run in production? Please [check our deployment guides](https://hexdocs
 ## Does it require a database?
 No.
 
+But the taxonomy and content tree implementations would be much simpler by using [PostgreSQL's ltree](https://www.postgresql.org/docs/current/ltree.html).
+
 ## Why does it use Ecto?
 - Eventually to add a database layer, if needed?
 - Being used for Post validation

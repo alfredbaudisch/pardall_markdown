@@ -1,11 +1,37 @@
 defmodule LiveMarkdown.RepositoryTest do
   use ExUnit.Case, async: true
-  alias LiveMarkdown.Content.Repository
+  alias LiveMarkdown.Content.{Cache, Repository}
 
   setup do
     Application.ensure_all_started(:live_markdown)
     # wait the Markdown content to be parsed and built
     Process.sleep(100)
+  end
+
+  @tag :sorting
+  test "taxonomies should be sorted by their closest sorting method" do
+    tree =
+      Cache.get_taxonomy_tree()
+      |> Enum.filter(fn %{type: type} -> type == :taxonomy end)
+
+    tree
+    |> Enum.map(fn %{slug: slug, parents: parents} -> %{slug: slug, parents: parents} end)
+    |> IO.inspect()
+
+    slugs =
+      tree
+      |> Enum.map(& &1.slug)
+      |> IO.inspect()
+
+    assert Enum.at(slugs, 0) == "/blog"
+    assert Enum.at(slugs, 1) == "/blog/dailies"
+    assert Enum.at(slugs, 2) == "/blog/dailies/2d"
+    assert Enum.at(slugs, 3) == "/blog/dailies/3d"
+    assert Enum.at(slugs, 4) == "/blog/dailies/3d/blender"
+    assert Enum.at(slugs, 5) == "/docs"
+    assert Enum.at(slugs, 6) == "/docs/getting-started"
+    assert Enum.at(slugs, 7) == "/docs/setup"
+    assert Enum.at(slugs, 8) == "/docs/advanced-topics"
   end
 
   # still not accounting for per-folder indexing

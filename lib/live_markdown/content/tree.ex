@@ -138,11 +138,115 @@ defmodule LiveMarkdown.Content.Tree do
       taxonomy
       |> Map.put(:children, posts)
     end)
+    |> sort_taxonomy_tree_taxonomies()
     |> sort_taxonomy_tree_posts()
   end
 
+  # Warning: highly inefficient implementation for now (roughly O(n!) or O(n^4)),
+  # but it fits the purpose, considering the content rebuilding process
+  # is performed as a rarely recurring background tasks.
   defp sort_taxonomy_tree_taxonomies(tree) when is_list(tree) do
+    sort_methods = get_sorting_method_for_all_taxonomies(tree)
+    nested_taxonomies = nest_children_taxonomies_into_root_taxonomies(tree)
   end
+
+  defp nest_children_taxonomies_into_root_taxonomies(tree) do
+    main_tree_by_slug =
+      Enum.reduce(tree, %{}, fn
+        %Link{slug: slug} = link, acc -> Map.put(acc, slug, link)
+      end)
+
+    tree
+    |> Enum.reduce(%{}, fn
+      %Link{parents: parents, type: :taxonomy} = link, acc ->
+        acc
+        |> Map.update(parents, [link], fn links -> links ++ [link] end)
+    end)
+    |> Enum.reduce(%{}, fn {parent_slugs, children}, acc_tree ->
+      case nest_children_links(
+             main_tree_by_slug,
+             acc_tree,
+             parent_slugs |> Enum.reverse(),
+             children
+           ) do
+        # Root level, no updates made
+        links when is_list(links) ->
+          acc_tree
+
+        %Link{slug: final_slug} = link ->
+          Map.put(acc_tree, final_slug, link)
+      end
+    end)
+  end
+
+  # Recursively nest children taxonomies into their innermost parent
+  # taxonomy `Link.children_links`. The result must be per each root taxonomy,
+  # a taxonomy `%Link{}` with all nested children (and each nest children
+  # contain their own children recursively).
+  defp nest_children_links(main_tree, updated_tree, parent_slugs, links, previous_parents \\ nil)
+
+  defp nest_children_links(main_tree, updated_tree, ["/" | parents], links, previous_parents),
+    do: nest_children_links(main_tree, updated_tree, parents, links, previous_parents)
+
+  defp nest_children_links(main_tree, updated_tree, [parent_slug | parents], links, nil) do
+    parent = Map.get(updated_tree, parent_slug) || Map.get(main_tree, parent_slug)
+    nest_children_links(main_tree, updated_tree, parents, links, [parent])
+  end
+
+  defp nest_children_links(
+         main_tree,
+         updated_tree,
+         [parent_slug | parents],
+         links,
+         [previous_parent | _] = previous_parents
+       ) do
+    parent =
+      Enum.find(previous_parent.children_links, fn
+        %{slug: slug} -> slug == parent_slug
+        _ -> false
+      end)
+      |> case do
+        nil -> Map.get(updated_tree, parent_slug) || Map.get(main_tree, parent_slug)
+        parent -> parent
+      end
+
+    nest_children_links(main_tree, updated_tree, parents, links, previous_parents ++ [parent])
+  end
+
+  # Final destination
+  defp nest_children_links(_, _, [], links, [final_parent | previous_parents]) do
+    final_link = put_children_links_into_parent_link_and_sort(final_parent, links)
+    put_parent_links_recursively(previous_parents, final_link)
+  end
+
+  # Call made with level 1 links and no nesting, return without any processing
+  defp nest_children_links(_, _, _, links, _), do: links
+
+  defp put_parent_links_recursively([parent | previous_parents], link) do
+    final_link = put_children_links_into_parent_link_and_sort(parent, link)
+    put_parent_links_recursively(previous_parents, final_link)
+  end
+
+  defp put_parent_links_recursively([], link), do: link
+
+  defp put_children_links_into_parent_link_and_sort(
+         %Link{children_links: current_children} = parent,
+         links
+       )
+       when is_list(links) do
+    # ATTENTION: SORT THE CHILDREN LINKS HERE
+
+    current_children =
+      current_children
+      |> Enum.reject(fn %Link{slug: child_slug} ->
+        not is_nil(Enum.find(links, fn %Link{slug: find_slug} -> child_slug == find_slug end))
+      end)
+
+    Map.update(parent, :children_links, links, fn _ -> current_children ++ links end)
+  end
+
+  defp put_children_links_into_parent_link_and_sort(%Link{} = parent, %Link{} = link),
+    do: put_children_links_into_parent_link_and_sort(parent, [link])
 
   defp sort_taxonomy_tree_posts(tree) when is_list(tree) do
     taxonomies_with_sorting = tree |> get_taxonomies_with_custom_sorting()
@@ -233,6 +337,26 @@ defmodule LiveMarkdown.Content.Tree do
     do: get_taxonomies_with_custom_sorting(tail, filtered)
 
   defp get_taxonomies_with_custom_sorting([], filtered), do: filtered
+
+  defp get_sorting_method_for_all_taxonomies(tree) when is_list(tree) do
+    default_sorting =
+      {:default,
+       {:sort_by, default_taxonomy_sort_by(), :sort_order, default_taxonomy_sort_order()}}
+
+    tree
+    |> Enum.reduce(%{}, fn
+      %Link{
+        slug: slug,
+        type: :taxonomy,
+        index_post: %Post{metadata: %{sort_by: sort_by, sort_order: sort_order}}
+      },
+      acc ->
+        acc |> Map.put(slug, {:custom, {:sort_by, sort_by, :sort_order, sort_order}})
+
+      %Link{slug: slug, type: :taxonomy}, acc ->
+        acc |> Map.put(slug, default_sorting)
+    end)
+  end
 
   @doc """
   Generates a content tree from an input taxonomy tree. The content
