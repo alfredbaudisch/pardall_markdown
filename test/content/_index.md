@@ -5,4 +5,4 @@
 }
 ---
 
-This post is supposed to be in the root folder, therefore it must be considered a Page instead of a Post.
+This post is supposed to be the Index for Home.

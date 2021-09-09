@@ -164,7 +164,7 @@ defmodule LiveMarkdown.Content.Tree do
              main_tree_by_slug,
              acc_tree,
              taxonomies_with_sorting,
-             parent_slugs,
+             if(parent_slugs == ["/"], do: "/", else: parent_slugs),
              children
            ) do
         # Root level, no updates made
@@ -192,6 +192,37 @@ defmodule LiveMarkdown.Content.Tree do
          links,
          previous_parents \\ nil
        )
+
+  defp nest_children_links(
+         main_tree,
+         updated_tree,
+         taxonomies_with_sorting,
+         ["/" | parents],
+         links,
+         previous_parents
+       ) do
+    nest_children_links(
+      main_tree,
+      updated_tree,
+      taxonomies_with_sorting,
+      parents,
+      links,
+      previous_parents
+    )
+  end
+
+  defp nest_children_links(
+         main_tree,
+         updated_tree,
+         taxonomies_with_sorting,
+         "/",
+         links,
+         nil
+       ) do
+    parent = Map.get(updated_tree, "/") || Map.get(main_tree, "/")
+
+    nest_children_links(main_tree, updated_tree, taxonomies_with_sorting, [], links, [parent])
+  end
 
   defp nest_children_links(
          main_tree,
@@ -436,8 +467,12 @@ defmodule LiveMarkdown.Content.Tree do
 
   defp get_taxonomies_with_custom_sorting([], filtered), do: filtered
 
-  defp remove_duplicate_home([head | _]) do
-    head.children_links
+  defp remove_duplicate_home(tree) do
+    tree
+    |> Enum.map(fn
+      %{slug: "/"} = link -> %{link | children_links: []}
+      link -> link
+    end)
   end
 
   def get_all_posts_from_tree(links, all \\ [], previous_level \\ -1)
