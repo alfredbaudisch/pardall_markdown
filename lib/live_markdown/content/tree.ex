@@ -79,19 +79,18 @@ defmodule LiveMarkdown.Content.Tree do
   end
 
   def build_taxonomy_tree(links, with_home \\ false) when is_list(links) do
-    build_content_tree(links, with_posts: false, with_home: with_home)
+    case build_content_tree(links, false) do
+      tree when not with_home ->
+        Enum.reject(tree, fn %{slug: slug} -> slug == "/" end)
+
+      tree ->
+        tree
+    end
   end
 
-  def build_content_tree(links, opts \\ []) when is_list(links) do
-    with_home = Keyword.get(opts, :with_home, false)
-    with_posts = Keyword.get(opts, :with_posts, true)
-
+  def build_content_tree(links, with_posts \\ true) when is_list(links) do
     links
     |> sort_by_slug()
-    |> (fn
-          [%Link{slug: "/"} | tree] when not with_home -> tree
-          tree -> tree
-        end).()
     |> Enum.map(fn
       %Link{children: posts, slug: slug} = taxonomy when with_posts ->
         posts =
@@ -130,6 +129,7 @@ defmodule LiveMarkdown.Content.Tree do
         taxonomy |> Map.put(:children, [])
     end)
     |> sort_taxonomy_tree_taxonomies()
+    |> remove_duplicate_home()
   end
 
   # Warning: highly inefficient implementation for now (roughly O(n!) or O(n^4)),
@@ -144,12 +144,6 @@ defmodule LiveMarkdown.Content.Tree do
       {:for_posts, taxonomies_with_post_sorting, :for_taxonomies, taxonomies_with_sorting}
     )
   end
-
-  # defp do_sort_taxonomy_tree_taxonomies(
-  #        [%{children_links: links, parents: parents} = link | tail],
-  #        taxonomies_with_sorting
-  #      ) do
-  # end
 
   defp nest_children_taxonomies_into_root_taxonomies(tree, taxonomies_with_sorting) do
     main_tree_by_slug =
@@ -198,24 +192,6 @@ defmodule LiveMarkdown.Content.Tree do
          links,
          previous_parents \\ nil
        )
-
-  defp nest_children_links(
-         main_tree,
-         updated_tree,
-         taxonomies_with_sorting,
-         ["/" | parents],
-         links,
-         previous_parents
-       ) do
-    nest_children_links(
-      main_tree,
-      updated_tree,
-      taxonomies_with_sorting,
-      parents,
-      links,
-      previous_parents
-    )
-  end
 
   defp nest_children_links(
          main_tree,
@@ -460,18 +436,8 @@ defmodule LiveMarkdown.Content.Tree do
 
   defp get_taxonomies_with_custom_sorting([], filtered), do: filtered
 
-  defp build_tree_navigation(tree) do
-    tree
-    |> Enum.with_index()
-    |> Enum.map(fn
-      {%Link{} = link, 0} ->
-        Map.put(link, :next, Enum.at(tree, 1))
-
-      {%Link{} = link, pos} ->
-        link
-        |> Map.put(:previous, Enum.at(tree, pos - 1))
-        |> Map.put(:next, Enum.at(tree, pos + 1))
-    end)
+  defp remove_duplicate_home([head | _]) do
+    head.children_links
   end
 
   def get_all_posts_from_tree(links, all \\ [], previous_level \\ -1)

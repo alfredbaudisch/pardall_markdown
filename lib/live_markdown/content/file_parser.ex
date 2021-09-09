@@ -71,7 +71,7 @@ defmodule LiveMarkdown.Content.FileParser do
   end
 
   # From https://github.com/dashbitco/nimble_publisher
-  defp parse_contents(path, contents, is_index? \\ false) do
+  defp parse_contents(path, contents, is_index?) do
     case :binary.split(contents, ["\n---\n", "\r\n---\r\n"]) do
       [_] ->
         {:error, "could not find separator --- in #{inspect(path)}"}
