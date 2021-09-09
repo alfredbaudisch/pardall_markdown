@@ -80,6 +80,9 @@ defmodule LiveMarkdown.Content.Cache do
 
   def build_taxonomy_tree() do
     tree = get_all_links() |> Tree.build_taxonomy_tree()
+
+    # TODO: sort taxonomies by their closest sorting method
+
     ConCache.put(@index_cache_name, taxonomy_tree_key(), tree)
     tree
   end

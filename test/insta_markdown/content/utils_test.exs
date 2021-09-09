@@ -4,4 +4,5 @@ defmodule InstaMarkdown.ContentUtilsTest do
   @moduletag :content
 
   doctest LiveMarkdown.Content.Utils
+  doctest LiveMarkdown.Content.Tree
 end

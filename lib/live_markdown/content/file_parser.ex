@@ -2,6 +2,7 @@ defmodule LiveMarkdown.Content.FileParser do
   require Logger
   alias LiveMarkdown.Content.Repository
   import LiveMarkdown.Content.Utils
+  alias LiveMarkdown.Content.Tree
 
   def load_all! do
     root_path()
@@ -144,7 +145,12 @@ defmodule LiveMarkdown.Content.FileParser do
     do: Map.put(attrs, :slug, path |> remove_root_path() |> extract_slug_from_path())
 
   defp extract_and_put_categories(attrs, path),
-    do: Map.put(attrs, :categories, path |> remove_root_path() |> extract_categories_from_path())
+    do:
+      Map.put(
+        attrs,
+        :categories,
+        path |> remove_root_path() |> Tree.extract_categories_from_path()
+      )
 
   defp maybe_put_title(attrs, path, is_index?)
 

@@ -4,6 +4,81 @@ defmodule LiveMarkdown.Content.Tree do
   import LiveMarkdown.Content.Filters
 
   @doc """
+  Splits a path into a tree of categories, containing both readable category names
+  and slugs for all categories in the hierarchy. The categories list is indexed from the
+  topmost to the lowermost in the hiearchy, example: Games > PC > RPG.
+
+  Also returns the level in the tree in which the category can be found,
+  as well as all parent categories slugs recursively, where `level: 0` is
+  for root pages (i.e. no category).
+
+  TODO: For the initial purpose of this project, this solution is ok,
+  but eventually let's implement it with a "real" tree or linked list.
+
+  ## Examples
+
+      iex> LiveMarkdown.Content.Utils.extract_categories_from_path("/blog/art/3d-models/post.md")
+      [
+        %{title: "Blog", slug: "/blog", level: 0, parents: ["/"]},
+        %{
+          title: "Art",
+          slug: "/blog/art",
+          level: 1,
+          parents: ["/", "/blog"]
+        },
+        %{
+          title: "3D Models",
+          slug: "/blog/art/3d-models",
+          level: 2,
+          parents: ["/", "/blog", "/blog/art"]
+        }
+      ]
+
+      iex> LiveMarkdown.Content.Utils.extract_categories_from_path("/blog/post.md")
+      [%{title: "Blog", slug: "/blog", level: 0, parents: ["/"]}]
+
+      iex> LiveMarkdown.Content.Utils.extract_categories_from_path("/post.md")
+      [%{title: "Home", slug: "/", level: 0, parents: ["/"]}]
+  """
+  def extract_categories_from_path(full_path) do
+    full_path
+    |> String.replace(Path.basename(full_path), "")
+    |> do_extract_categories()
+  end
+
+  # Root / Page
+  defp do_extract_categories("/"), do: [%{title: "Home", slug: "/", level: 0, parents: ["/"]}]
+  # Path with category and possibly, hierarchy
+  defp do_extract_categories(path) do
+    final_slug = extract_slug_from_path(path)
+    slug_parts = final_slug |> String.split("/")
+
+    path
+    |> String.replace(~r/^\/(.*)\/$/, "\\1")
+    |> String.split("/")
+    |> Enum.with_index()
+    |> Enum.map(fn {part, pos} ->
+      slug =
+        slug_parts
+        |> Enum.take(pos + 2)
+        |> Enum.join("/")
+
+      parents =
+        for idx <- 0..pos do
+          slug_parts |> Enum.take(idx + 1) |> Enum.join("/")
+        end
+        |> Enum.map(fn
+          "" -> "/"
+          parent -> parent
+        end)
+
+      category = part |> capitalize_as_taxonomy_name()
+
+      %{title: category, slug: slug, level: pos, parents: parents}
+    end)
+  end
+
+  @doc """
   Generates a tree of taxonomies, where each taxonomy gets
   inserted their direct children non-draft posts.
   - Posts are sorted by their innermost taxonomy sorting method.
@@ -65,6 +140,99 @@ defmodule LiveMarkdown.Content.Tree do
     end)
     |> sort_taxonomy_tree_posts()
   end
+
+  defp sort_taxonomy_tree_taxonomies(tree) when is_list(tree) do
+  end
+
+  defp sort_taxonomy_tree_posts(tree) when is_list(tree) do
+    taxonomies_with_sorting = tree |> get_taxonomies_with_custom_sorting()
+
+    tree
+    |> Enum.map(fn %Link{children: posts} = taxonomy ->
+      taxonomy
+      |> Map.put(
+        :children,
+        posts
+        |> sort_posts_by_closest_sorting_method(taxonomy, taxonomies_with_sorting)
+      )
+    end)
+  end
+
+  defp sort_posts_by_closest_sorting_method(
+         posts,
+         %Link{
+           type: :taxonomy,
+           index_post: %Post{metadata: %{sort_by: sort_by, sort_order: sort_order}}
+         },
+         _taxonomies_with_sorting
+       ) do
+    posts
+    |> sort_by_custom(sort_by, sort_order)
+  end
+
+  defp sort_posts_by_closest_sorting_method(
+         [%Post{taxonomies: post_taxonomies} | _] = posts,
+         %Link{level: max_level, type: :taxonomy},
+         taxonomies_with_sorting
+       ) do
+    {:sort_by, sort_by, :sort_order, sort_order} =
+      post_taxonomies
+      |> Enum.reject(fn %Link{level: level} -> level > max_level end)
+      |> Enum.reverse()
+      |> find_sorting_method_from_taxonomies(taxonomies_with_sorting)
+
+    posts
+    |> sort_by_custom(sort_by, sort_order)
+  end
+
+  defp sort_posts_by_closest_sorting_method([], _, _), do: []
+
+  defp find_sorting_method_from_taxonomies(post_taxonomies, taxonomies_with_sorting) do
+    # O(n^2)
+    taxonomies_with_sorting
+    |> Enum.find(fn
+      %Link{
+        slug: tax_slug,
+        type: :taxonomy,
+        index_post: %Post{metadata: %{sort_by: sort_by, sort_order: sort_order}}
+      }
+      when not is_nil(sort_by) and not is_nil(sort_order) ->
+        post_taxonomies
+        |> Enum.find(fn %Link{slug: slug} ->
+          tax_slug == slug
+        end)
+
+      _ ->
+        false
+    end)
+    |> case do
+      nil ->
+        {:sort_by, default_sort_by(), :sort_order, default_sort_order()}
+
+      %Link{index_post: %Post{metadata: %{sort_by: sort_by, sort_order: sort_order}}} ->
+        {:sort_by, sort_by, :sort_order, sort_order}
+    end
+  end
+
+  defp get_taxonomies_with_custom_sorting(taxonomies, filtered \\ [])
+
+  defp get_taxonomies_with_custom_sorting(
+         [
+           %Link{
+             type: :taxonomy,
+             index_post: %Post{metadata: %{sort_by: sort_by, sort_order: sort_order}}
+           } = taxonomy
+           | tail
+         ],
+         filtered
+       )
+       when not is_nil(sort_by) and not is_nil(sort_order),
+       do: get_taxonomies_with_custom_sorting(tail, filtered ++ [taxonomy])
+
+  defp get_taxonomies_with_custom_sorting([_ | tail], filtered),
+    do: get_taxonomies_with_custom_sorting(tail, filtered)
+
+  defp get_taxonomies_with_custom_sorting([], filtered), do: filtered
 
   @doc """
   Generates a content tree from an input taxonomy tree. The content
@@ -148,94 +316,4 @@ defmodule LiveMarkdown.Content.Tree do
     do: parent_level
 
   defp joined_post_level(_, parent_level), do: parent_level + 1
-
-  defp sort_taxonomy_tree_posts(tree) when is_list(tree) do
-    taxonomies_with_sorting = tree |> filter_taxonomies_with_custom_sorting()
-
-    tree
-    |> Enum.map(fn %Link{children: posts} = taxonomy ->
-      taxonomy
-      |> Map.put(
-        :children,
-        posts
-        |> sort_posts_by_closest_sorting_method(taxonomy, taxonomies_with_sorting)
-      )
-    end)
-  end
-
-  defp sort_posts_by_closest_sorting_method(
-         posts,
-         %Link{
-           type: :taxonomy,
-           index_post: %Post{metadata: %{sort_by: sort_by, sort_order: sort_order}}
-         },
-         _taxonomies_with_sorting
-       ) do
-    posts
-    |> sort_by_custom(sort_by, sort_order)
-  end
-
-  defp sort_posts_by_closest_sorting_method(
-         [%Post{taxonomies: post_taxonomies} | _] = posts,
-         %Link{level: max_level, type: :taxonomy},
-         taxonomies_with_sorting
-       ) do
-    {:sort_by, sort_by, :sort_order, sort_order} =
-      post_taxonomies
-      |> Enum.reject(fn %Link{level: level} -> level > max_level end)
-      |> Enum.reverse()
-      |> find_sorting_method_from_taxonomies(taxonomies_with_sorting)
-
-    posts
-    |> sort_by_custom(sort_by, sort_order)
-  end
-
-  defp sort_posts_by_closest_sorting_method([], _, _), do: []
-
-  defp find_sorting_method_from_taxonomies(post_taxonomies, taxonomies_with_sorting) do
-    # O(n^2)
-    taxonomies_with_sorting
-    |> Enum.find(fn
-      %Link{
-        slug: tax_slug,
-        type: :taxonomy,
-        index_post: %Post{metadata: %{sort_by: sort_by, sort_order: sort_order}}
-      }
-      when not is_nil(sort_by) and not is_nil(sort_order) ->
-        post_taxonomies
-        |> Enum.find(fn %Link{slug: slug} ->
-          tax_slug == slug
-        end)
-
-      _ ->
-        false
-    end)
-    |> case do
-      nil ->
-        {:sort_by, default_sort_by(), :sort_order, default_sort_order()}
-
-      %Link{index_post: %Post{metadata: %{sort_by: sort_by, sort_order: sort_order}}} ->
-        {:sort_by, sort_by, :sort_order, sort_order}
-    end
-  end
-
-  defp filter_taxonomies_with_custom_sorting(taxonomies, filtered \\ [])
-
-  defp filter_taxonomies_with_custom_sorting(
-         [
-           %Link{
-             type: :taxonomy,
-             index_post: %Post{metadata: %{sort_by: sort_by, sort_order: sort_order}}
-           } = taxonomy
-           | tail
-         ],
-         filtered
-       )
-       when not is_nil(sort_by) and not is_nil(sort_order),
-       do: filter_taxonomies_with_custom_sorting(tail, filtered ++ [taxonomy])
-
-  defp filter_taxonomies_with_custom_sorting([_ | tail], filtered),
-    do: filter_taxonomies_with_custom_sorting(tail, filtered)
-
-  defp filter_taxonomies_with_custom_sorting([], filtered), do: filtered
 end

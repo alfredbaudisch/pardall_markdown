@@ -24,82 +24,9 @@ defmodule LiveMarkdown.Content.Utils do
 
   def default_sort_by, do: :date
   def default_sort_order, do: :desc
+  def default_taxonomy_sort_by, do: :title
+  def default_taxonomy_sort_order, do: :asc
   def default_position, do: 100_000
-
-  @doc """
-  Splits a path into a tree of categories, containing both readable category names
-  and slugs for all categories in the hierarchy. The categories list is indexed from the
-  topmost to the lowermost in the hiearchy, example: Games > PC > RPG.
-
-  Also returns the level in the tree in which the category can be found,
-  as well as all parent categories slugs recursively, where `level: 0` is
-  for root pages (i.e. no category).
-
-  TODO: For the initial purpose of this project, this solution is ok,
-  but eventually let's implement it with a "real" tree or linked list.
-
-  ## Examples
-
-      iex> LiveMarkdown.Content.Utils.extract_categories_from_path("/blog/art/3d-models/post.md")
-      [
-        %{title: "Blog", slug: "/blog", level: 0, parents: ["/"]},
-        %{
-          title: "Art",
-          slug: "/blog/art",
-          level: 1,
-          parents: ["/", "/blog"]
-        },
-        %{
-          title: "3D Models",
-          slug: "/blog/art/3d-models",
-          level: 2,
-          parents: ["/", "/blog", "/blog/art"]
-        }
-      ]
-
-      iex> LiveMarkdown.Content.Utils.extract_categories_from_path("/blog/post.md")
-      [%{title: "Blog", slug: "/blog", level: 0, parents: ["/"]}]
-
-      iex> LiveMarkdown.Content.Utils.extract_categories_from_path("/post.md")
-      [%{title: "Home", slug: "/", level: 0, parents: ["/"]}]
-  """
-  def extract_categories_from_path(full_path) do
-    full_path
-    |> String.replace(Path.basename(full_path), "")
-    |> do_extract_categories()
-  end
-
-  # Root / Page
-  defp do_extract_categories("/"), do: [%{title: "Home", slug: "/", level: 0, parents: ["/"]}]
-  # Path with category and possibly, hierarchy
-  defp do_extract_categories(path) do
-    final_slug = extract_slug_from_path(path)
-    slug_parts = final_slug |> String.split("/")
-
-    path
-    |> String.replace(~r/^\/(.*)\/$/, "\\1")
-    |> String.split("/")
-    |> Enum.with_index()
-    |> Enum.map(fn {part, pos} ->
-      slug =
-        slug_parts
-        |> Enum.take(pos + 2)
-        |> Enum.join("/")
-
-      parents =
-        for idx <- 0..pos do
-          slug_parts |> Enum.take(idx + 1) |> Enum.join("/")
-        end
-        |> Enum.map(fn
-          "" -> "/"
-          parent -> parent
-        end)
-
-      category = part |> capitalize_as_taxonomy_name()
-
-      %{title: category, slug: slug, level: pos, parents: parents}
-    end)
-  end
 
   @doc """
   ## Examples
