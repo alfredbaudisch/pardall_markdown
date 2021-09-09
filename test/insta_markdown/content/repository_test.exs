@@ -1,6 +1,7 @@
 defmodule LiveMarkdown.RepositoryTest do
   use ExUnit.Case, async: true
   alias LiveMarkdown.Content.{Cache, Repository}
+  alias LiveMarkdown.Link
 
   setup do
     Application.ensure_all_started(:live_markdown)
@@ -8,24 +9,13 @@ defmodule LiveMarkdown.RepositoryTest do
     Process.sleep(100)
   end
 
-  @tag :sorting
   test "taxonomies should be sorted by their closest sorting method" do
     tree =
       Cache.get_taxonomy_tree()
       |> Enum.filter(fn %{type: type} -> type == :taxonomy end)
 
-    print_tree(tree)
-    Enum.map(tree, & &1.slug) |> IO.inspect()
     assert Enum.count(tree) == 2
   end
-
-  def print_tree([%{slug: slug, children_links: links} | tail]) do
-    IO.inspect("Slug: #{slug}")
-    print_tree(links)
-    print_tree(tail)
-  end
-
-  def print_tree([]), do: :ok
 
   # still not accounting for per-folder indexing
   test "content tree previous and next links" do
@@ -52,4 +42,23 @@ defmodule LiveMarkdown.RepositoryTest do
     assert post.link.previous.slug == "/blog/dailies/3d/blender"
     assert post.link.next.slug == "/docs"
   end
+
+  def print_tree(links, all \\ "<ul>", previous_level \\ -1)
+
+  def print_tree([%Link{slug: slug, children_links: children} | tail], all, -1) do
+    all = all <> "<li>" <> slug
+    all_children = print_tree(children)
+    print_tree(tail, all <> all_children, 1)
+  end
+
+  def print_tree([%Link{slug: slug, children_links: children} | tail], all, previous_level) do
+    all = all <> "</li><li>" <> slug
+    all_children = print_tree(children)
+    print_tree(tail, all <> all_children, previous_level)
+  end
+
+  def print_tree([], "<ul>", _), do: ""
+  def print_tree([], all, _), do: all <> "</li></ul>"
+
+  def link(slug), do: slug
 end

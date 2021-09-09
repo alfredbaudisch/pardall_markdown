@@ -499,6 +499,8 @@ defmodule LiveMarkdown.Content.Tree do
   ```
   """
   def build_content_tree(tree) when is_list(tree) do
+    raise "update with the new format with :children_links"
+
     with_home =
       Application.get_env(:live_markdown, LiveMarkdown.Content)[:content_tree_display_home]
 
