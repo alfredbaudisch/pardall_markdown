@@ -1,7 +1,6 @@
 defmodule LiveMarkdown.Content.FileParser do
   require Logger
   alias LiveMarkdown.Content.Repository
-  alias LiveMarkdown.Link
   import LiveMarkdown.Content.Utils
 
   def load_all! do
@@ -110,11 +109,19 @@ defmodule LiveMarkdown.Content.FileParser do
         sort_by = maybe_to_atom(sort_by)
         sort_order = maybe_to_atom(sort_order)
 
-        if Link.is_sort_by_valid?(sort_by) and Link.is_sort_order_valid?(sort_order) do
+        if is_sort_by_valid?(sort_by) and is_sort_order_valid?(sort_order) do
           {:ok,
            attrs
            |> Map.put(:sort_order, sort_order)
-           |> Map.put(:sort_by, sort_by)}
+           |> Map.put(:sort_by, sort_by)
+           |> (fn
+                 # Force :asc when by :position
+                 %{sort_by: :position} = attrs ->
+                   Map.put(attrs, :sort_order, :asc)
+
+                 attrs ->
+                   attrs
+               end).()}
         else
           invalid
         end
@@ -161,7 +168,7 @@ defmodule LiveMarkdown.Content.FileParser do
   defp maybe_put_position(%{position: position} = attrs) when is_number(position),
     do: attrs
 
-  defp maybe_put_position(attrs), do: Map.put(attrs, :position, 0)
+  defp maybe_put_position(attrs), do: Map.put(attrs, :position, default_position())
 
   # Date provided in the markdown file, try to parse it
   defp parse_or_get_date(%{date: date}, _path) when is_binary(date) and date != "" do

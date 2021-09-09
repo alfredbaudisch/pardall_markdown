@@ -17,6 +17,15 @@ defmodule LiveMarkdown.Content.Utils do
   def taxonomy_index_file, do: @taxonomy_index_file
   def is_index_file?(path), do: Path.basename(path) == taxonomy_index_file()
 
+  def is_sort_by_valid?(sort_by) when sort_by in [:title, :date, :slug, :position], do: true
+  def is_sort_by_valid?(_), do: false
+  def is_sort_order_valid?(sort_order) when sort_order in [:asc, :desc], do: true
+  def is_sort_order_valid?(_), do: false
+
+  def default_sort_by, do: :date
+  def default_sort_order, do: :desc
+  def default_position, do: 100_000
+
   @doc """
   Splits a path into a tree of categories, containing both readable category names
   and slugs for all categories in the hierarchy. The categories list is indexed from the

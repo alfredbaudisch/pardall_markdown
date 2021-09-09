@@ -13,7 +13,7 @@ defmodule LiveMarkdown.Post do
     field :file_path, :string
     field :is_published, :boolean, default: false
     field :metadata, :map
-    field :position, :integer, default: 0
+    field :position, :integer, default: 100_000
     embeds_many :taxonomies, LiveMarkdown.Link
     embeds_one :link, LiveMarkdown.Link
   end

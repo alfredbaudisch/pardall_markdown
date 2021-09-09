@@ -1,6 +1,7 @@
 defmodule LiveMarkdown.Content.Cache do
   require Logger
   alias LiveMarkdown.{Post, Link}
+  import LiveMarkdown.Content.Utils
   import LiveMarkdown.Content.Filters
 
   @cache_name Application.compile_env!(:live_markdown, [LiveMarkdown.Content, :cache_name])
@@ -305,5 +306,5 @@ defmodule LiveMarkdown.Content.Cache do
     do: find_sorting_method_from_taxonomies(tail)
 
   defp find_sorting_method_from_taxonomies([]),
-    do: {:sort_by, Link.default_sort_by(), :sort_order, Link.default_sort_order()}
+    do: {:sort_by, default_sort_by(), :sort_order, default_sort_order()}
 end

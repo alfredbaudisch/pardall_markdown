@@ -10,7 +10,7 @@ defmodule LiveMarkdown.Link do
     field :custom_type, :string, default: nil
     field :level, :integer, default: 1
     field :parents, {:array, :string}, default: ["/"]
-    field :position, :integer, default: 0
+    field :position, :integer, default: 100_000
     embeds_one :previous, __MODULE__
     embeds_one :next, __MODULE__
     embeds_many :children, LiveMarkdown.Post
@@ -39,12 +39,4 @@ defmodule LiveMarkdown.Link do
     |> cast_embed(:next)
     |> cast_embed(:index_post)
   end
-
-  def is_sort_by_valid?(sort_by) when sort_by in [:title, :date, :slug, :position], do: true
-  def is_sort_by_valid?(_), do: false
-  def is_sort_order_valid?(sort_order) when sort_order in [:asc, :desc], do: true
-  def is_sort_order_valid?(_), do: false
-
-  def default_sort_by, do: :date
-  def default_sort_order, do: :desc
 end
