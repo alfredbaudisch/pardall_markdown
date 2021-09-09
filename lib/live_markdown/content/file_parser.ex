@@ -45,7 +45,7 @@ defmodule LiveMarkdown.Content.FileParser do
     is_index? = is_index_file?(path)
 
     with {:ok, raw_content} <- File.read(path),
-         {:ok, attrs, body} <- parse_contents(path, raw_content),
+         {:ok, attrs, body} <- parse_contents(path, raw_content, is_index?),
          {:ok, body_html, _} <- markdown_to_html(body),
          {:ok, summary_html, _} <- maybe_summary_to_html(attrs),
          {:ok, date} <- parse_or_get_date(attrs, path) do
@@ -71,7 +71,7 @@ defmodule LiveMarkdown.Content.FileParser do
   end
 
   # From https://github.com/dashbitco/nimble_publisher
-  defp parse_contents(path, contents) do
+  defp parse_contents(path, contents, is_index? \\ false) do
     case :binary.split(contents, ["\n---\n", "\r\n---\r\n"]) do
       [_] ->
         {:error, "could not find separator --- in #{inspect(path)}"}
@@ -81,12 +81,7 @@ defmodule LiveMarkdown.Content.FileParser do
           case Code.eval_string(code, []) do
             {%{} = attrs, _} ->
               {:ok,
-               %{
-                 sort_by: default_sort_by(),
-                 sort_order: default_sort_order(),
-                 sort_taxonomies_by: default_taxonomy_sort_by(),
-                 sort_taxonomies_order: default_taxonomy_sort_order()
-               }
+               default_attributes(is_index?)
                |> Map.merge(attrs)
                |> atomize_keys()
                |> atomize_value_if_found(:sort_by)
@@ -170,4 +165,15 @@ defmodule LiveMarkdown.Content.FileParser do
     NaiveDateTime.new!(a, b, c, d, e, f)
     |> DateTime.from_naive("Etc/UTC")
   end
+
+  defp default_attributes(true = _is_index?) do
+    %{
+      sort_by: default_sort_by(),
+      sort_order: default_sort_order(),
+      sort_taxonomies_by: default_taxonomy_sort_by(),
+      sort_taxonomies_order: default_taxonomy_sort_order()
+    }
+  end
+
+  defp default_attributes(_is_index?), do: %{}
 end
