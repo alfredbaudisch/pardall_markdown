@@ -20,6 +20,11 @@ Ready to run in production? Please [check our deployment guides](https://hexdocs
 - Source: https://github.com/phoenixframework/phoenix
 
 # Stuff to add here
+## Split into 3 projects
+- Phoenix helpers (i.e. content tree links or maybe put this into the project LiveMarkdown Web example?)
+- LiveMarkdown
+- LiveMarkdown Web example
+
 ## Post metadata/attributes
 - Custom title and date
 - :published

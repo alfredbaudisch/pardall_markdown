@@ -3,8 +3,40 @@ defmodule LiveMarkdown.Content.Tree do
   import LiveMarkdown.Content.Utils
   import LiveMarkdown.Content.Filters
 
-  # TODO: For the initial purpose of this project, this solution is ok,
-  # but eventually let's implement it with a "real" tree or linked list.
+  @doc """
+  Generates a tree of taxonomies, where each taxonomy gets
+  inserted their direct children non-draft posts.
+  - Posts are sorted by their innermost taxonomy sorting method.
+  - Children taxonomy are added after their closest parent taxonomy,
+    they are not nested in its parent taxonomy.
+
+  ## Example
+
+  Consider the following content structure:
+  - Blog
+    - root-post
+    - News
+      - post-1
+      - post-2
+  - Docs
+    - introducion
+
+  The taxonomy tree will be generated as (most fields omitted for readability):
+  ```
+  [
+    %Link{slug: "/blog", title: "Blog", level: 1, children: [
+      %Post{slug: "/blog/root-post"}
+    ]},
+    %Link{slug: "/blog/news", title: "News", level: 2, children: [
+      %Post{slug: "/blog/news/post-1"},
+      %Post{slug: "/blog/news/post-2"}
+    ]},
+    %Link{slug: "/docs", title: "Docs", level: 1, children: [
+      %Post{slug: "/docs/introducion"}
+    ]}
+  ]
+  ```
+  """
   def build_taxonomy_tree(links, with_home \\ false) when is_list(links) do
     links
     |> sort_by_slug()
@@ -20,7 +52,7 @@ defmodule LiveMarkdown.Content.Tree do
             # The last taxonomy of a post is its parent taxonomy.
             # I.e. a post in *Blog > Art > 3D* has 3 taxonomies:
             # Blog, Blog > Art and Blog > Art > 3D,
-            # where its parent is the last one.
+            # where its parent is its innermost taxonomy.
             List.last(post_taxonomies).slug == slug
 
           _ ->
@@ -37,6 +69,38 @@ defmodule LiveMarkdown.Content.Tree do
     end)
   end
 
+  @doc """
+  Generates a content tree from an input taxonomy tree. The content
+  tree is akin to a sitemap.
+
+  Posts are moved out of the taxonomy `children` field and added to the
+  main list as %Link of the type `:post`, positioned after their
+  innermost parent taxonomy.
+
+  ## Example
+
+  Consider the following content structure:
+  - Blog
+    - root-post
+    - News
+      - post-1
+      - post-2
+  - Docs
+    - introducion
+
+  The content tree will be generated as (most fields omitted for readability):
+  ```
+  [
+    %Link{slug: "/blog", title: "Blog", type: :taxonomy, level: 1},
+    %Link{slug: "/blog/root-post", title: "Root Post", type: :post, level: 2},
+    %Link{slug: "/blog/news", title: "News", type: :taxonomy, level: 2},
+    %Link{slug: "/blog/news/post-1", title: "Post 1", type: :post, level: 3},
+    %Link{slug: "/blog/news/post-2", title: "Post 2", type: :post, level: 3},
+    %Link{slug: "/docs", title: "Docs", type: :taxonomy, level: 1},
+    %Link{slug: "/docs/introducion", title: "Introducion", type: :post, level: 2}
+  ]
+  ```
+  """
   def build_content_tree(tree) when is_list(tree) do
     with_home =
       Application.get_env(:live_markdown, LiveMarkdown.Content)[:content_tree_display_home]
