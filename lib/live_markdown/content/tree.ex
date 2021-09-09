@@ -170,19 +170,23 @@ defmodule LiveMarkdown.Content.Tree do
     |> Enum.reduce(%{}, fn
       %Link{parents: parents, type: :taxonomy} = link, acc ->
         acc
-        |> Map.update(parents, [link], fn links -> links ++ [link] end)
+        |> Map.update(parents, [link], fn links ->
+          links ++ [link]
+        end)
     end)
     |> Enum.reduce(%{}, fn {parent_slugs, children}, acc_tree ->
       case nest_children_links(
              main_tree_by_slug,
              acc_tree,
              taxonomies_with_sorting,
-             parent_slugs |> Enum.reverse(),
+             parent_slugs,
              children
            ) do
         # Root level, no updates made
         links when is_list(links) ->
-          acc_tree
+          Enum.reduce(links, acc_tree, fn %{slug: slug} = link, acc ->
+            Map.put(acc, slug, link)
+          end)
 
         %Link{slug: final_slug} = link ->
           Map.put(acc_tree, final_slug, link)
@@ -211,16 +215,16 @@ defmodule LiveMarkdown.Content.Tree do
          ["/" | parents],
          links,
          previous_parents
-       ),
-       do:
-         nest_children_links(
-           main_tree,
-           updated_tree,
-           taxonomies_with_sorting,
-           parents,
-           links,
-           previous_parents
-         )
+       ) do
+    nest_children_links(
+      main_tree,
+      updated_tree,
+      taxonomies_with_sorting,
+      parents,
+      links,
+      previous_parents
+    )
+  end
 
   defp nest_children_links(
          main_tree,
@@ -249,8 +253,11 @@ defmodule LiveMarkdown.Content.Tree do
         _ -> false
       end)
       |> case do
-        nil -> Map.get(updated_tree, parent_slug) || Map.get(main_tree, parent_slug)
-        parent -> parent
+        nil ->
+          Map.get(updated_tree, parent_slug) || Map.get(main_tree, parent_slug)
+
+        parent ->
+          parent
       end
 
     nest_children_links(
@@ -264,13 +271,17 @@ defmodule LiveMarkdown.Content.Tree do
   end
 
   # Final destination
-  defp nest_children_links(_, _, taxonomies_with_sorting, [], links, [
-         final_parent | previous_parents
-       ]) do
-    final_link =
-      put_children_links_into_parent_link_and_sort(final_parent, links, taxonomies_with_sorting)
+  defp nest_children_links(_, _, taxonomies_with_sorting, [], links, [_ | _] = all_parents) do
+    [first | all] = all_parents |> Enum.reverse()
 
-    put_parent_links_recursively(previous_parents, final_link, taxonomies_with_sorting)
+    final_link =
+      put_children_links_into_parent_link_and_sort(
+        first,
+        links,
+        taxonomies_with_sorting
+      )
+
+    put_parent_links_recursively(all, final_link, taxonomies_with_sorting)
   end
 
   # Call made with level 1 links and no nesting, return without any processing

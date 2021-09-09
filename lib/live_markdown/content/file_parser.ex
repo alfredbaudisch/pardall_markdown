@@ -92,8 +92,7 @@ defmodule LiveMarkdown.Content.FileParser do
                |> atomize_value_if_found(:sort_by)
                |> atomize_value_if_found(:sort_order)
                |> atomize_value_if_found(:sort_taxonomies_by)
-               |> atomize_value_if_found(:sort_taxonomies_order)
-               |> IO.inspect(), body}
+               |> atomize_value_if_found(:sort_taxonomies_order), body}
 
             {other, _} ->
               {:error,

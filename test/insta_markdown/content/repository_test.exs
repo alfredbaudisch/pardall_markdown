@@ -15,7 +15,7 @@ defmodule LiveMarkdown.RepositoryTest do
       |> Enum.filter(fn %{type: type} -> type == :taxonomy end)
 
     print_tree(tree)
-    1 = 2
+    Enum.map(tree, & &1.slug) |> IO.inspect()
     assert Enum.count(tree) == 2
   end
 
