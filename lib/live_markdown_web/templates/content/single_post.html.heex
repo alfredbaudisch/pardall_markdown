@@ -7,6 +7,12 @@
 <h1><%= @content.title %></h1>
 <%= raw(@content.content) %>
 
+<h2>Related</h2>
+<ul>
+<li>Previous: <%= if(not is_nil(@content.link.previous)) do live_redirect @content.link.previous.title, to: @content.link.previous.slug end %></li>
+<li>Next: <%= if(@content.link.next) do (live_redirect @content.link.next.title, to: @content.link.next.slug) end %></li>
+</ul>
+
 <h2>Categories</h2>
 <ul>
 <%= for category <- @content.taxonomies do %>

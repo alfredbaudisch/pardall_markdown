@@ -269,21 +269,71 @@ defmodule LiveMarkdown.Content.Cache do
           tree ->
             tree
         end).()
-    |> build_tree_navigation()
     |> sort_taxonomies_embedded_posts()
+    |> build_tree_navigation()
   end
 
   defp build_tree_navigation(tree) do
-    tree
-    |> Enum.with_index()
+    total = Enum.count(tree)
+
+    indexed =
+      tree
+      |> Enum.with_index()
+
+    indexed
     |> Enum.map(fn
       {%Link{} = link, 0} ->
-        Map.put(link, :next, Enum.at(tree, 1))
+        next =
+          case find_next_post(indexed, 0) do
+            {next, _} -> next
+            _ -> nil
+          end
+
+        Map.put(link, :next, next)
+
+      {%Link{} = link, pos} when pos == total - 1 ->
+        previous =
+          case find_previous_post(indexed, pos) do
+            {previous, _} -> previous
+            _ -> nil
+          end
+
+        link
+        |> Map.put(:previous, previous)
 
       {%Link{} = link, pos} ->
+        previous =
+          case find_previous_post(indexed, pos) do
+            {previous, _} -> previous
+            _ -> nil
+          end
+
+        next =
+          case find_next_post(indexed, pos) do
+            {next, _} -> next
+            _ -> nil
+          end
+
         link
-        |> Map.put(:previous, Enum.at(tree, pos - 1))
-        |> Map.put(:next, Enum.at(tree, pos + 1))
+        |> Map.put(:previous, previous)
+        |> Map.put(:next, next)
+    end)
+  end
+
+  defp find_previous_post(all_indexed, before_index) do
+    all_indexed
+    |> Enum.reverse()
+    |> Enum.find(fn
+      {%Link{type: :post}, pos} when pos < before_index -> true
+      {_, _} -> false
+    end)
+  end
+
+  defp find_next_post(all_indexed, after_index) do
+    all_indexed
+    |> Enum.find(fn
+      {%Link{type: :post}, pos} when pos > after_index -> true
+      {_, _} -> false
     end)
   end
 
@@ -292,20 +342,21 @@ defmodule LiveMarkdown.Content.Cache do
 
   defp level_for_joined_post(_, parent_level), do: parent_level + 1
 
-  defp sort_taxonomies_embedded_posts(content_tree) do
+  defp sort_taxonomies_embedded_posts(tree) do
     taxonomies = get_all_links(:taxonomy)
     sorting_methods = get_taxonomy_sorting_methods_from_topmost_taxonomies()
 
     taxonomies
-    |> Enum.map(fn %Link{children: posts} = taxonomy ->
-      {sort_by, sort_order} = find_sorting_method_for_taxonomy(taxonomy, sorting_methods)
+    |> Enum.map(fn
+      %Link{type: :taxonomy, children: posts} = taxonomy ->
+        {sort_by, sort_order} = find_sorting_method_for_taxonomy(taxonomy, sorting_methods)
 
-      taxonomy
-      |> Map.put(:children, posts |> sort_by_custom(sort_by, sort_order))
-      |> save_slug()
+        taxonomy
+        |> Map.put(:children, posts |> sort_by_custom(sort_by, sort_order))
+        |> save_slug()
     end)
 
-    content_tree
+    tree
   end
 
   defp find_sorting_method_for_taxonomy(
