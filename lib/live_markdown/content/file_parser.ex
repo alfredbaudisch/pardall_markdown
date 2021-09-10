@@ -166,14 +166,5 @@ defmodule LiveMarkdown.Content.FileParser do
     |> DateTime.from_naive("Etc/UTC")
   end
 
-  defp default_attributes(true = _is_index?) do
-    %{
-      sort_by: default_sort_by(),
-      sort_order: default_sort_order(),
-      sort_taxonomies_by: default_taxonomy_sort_by(),
-      sort_taxonomies_order: default_taxonomy_sort_order()
-    }
-  end
-
   defp default_attributes(_is_index?), do: %{}
 end
