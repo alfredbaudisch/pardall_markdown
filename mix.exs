@@ -1,9 +1,9 @@
-defmodule LiveMarkdown.MixProject do
+defmodule KodaMarkdown.MixProject do
   use Mix.Project
 
   def project do
     [
-      app: :live_markdown,
+      app: :koda_markdown,
       version: "0.1.0",
       elixir: "~> 1.7",
       elixirc_paths: elixirc_paths(Mix.env()),
@@ -19,7 +19,7 @@ defmodule LiveMarkdown.MixProject do
   # Type `mix help compile.app` for more information.
   def application do
     [
-      mod: {LiveMarkdown.Application, []},
+      mod: {KodaMarkdown.Application, []},
       extra_applications: [:logger, :runtime_tools, :con_cache]
     ]
   end
