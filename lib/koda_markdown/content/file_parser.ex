@@ -2,6 +2,7 @@ defmodule KodaMarkdown.Content.FileParser do
   require Logger
   alias KodaMarkdown.Content.Repository
   import KodaMarkdown.Content.Utils
+  import KodaMarkdown.Content.HtmlUtils
 
   def load_all! do
     root_path()
@@ -49,6 +50,7 @@ defmodule KodaMarkdown.Content.FileParser do
     with {:ok, raw_content} <- File.read(path),
          {:ok, attrs, body} <- parse_contents(path, raw_content),
          {:ok, body_html, _} <- markdown_to_html(body),
+         body_html <- add_ids_and_anchors_to_headings(body_html),
          {:ok, summary_html, _} <- maybe_summary_to_html(attrs),
          {:ok, date} <- parse_or_get_date(attrs, path) do
       attrs =
