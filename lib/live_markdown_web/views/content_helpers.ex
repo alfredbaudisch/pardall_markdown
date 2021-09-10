@@ -36,9 +36,9 @@ defmodule LiveMarkdownWeb.ContentHelpers do
   </ul>
   ```
   """
-  def taxonomy_tree_list(taxonomies) do
-    taxonomy_tree(taxonomies)
-  end
+  def taxonomy_tree_list(nil), do: nil
+
+  def taxonomy_tree_list(taxonomies), do: taxonomy_tree(taxonomies)
 
   defp taxonomy_tree(taxonomies, all \\ "<ul>", previous_level \\ -1)
 
