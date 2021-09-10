@@ -1,6 +1,6 @@
 %{
     title: "The Default Cube is much more useful than you imagine",
-    date: "2020-09-05",
+    date: "2019-05-05",
     published: true
 }
 ---

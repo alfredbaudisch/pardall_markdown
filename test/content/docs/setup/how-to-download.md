@@ -1,7 +1,8 @@
 %{
     title: "How to Download for any Platform",
     date: "2020-09-05",
-    published: true
+    published: true,
+    position: 0
 }
 ---
 

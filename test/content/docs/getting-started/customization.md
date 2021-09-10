@@ -1,7 +1,8 @@
 %{
     title: "Customization of the Interface",
     date: "2020-09-05",
-    published: true
+    published: true,
+    position: 3
 }
 ---
 

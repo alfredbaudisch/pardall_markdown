@@ -1,7 +1,8 @@
 %{
-    title: "Advanced Topic #2",
+    title: "Advanced Topic #2 - Reversed on purpose",
     date: "2020-09-05",
-    published: true
+    published: true,
+    position: 0
 }
 ---
 

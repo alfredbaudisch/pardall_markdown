@@ -1,6 +1,6 @@
 %{
-    title: "Dachshund Painting",
-    date: "2021-08-02",
+    title: "Ant Painting",
+    date: "2021-09-01",
     published: true
 }
 ---
