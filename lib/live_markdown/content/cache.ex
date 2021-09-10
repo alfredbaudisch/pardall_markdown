@@ -1,7 +1,8 @@
 defmodule LiveMarkdown.Content.Cache do
   require Logger
   alias LiveMarkdown.{Post, Link}
-  import LiveMarkdown.Content.Repository.Filters
+  import LiveMarkdown.Content.Filters
+  import LiveMarkdown.Content.Utils
 
   @cache_name Application.compile_env!(:live_markdown, [LiveMarkdown.Content, :cache_name])
   @index_cache_name Application.compile_env!(:live_markdown, [
@@ -31,8 +32,8 @@ defmodule LiveMarkdown.Content.Cache do
     |> Enum.map(fn {_, %Link{} = link} -> link end)
   end
 
-  def get_taxonomy_tree(sort_by \\ :date) when sort_by in [:date] do
-    get = fn -> ConCache.get(@index_cache_name, taxonomy_tree_key(sort_by)) end
+  def get_taxonomy_tree do
+    get = fn -> ConCache.get(@index_cache_name, taxonomy_tree_key()) end
 
     case get.() do
       nil ->
@@ -44,8 +45,8 @@ defmodule LiveMarkdown.Content.Cache do
     end
   end
 
-  def get_content_tree(sort_by \\ :date) when sort_by in [:date] do
-    get = fn -> ConCache.get(@index_cache_name, content_tree_key(sort_by)) end
+  def get_content_tree do
+    get = fn -> ConCache.get(@index_cache_name, content_tree_key()) end
 
     case get.() do
       nil ->
@@ -57,14 +58,17 @@ defmodule LiveMarkdown.Content.Cache do
     end
   end
 
+  def save_post(%Post{type: :index} = post) do
+    save_post_taxonomies(post)
+  end
+
   def save_post(%Post{} = post) do
     save_post_pure(post)
     save_post_taxonomies(post)
   end
 
-  def save_post_pure(%Post{slug: slug} = post) do
-    key = slug_key(slug)
-    ConCache.put(@cache_name, key, post)
+  def save_post_pure(%Post{slug: _slug} = post) do
+    save_slug(post)
   end
 
   def update_post_field(slug, field, value) do
@@ -74,26 +78,14 @@ defmodule LiveMarkdown.Content.Cache do
     end
   end
 
-  def upsert_taxonomy_appending_post(
-        %Link{slug: slug, children: children} = taxonomy,
-        %Post{} = post
-      ) do
-    do_update = fn taxonomy, children ->
-      {:ok, %{taxonomy | children: children ++ [Map.put(post, :content, nil)]}}
-    end
-
-    ConCache.update(@cache_name, slug_key(slug), fn
-      nil ->
-        do_update.(taxonomy, children)
-
-      %Link{children: children} = taxonomy ->
-        do_update.(taxonomy, children)
-    end)
+  def save_slug(%{slug: slug} = item) do
+    key = slug_key(slug)
+    ConCache.put(@cache_name, key, item)
   end
 
   def build_taxonomy_tree() do
     tree = do_build_taxonomy_tree()
-    ConCache.put(@index_cache_name, taxonomy_tree_key(:date), tree)
+    ConCache.put(@index_cache_name, taxonomy_tree_key(), tree)
     tree
   end
 
@@ -120,7 +112,7 @@ defmodule LiveMarkdown.Content.Cache do
     # orders for the same post set. Generate only once, respecting the post set
     # ordering configuration.
 
-    ConCache.put(@index_cache_name, content_tree_key(:date), tree)
+    ConCache.put(@index_cache_name, content_tree_key(), tree)
     tree
   end
 
@@ -140,14 +132,81 @@ defmodule LiveMarkdown.Content.Cache do
   # Internal
   #
 
+  defp save_post_taxonomies(%Post{type: :index, taxonomies: taxonomies} = post) do
+    taxonomies
+    |> List.last()
+    |> upsert_taxonomy_appending_post(post)
+  end
+
   defp save_post_taxonomies(%Post{taxonomies: taxonomies} = post) do
     taxonomies
     |> Enum.map(&upsert_taxonomy_appending_post(&1, post))
   end
 
-  # TODO: For the initial purpose of this project, this solution is ok,
-  # but eventually let's implement it with a "real" tree or linked list.
+  defp upsert_taxonomy_appending_post(
+         %Link{slug: slug} = taxonomy,
+         %Post{type: :index, position: position, title: post_title, metadata: metadata} = post
+       ) do
+    do_update = fn taxonomy ->
+      {:ok,
+       %{
+         taxonomy
+         | index_post: post,
+           position: position,
+           title: post_title,
+           sort_by: Map.get(metadata, :sort_by, default_sort_by()) |> maybe_to_atom(),
+           sort_order: Map.get(metadata, :sort_order, default_sort_order()) |> maybe_to_atom()
+       }}
+    end
+
+    ConCache.update(@cache_name, slug_key(slug), fn
+      nil ->
+        do_update.(taxonomy)
+
+      %Link{} = taxonomy ->
+        do_update.(taxonomy)
+    end)
+  end
+
+  defp upsert_taxonomy_appending_post(
+         %Link{slug: slug, children: children} = taxonomy,
+         %Post{} = post
+       ) do
+    do_update = fn taxonomy, children ->
+      {:ok, %{taxonomy | children: children ++ [Map.put(post, :content, nil)]}}
+    end
+
+    ConCache.update(@cache_name, slug_key(slug), fn
+      nil ->
+        do_update.(taxonomy, children)
+
+      %Link{children: children} = taxonomy ->
+        do_update.(taxonomy, children)
+    end)
+  end
+
+  defp get_sorting_methods_for_topmost_taxonomies do
+    get_all_links()
+    |> sort_by_slug()
+    |> Enum.reduce(%{}, fn
+      %Link{
+        type: :taxonomy,
+        level: 0,
+        sort_by: sort_by,
+        sort_order: sort_order,
+        slug: slug
+      },
+      acc ->
+        Map.put(acc, slug, {sort_by, sort_order})
+
+      _, acc ->
+        acc
+    end)
+  end
+
   defp do_build_taxonomy_tree(with_home \\ false) do
+    sorting_methods = get_sorting_methods_for_topmost_taxonomies()
+
     get_all_links()
     |> sort_by_slug()
     |> (fn
@@ -173,9 +232,12 @@ defmodule LiveMarkdown.Content.Cache do
       taxonomy
       |> Map.put(:children, posts)
     end)
-    |> Enum.map(fn %Link{children: posts} = taxonomy ->
+    |> Enum.map(fn %Link{children: posts, parents: parents} = taxonomy ->
+      root_taxonomy = if Enum.count(parents) == 1, do: "/", else: Enum.at(parents, 1)
+      {sort_by, sort_order} = sorting_methods[root_taxonomy]
+
       taxonomy
-      |> Map.put(:children, posts |> sort_by_published_date())
+      |> Map.put(:children, posts |> sort_by_custom(sort_by, sort_order))
     end)
   end
 
@@ -195,7 +257,8 @@ defmodule LiveMarkdown.Content.Cache do
             title: post.title,
             level: level_for_joined_post(taxonomy.slug, taxonomy.level),
             parents: parents,
-            type: :post
+            type: :post,
+            position: post.position
           }
         end)
       )
@@ -208,6 +271,7 @@ defmodule LiveMarkdown.Content.Cache do
             tree
         end).()
     |> build_tree_navigation()
+    |> sort_taxonomies_embedded_posts()
   end
 
   defp build_tree_navigation(tree) do
@@ -229,9 +293,26 @@ defmodule LiveMarkdown.Content.Cache do
 
   defp level_for_joined_post(_, parent_level), do: parent_level + 1
 
-  defp slug_key(slug), do: {:slug, slug}
-  defp taxonomy_tree_key(sort_posts_by), do: {:taxonomy_tree, sort_posts_by}
+  defp sort_taxonomies_embedded_posts(content_tree) do
+    taxonomies = get_all_links(:taxonomy)
+    sorting_methods = get_sorting_methods_for_topmost_taxonomies()
 
-  defp content_tree_key(sort_posts_by),
-    do: {:content_tree, sort_posts_by}
+    taxonomies
+    |> Enum.map(fn %Link{children: posts, parents: parents} = taxonomy ->
+      root_taxonomy = if Enum.count(parents) == 1, do: "/", else: Enum.at(parents, 1)
+      {sort_by, sort_order} = sorting_methods[root_taxonomy]
+
+      taxonomy
+      |> Map.put(:children, posts |> sort_by_custom(sort_by, sort_order))
+      |> save_slug()
+    end)
+
+    content_tree
+  end
+
+  defp slug_key(slug), do: {:slug, slug}
+  defp taxonomy_tree_key(slug \\ "/"), do: {:taxonomy_tree, slug}
+
+  defp content_tree_key(slug \\ "/"),
+    do: {:content_tree, slug}
 end

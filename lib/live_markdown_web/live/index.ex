@@ -9,7 +9,7 @@ defmodule LiveMarkdownWeb.Live.Index do
 
     {:ok,
      assign(socket,
-       posts: Repository.get_all_published(),
+       posts: Repository.get_all_published() |> sort_by_published_date(),
        content_tree: Repository.get_content_tree(),
        taxonomy_tree: Repository.get_taxonomy_tree()
      )
@@ -30,8 +30,8 @@ defmodule LiveMarkdownWeb.Live.Index do
         %{id: post_id} when post_id == id -> post
         i_post -> i_post
       end)
-      |> Repository.Filters.filter_by_is_published()
-      |> Repository.Filters.sort_by_published_date()
+      |> filter_by_is_published()
+      |> sort_by_published_date()
 
     {:noreply, socket |> assign(:posts, posts)}
   end

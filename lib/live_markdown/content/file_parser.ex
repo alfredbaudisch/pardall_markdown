@@ -41,19 +41,21 @@ defmodule LiveMarkdown.Content.FileParser do
 
   defp parse!(path) do
     Logger.info("Parsing file #{path}...")
+    is_index? = is_index_file?(path)
 
     with {:ok, raw_content} <- File.read(path),
          {:ok, attrs, body} <- parse_contents(path, raw_content),
-         {:ok, attrs} <- validate_attrs(attrs),
          {:ok, body_html, _} <- markdown_to_html(body),
          {:ok, summary_html, _} <- maybe_summary_to_html(attrs),
-         {:ok, date} <- parse_date(attrs) do
+         {:ok, date} <- parse_or_get_date(attrs, path) do
       attrs =
         attrs
         |> extract_and_put_slug(path)
         |> extract_and_put_categories(path)
+        |> maybe_put_title(path, is_index?)
         |> Map.put(:summary, summary_html)
         |> Map.put(:date, date)
+        |> Map.put(:is_index, is_index?)
 
       Logger.info("Pushed converted Markdown: #{path}")
       Repository.push_post(path, attrs, body_html)
@@ -76,7 +78,7 @@ defmodule LiveMarkdown.Content.FileParser do
         try do
           case Code.eval_string(code, []) do
             {%{} = attrs, _} ->
-              {:ok, attrs, body}
+              {:ok, attrs |> atomize_keys(), body}
 
             {other, _} ->
               {:error,
@@ -88,12 +90,6 @@ defmodule LiveMarkdown.Content.FileParser do
         end
     end
   end
-
-  defp validate_attrs(%{title: title, date: date} = attrs)
-       when is_binary(title) and is_binary(date) and title != "" and date != "",
-       do: {:ok, attrs}
-
-  defp validate_attrs(_), do: {:error, "attrs must contain valid :title and :date strings"}
 
   defp maybe_summary_to_html(%{summary: summary}) when is_binary(summary) and summary != "",
     do: summary |> markdown_to_html()
@@ -108,7 +104,24 @@ defmodule LiveMarkdown.Content.FileParser do
   defp extract_and_put_categories(attrs, path),
     do: Map.put(attrs, :categories, path |> remove_root_path() |> extract_categories_from_path())
 
-  defp parse_date(%{date: date}) do
+  defp maybe_put_title(attrs, path, is_index?)
+
+  # Custom title provided
+  defp maybe_put_title(%{title: title} = attrs, _path, _) when is_binary(title) and title != "",
+    do: attrs
+
+  # Page is the index page and a custom title wasn't provided,
+  # set the main taxonomy name as the page title
+  defp maybe_put_title(%{categories: categories} = attrs, _path, true),
+    do: Map.put(attrs, :title, List.last(categories)[:title])
+
+  # A post and custom title not provided,
+  # title-fy the file name
+  defp maybe_put_title(attrs, path, false),
+    do: Map.put(attrs, :title, extract_title_from_path(path))
+
+  # Date provided in the markdown file, try to parse it
+  defp parse_or_get_date(%{date: date}, _path) when is_binary(date) and date != "" do
     cond do
       is_date?(date) ->
         {:ok, date} = date |> Date.from_iso8601()
@@ -119,7 +132,14 @@ defmodule LiveMarkdown.Content.FileParser do
         {:ok, datetime}
 
       true ->
-        {:error, "Post :date must be in a valid Elixir date format, received: #{date}"}
+        {:error, "Post :date must be in a valid ISO datetime, received: #{date}"}
     end
+  end
+
+  defp parse_or_get_date(_, path) do
+    {:ok, %File.Stat{ctime: {{a, b, c}, {d, e, f}}}} = File.lstat(path)
+
+    NaiveDateTime.new!(a, b, c, d, e, f)
+    |> DateTime.from_naive("Etc/UTC")
   end
 end
