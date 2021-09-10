@@ -185,7 +185,7 @@ defmodule LiveMarkdown.Content.Cache do
     end)
   end
 
-  defp get_sorting_methods_for_topmost_taxonomies do
+  defp get_taxonomy_sorting_methods_from_topmost_taxonomies do
     get_all_links()
     |> sort_by_slug()
     |> Enum.reduce(%{}, fn
@@ -205,7 +205,7 @@ defmodule LiveMarkdown.Content.Cache do
   end
 
   defp do_build_taxonomy_tree(with_home \\ false) do
-    sorting_methods = get_sorting_methods_for_topmost_taxonomies()
+    sorting_methods = get_taxonomy_sorting_methods_from_topmost_taxonomies()
 
     get_all_links()
     |> sort_by_slug()
@@ -232,15 +232,8 @@ defmodule LiveMarkdown.Content.Cache do
       taxonomy
       |> Map.put(:children, posts)
     end)
-    |> Enum.map(fn %Link{children: posts, parents: parents, slug: slug} = taxonomy ->
-      target_sort_taxonomy =
-        cond do
-          Enum.count(parents) == 1 and slug != "/" -> slug
-          Enum.count(parents) == 1 -> "/"
-          true -> Enum.at(parents, 1)
-        end
-
-      {sort_by, sort_order} = sorting_methods[target_sort_taxonomy]
+    |> Enum.map(fn %Link{children: posts} = taxonomy ->
+      {sort_by, sort_order} = find_sorting_method_for_taxonomy(taxonomy, sorting_methods)
 
       taxonomy
       |> Map.put(:children, posts |> sort_by_custom(sort_by, sort_order))
@@ -301,18 +294,11 @@ defmodule LiveMarkdown.Content.Cache do
 
   defp sort_taxonomies_embedded_posts(content_tree) do
     taxonomies = get_all_links(:taxonomy)
-    sorting_methods = get_sorting_methods_for_topmost_taxonomies()
+    sorting_methods = get_taxonomy_sorting_methods_from_topmost_taxonomies()
 
     taxonomies
-    |> Enum.map(fn %Link{children: posts, parents: parents, slug: slug} = taxonomy ->
-      target_sort_taxonomy =
-        cond do
-          Enum.count(parents) == 1 and slug != "/" -> slug
-          Enum.count(parents) == 1 -> "/"
-          true -> Enum.at(parents, 1)
-        end
-
-      {sort_by, sort_order} = sorting_methods[target_sort_taxonomy]
+    |> Enum.map(fn %Link{children: posts} = taxonomy ->
+      {sort_by, sort_order} = find_sorting_method_for_taxonomy(taxonomy, sorting_methods)
 
       taxonomy
       |> Map.put(:children, posts |> sort_by_custom(sort_by, sort_order))
@@ -320,6 +306,20 @@ defmodule LiveMarkdown.Content.Cache do
     end)
 
     content_tree
+  end
+
+  defp find_sorting_method_for_taxonomy(
+         %Link{parents: parents, slug: slug, level: level},
+         sorting_methods
+       ) do
+    target_sort_taxonomy =
+      cond do
+        level == 0 and slug != "/" -> slug
+        level == 0 -> "/"
+        true -> Enum.at(parents, 1)
+      end
+
+    sorting_methods[target_sort_taxonomy]
   end
 
   defp slug_key(slug), do: {:slug, slug}
