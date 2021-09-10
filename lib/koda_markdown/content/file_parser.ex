@@ -50,7 +50,6 @@ defmodule KodaMarkdown.Content.FileParser do
     with {:ok, raw_content} <- File.read(path),
          {:ok, attrs, body} <- parse_contents(path, raw_content),
          {:ok, body_html, _} <- markdown_to_html(body),
-         body_html <- add_ids_and_anchors_to_headings(body_html),
          {:ok, summary_html, _} <- maybe_summary_to_html(attrs),
          {:ok, date} <- parse_or_get_date(attrs, path) do
       attrs =
@@ -61,6 +60,9 @@ defmodule KodaMarkdown.Content.FileParser do
         |> Map.put(:summary, summary_html)
         |> Map.put(:date, date)
         |> Map.put(:is_index, is_index?)
+
+      {:ok, body_html, toc} = generate_anchors_and_toc(body_html, attrs)
+      attrs = attrs |> Map.put(:toc, toc)
 
       Logger.info("Pushed converted Markdown: #{path}")
       Repository.push_post(path, attrs, body_html)

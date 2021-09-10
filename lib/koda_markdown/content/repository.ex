@@ -57,7 +57,8 @@ defmodule KodaMarkdown.Content.Repository do
       # for now, when a post is pushed to the repository, only "categories" are known
       taxonomies: attrs.categories,
       metadata: attrs |> remove_default_attributes(),
-      position: Map.get(attrs, :position, 0)
+      position: Map.get(attrs, :position, 0),
+      toc: attrs.toc
     })
     |> (fn
           %Changeset{valid?: true} = changeset ->
@@ -94,6 +95,6 @@ defmodule KodaMarkdown.Content.Repository do
 
   defp remove_default_attributes(attrs) do
     attrs
-    |> Map.drop([:title, :slug, :date, :summary, :published, :categories, :is_index])
+    |> Map.drop([:title, :slug, :date, :summary, :published, :categories, :is_index, :toc])
   end
 end

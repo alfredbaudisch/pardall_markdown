@@ -1,5 +1,5 @@
 defmodule KodaMarkdownWeb.ContentHelpers do
-  alias KodaMarkdown.Link
+  alias KodaMarkdown.{Link, ContentLink}
   use Phoenix.HTML
   import Phoenix.LiveView.Helpers
 
@@ -78,4 +78,44 @@ defmodule KodaMarkdownWeb.ContentHelpers do
     live_redirect(title, to: slug)
     |> safe_to_string()
   end
+
+  def post_toc_list(nil), do: nil
+
+  def post_toc_list(links), do: post_toc(links)
+
+  defp post_toc(links, all \\ "<ul>", previous_level \\ -1)
+
+  defp post_toc([%ContentLink{level: level} = link | tail], all, -1) do
+    post_toc(tail, all <> "<li>" <> toc_link(link), level)
+  end
+
+  defp post_toc([%ContentLink{level: level} = link | tail], all, previous_level)
+       when level > previous_level do
+    # nest new level
+    post_toc(tail, all <> "<ul><li>" <> toc_link(link), level)
+  end
+
+  defp post_toc([%ContentLink{level: level} = link | tail], all, previous_level)
+       when level < previous_level do
+    # go up (previous_level - level) levels, closing nest(s)
+    diff = previous_level - level
+    close = String.duplicate("</ul></li>", diff)
+
+    post_toc(tail, all <> close <> "<li>" <> toc_link(link), level)
+  end
+
+  defp post_toc([%ContentLink{level: level} = link | tail], all, previous_level)
+       when level == previous_level do
+    # same level
+    post_toc(tail, all <> "</li><li>" <> toc_link(link), level)
+  end
+
+  # Empty initial list provided
+  defp post_toc([], "<ul>", _), do: ""
+
+  # No more taxonomies to traverse, finish and return the list
+  defp post_toc([], all, previous_level),
+    do: all <> String.duplicate("</li></ul>", previous_level) <> "</li></ul>"
+
+  defp toc_link(%ContentLink{title: title, id: id}), do: "<a href=\"#{id}\">#{title}</a>"
 end

@@ -196,7 +196,8 @@ defmodule KodaMarkdown.Content.Cache do
          %Post{} = post
        ) do
     do_update = fn taxonomy, children ->
-      {:ok, %{taxonomy | children: children ++ [Map.put(post, :content, nil)]}}
+      stripped_post = post |> Map.put(:content, nil) |> Map.put(:toc, [])
+      {:ok, %{taxonomy | children: children ++ [stripped_post]}}
     end
 
     ConCache.update(@cache_name, slug_key(slug), fn

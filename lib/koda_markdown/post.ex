@@ -14,6 +14,7 @@ defmodule KodaMarkdown.Post do
     field :is_published, :boolean, default: false
     field :metadata, :map
     field :position, :integer, default: 0
+    embeds_many :toc, KodaMarkdown.ContentLink
     embeds_many :taxonomies, KodaMarkdown.Link
     embeds_one :link, KodaMarkdown.Link
   end
@@ -35,5 +36,6 @@ defmodule KodaMarkdown.Post do
     |> validate_required([:type, :title, :slug, :date, :file_path])
     |> cast_embed(:taxonomies)
     |> cast_embed(:link)
+    |> cast_embed(:toc)
   end
 end

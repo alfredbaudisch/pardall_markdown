@@ -13,9 +13,18 @@
 <li>Next: <%= if(@content.link.next) do (live_redirect @content.link.next.title, to: @content.link.next.slug) end %></li>
 </ul>
 
+<hr/>
+
 <h2>Categories</h2>
 <ul>
 <%= for category <- @content.taxonomies do %>
     <li><%= live_redirect category.title, to: category.slug %></li>
 <% end %>
 </ul>
+
+<hr/>
+
+<h2>Table of Contents</h2>
+<section class="row">
+  <%= raw post_toc_list(@content.toc) %>
+</section>

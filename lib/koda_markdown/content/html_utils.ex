@@ -1,8 +1,8 @@
 defmodule KodaMarkdown.Content.HtmlUtils do
-  def add_ids_and_anchors_to_headings(html) do
-    {updated_tree, _} =
+  def generate_anchors_and_toc(html, %{slug: slug}) do
+    {updated_tree, %{toc: toc}} =
       Floki.parse_fragment!(html)
-      |> Floki.traverse_and_update(%{}, fn
+      |> Floki.traverse_and_update(%{counters: %{}, toc: []}, fn
         {"h" <> level, attrs, children} = el, acc ->
           case find_node_text(children) do
             nil ->
@@ -10,27 +10,42 @@ defmodule KodaMarkdown.Content.HtmlUtils do
 
             text ->
               id = Slug.slugify(text)
-              count = Map.get(acc, id, "")
+              count = Map.get(acc.counters, id, "")
               attrs = [{"id", get_id_with_count(id, count)} | attrs]
+
+              title = text |> String.trim()
+              link_id = "#" <> get_id_with_count(id, count)
 
               anchor =
                 {"a",
                  [
-                   {"href", "#" <> get_id_with_count(id, count)},
-                   {"class", "anchor-link"},
-                   {"data-title", text |> String.trim()}
+                   {"href", link_id},
+                   {"class", "anchor-link __koda-anchor-link"},
+                   {"data-title", title}
                  ], []}
 
-              {{"h" <> level, attrs, [anchor | children]},
-               Map.put(acc, id, increase_id_count(count))}
+              toc_item = %{
+                id: link_id,
+                parent_slug: slug,
+                title: title,
+                level: get_level_for_toc(acc[:toc], level)
+              }
+
+              acc = put_in(acc[:counters][id], increase_id_count(count))
+              acc = put_in(acc[:toc], acc.toc ++ [toc_item])
+
+              {{"h" <> level, attrs, [anchor | children]}, acc}
           end
 
         el, acc ->
           {el, acc}
       end)
 
-    updated_tree |> Floki.raw_html()
+    {:ok, updated_tree |> Floki.raw_html(), toc}
   end
+
+  defp get_level_for_toc([], _), do: 1
+  defp get_level_for_toc(_, level), do: level |> String.to_integer()
 
   def strip_in_between_space(html),
     do:

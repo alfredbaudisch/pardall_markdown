@@ -2,6 +2,7 @@ defmodule KodaMarkdownWeb.ContentViewTest do
   use KodaMarkdownWeb.ConnCase, async: true
 
   alias KodaMarkdown.Content.Repository
+  alias KodaMarkdown.Content.HtmlUtils
 
   test "taxonomy tree is generated correctly" do
     tree = Repository.get_taxonomy_tree()
@@ -38,7 +39,7 @@ defmodule KodaMarkdownWeb.ContentViewTest do
       </li>
       </ul>
       """
-      |> KodaMarkdown.Content.HtmlUtils.strip_in_between_space()
+      |> HtmlUtils.strip_in_between_space()
 
     assert generated == expected
 
