@@ -7,9 +7,6 @@
 # General application configuration
 use Mix.Config
 
-config :live_markdown,
-  ecto_repos: [LiveMarkdown.Repo]
-
 # Configures the endpoint
 config :live_markdown, LiveMarkdownWeb.Endpoint,
   url: [host: "localhost"],
@@ -25,7 +22,7 @@ config :live_markdown, LiveMarkdown.Content,
   index_cache_name: :content_index_cache,
   # Site name to be appened into page titles
   site_name: "Live Markdown",
-  recheck_pending_file_events_interval: 1_000,
+  recheck_pending_file_events_interval: 10_000,
   content_tree_display_home: false
 
 # Configures Elixir's Logger

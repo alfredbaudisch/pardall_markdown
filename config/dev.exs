@@ -1,14 +1,5 @@
 use Mix.Config
 
-# Configure your database
-config :live_markdown, LiveMarkdown.Repo,
-  username: "postgres",
-  password: "postgres",
-  database: "live_markdown_dev",
-  hostname: "localhost",
-  show_sensitive_data_on_connection_error: true,
-  pool_size: 10
-
 # For development, we disable any cache and enable
 # debugging and code reloading.
 #

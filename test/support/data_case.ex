@@ -18,8 +18,6 @@ defmodule LiveMarkdown.DataCase do
 
   using do
     quote do
-      alias LiveMarkdown.Repo
-
       import Ecto
       import Ecto.Changeset
       import Ecto.Query
@@ -27,13 +25,7 @@ defmodule LiveMarkdown.DataCase do
     end
   end
 
-  setup tags do
-    :ok = Ecto.Adapters.SQL.Sandbox.checkout(LiveMarkdown.Repo)
-
-    unless tags[:async] do
-      Ecto.Adapters.SQL.Sandbox.mode(LiveMarkdown.Repo, {:shared, self()})
-    end
-
+  setup _tags do
     :ok
   end
 

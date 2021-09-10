@@ -37,7 +37,6 @@ defmodule LiveMarkdown.MixProject do
       {:phoenix_html, "~> 3.0"},
       {:ecto_sql, "~> 3.7", override: true},
       {:phoenix_ecto, "~> 4.4"},
-      {:postgrex, ">= 0.0.0"},
       {:phoenix_live_view, "~> 0.16.0"},
       {:phoenix_live_dashboard, "~> 0.5"},
       {:telemetry_metrics, "~> 0.6"},
@@ -63,10 +62,8 @@ defmodule LiveMarkdown.MixProject do
   # See the documentation for `Mix` for more info on aliases.
   defp aliases do
     [
-      setup: ["deps.get", "ecto.setup", "cmd npm install --prefix assets"],
-      "ecto.setup": ["ecto.create", "ecto.migrate", "run priv/repo/seeds.exs"],
-      "ecto.reset": ["ecto.drop", "ecto.setup"],
-      test: ["ecto.create --quiet", "ecto.migrate --quiet", "test"],
+      setup: ["deps.get", "cmd npm install --prefix assets"],
+      test: ["test"],
       "assets.deploy": ["esbuild default --minify", "phx.digest"]
     ]
   end

@@ -18,7 +18,7 @@ defmodule LiveMarkdown.RepositoryTest do
 
     # should we really go to the index of the category? Shouldn't we jump straight to the previous post located in the tree?
     assert link.previous.slug == "/docs/getting-started/themes"
-    assert link.next.slug == "/docs/setup"
+    assert link.next.slug == "/docs/setup/how-to-download"
 
     first = Enum.at(tree, 0)
     assert is_nil(first.previous) and not is_nil(first.next)
@@ -27,10 +27,10 @@ defmodule LiveMarkdown.RepositoryTest do
     assert not is_nil(last.previous) and is_nil(last.next)
   end
 
-  test "post must have its related link" do
+  test "post must have its related link and navigation" do
     post = Repository.get_by_slug!("/blog/dailies/3d/blender/default-cube-not-deleted")
     assert post.link.slug == "/blog/dailies/3d/blender/default-cube-not-deleted"
-    assert post.link.previous.slug == "/blog/dailies/3d/blender"
-    assert post.link.next.slug == "/docs"
+    assert post.link.previous.slug == "/blog/dailies/2d/dachshund-painting"
+    assert post.link.next.slug == "/docs/start-here"
   end
 end
