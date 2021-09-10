@@ -45,8 +45,8 @@ defmodule LiveMarkdown.Content.Cache do
     end
   end
 
-  def get_content_tree do
-    get = fn -> ConCache.get(@index_cache_name, content_tree_key()) end
+  def get_content_tree(slug \\ "/") do
+    get = fn -> ConCache.get(@index_cache_name, content_tree_key(slug)) end
 
     case get.() do
       nil ->
@@ -89,9 +89,14 @@ defmodule LiveMarkdown.Content.Cache do
     tree
   end
 
-  # Posts are extracted from the `children` field of a taxonomy
-  # and added to the taxonomies list as a Link, while keeping
-  # the correct nesting under their parent taxonomy.
+  @doc """
+  Posts are extracted from the `children` field of a taxonomy
+  and added to the taxonomies list as a Link, while keeping
+  the correct nesting under their parent taxonomy.
+
+  Posts are also sorted accordingly to their topmost taxonomy
+  sorting configuration.
+  """
   def build_content_tree do
     tree =
       do_build_taxonomy_tree(true)
@@ -108,11 +113,29 @@ defmodule LiveMarkdown.Content.Cache do
         :ignore
     end)
 
-    # TODO: redo this, do not generate separate content trees with different sort
-    # orders for the same post set. Generate only once, respecting the post set
-    # ordering configuration.
-
     ConCache.put(@index_cache_name, content_tree_key(), tree)
+
+    # Split each root slug and its nested children and
+    # save the roots independently.
+    tree
+    |> Enum.reduce(%{}, fn
+      # Only root taxonomies, and ignore pages
+      # (pages are posts in the root, but a link of type :post)
+      %{type: :taxonomy, slug: slug, level: 0} = link, acc when slug != "/" ->
+        Map.put(acc, slug, %{link: link, children: []})
+
+      %{parents: [_ | [root_parent | _]]} = link, acc ->
+        children = Map.get(acc, root_parent)[:children]
+        put_in(acc[root_parent][:children], children ++ [link])
+
+      # Ignore the very root link "/" and pages
+      _, acc ->
+        acc
+    end)
+    |> Enum.each(fn {root_slug, %{children: children}} ->
+      ConCache.put(@index_cache_name, content_tree_key(root_slug), children)
+    end)
+
     tree
   end
 

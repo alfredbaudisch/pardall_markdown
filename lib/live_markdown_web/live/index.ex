@@ -11,7 +11,8 @@ defmodule LiveMarkdownWeb.Live.Index do
      assign(socket,
        posts: Repository.get_all_published() |> sort_by_published_date(),
        content_tree: Repository.get_content_tree(),
-       taxonomy_tree: Repository.get_taxonomy_tree()
+       taxonomy_tree: Repository.get_taxonomy_tree(),
+       docs_tree: Repository.get_content_tree("/docs")
      )
      |> assign_page_title()}
   end

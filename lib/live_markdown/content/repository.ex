@@ -26,8 +26,8 @@ defmodule LiveMarkdown.Content.Repository do
     Cache.get_taxonomy_tree()
   end
 
-  def get_content_tree() do
-    Cache.get_content_tree()
+  def get_content_tree(slug \\ "/") do
+    Cache.get_content_tree(slug)
   end
 
   def get_all_published do
