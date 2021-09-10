@@ -14,14 +14,40 @@ defmodule LiveMarkdown.Link do
     embeds_one :previous, __MODULE__
     embeds_one :next, __MODULE__
     embeds_many :children, LiveMarkdown.Post
+
+    #
+    # Taxonomy specific fields
+    #
+    # how to sort children posts
+    field :sort_by, Ecto.Enum, values: [:title, :date, :slug, :position], default: :date
+    field :sort_order, Ecto.Enum, values: [:asc, :desc], default: :desc
     # the taxonomy own post/custom page
     embeds_one :index_post, LiveMarkdown.Post
   end
 
   def changeset(model, params) do
     model
-    |> cast(params, [:title, :slug, :type, :level, :parents, :custom_type, :position])
-    |> validate_required([:title, :slug, :type, :level, :parents])
+    |> cast(params, [
+      :title,
+      :slug,
+      :type,
+      :level,
+      :parents,
+      :custom_type,
+      :position,
+      :sort_by,
+      :sort_order
+    ])
+    |> validate_required([
+      :title,
+      :slug,
+      :type,
+      :level,
+      :parents,
+      :position,
+      :sort_by,
+      :sort_order
+    ])
     |> cast_embed(:children)
     |> cast_embed(:previous)
     |> cast_embed(:next)

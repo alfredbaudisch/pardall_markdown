@@ -78,7 +78,7 @@ defmodule LiveMarkdown.Content.FileParser do
         try do
           case Code.eval_string(code, []) do
             {%{} = attrs, _} ->
-              {:ok, attrs, body}
+              {:ok, attrs |> atomize_keys(), body}
 
             {other, _} ->
               {:error,

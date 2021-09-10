@@ -25,7 +25,7 @@ config :live_markdown, LiveMarkdown.Content,
   index_cache_name: :content_index_cache,
   # Site name to be appened into page titles
   site_name: "Live Markdown",
-  recheck_pending_file_events_interval: 10_000,
+  recheck_pending_file_events_interval: 1_000,
   content_tree_display_home: false
 
 # Configures Elixir's Logger

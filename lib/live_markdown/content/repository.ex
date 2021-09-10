@@ -22,12 +22,12 @@ defmodule LiveMarkdown.Content.Repository do
     Cache.get_all_links(type)
   end
 
-  def get_taxonomy_tree(sort_by \\ :date) do
-    Cache.get_taxonomy_tree(sort_by)
+  def get_taxonomy_tree() do
+    Cache.get_taxonomy_tree()
   end
 
-  def get_content_tree(sort_by \\ :date) do
-    Cache.get_content_tree(sort_by)
+  def get_content_tree() do
+    Cache.get_content_tree()
   end
 
   def get_all_published do
@@ -57,7 +57,8 @@ defmodule LiveMarkdown.Content.Repository do
       is_published: Map.get(attrs, :published, false),
       # for now, when a post is pushed to the repository, only "categories" are known
       taxonomies: attrs.categories,
-      metadata: attrs |> remove_default_attributes()
+      metadata: attrs |> remove_default_attributes(),
+      position: Map.get(attrs, :position, 0)
     })
     |> (fn
           %Changeset{valid?: true} = changeset ->
