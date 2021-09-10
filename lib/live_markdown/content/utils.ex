@@ -114,6 +114,9 @@ defmodule LiveMarkdown.Content.Utils do
 
       iex> LiveMarkdown.Content.Utils.extract_slug_from_path("/blog/My new Project.md")
       "/blog/my-new-project"
+
+      iex> LiveMarkdown.Content.Utils.extract_slug_from_path("/blog/_index.md")
+      "/blog/-index"
   """
   def extract_slug_from_path(path) do
     path

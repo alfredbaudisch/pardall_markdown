@@ -57,6 +57,10 @@ defmodule LiveMarkdown.Content.Cache do
     end
   end
 
+  def save_post(%Post{type: :index} = post) do
+    save_post_taxonomies(post)
+  end
+
   def save_post(%Post{} = post) do
     save_post_pure(post)
     save_post_taxonomies(post)
@@ -72,23 +76,6 @@ defmodule LiveMarkdown.Content.Cache do
       nil -> nil
       %Post{} = post -> post |> Map.put(field, value) |> save_post_pure()
     end
-  end
-
-  def upsert_taxonomy_appending_post(
-        %Link{slug: slug, children: children} = taxonomy,
-        %Post{} = post
-      ) do
-    do_update = fn taxonomy, children ->
-      {:ok, %{taxonomy | children: children ++ [Map.put(post, :content, nil)]}}
-    end
-
-    ConCache.update(@cache_name, slug_key(slug), fn
-      nil ->
-        do_update.(taxonomy, children)
-
-      %Link{children: children} = taxonomy ->
-        do_update.(taxonomy, children)
-    end)
   end
 
   def build_taxonomy_tree() do
@@ -140,9 +127,55 @@ defmodule LiveMarkdown.Content.Cache do
   # Internal
   #
 
+  defp save_post_taxonomies(%Post{type: :index, taxonomies: taxonomies} = post) do
+    taxonomies
+    |> List.last()
+    |> upsert_taxonomy_appending_post(post)
+  end
+
   defp save_post_taxonomies(%Post{taxonomies: taxonomies} = post) do
     taxonomies
     |> Enum.map(&upsert_taxonomy_appending_post(&1, post))
+  end
+
+  defp upsert_taxonomy_appending_post(
+         %Link{slug: slug} = taxonomy,
+         %Post{type: :index, position: position, title: post_title} = post
+       ) do
+    do_update = fn taxonomy ->
+      {:ok,
+       %{
+         taxonomy
+         | index_post: post,
+           position: position,
+           title: post_title
+       }}
+    end
+
+    ConCache.update(@cache_name, slug_key(slug), fn
+      nil ->
+        do_update.(taxonomy)
+
+      %Link{} = taxonomy ->
+        do_update.(taxonomy)
+    end)
+  end
+
+  defp upsert_taxonomy_appending_post(
+         %Link{slug: slug, children: children} = taxonomy,
+         %Post{} = post
+       ) do
+    do_update = fn taxonomy, children ->
+      {:ok, %{taxonomy | children: children ++ [Map.put(post, :content, nil)]}}
+    end
+
+    ConCache.update(@cache_name, slug_key(slug), fn
+      nil ->
+        do_update.(taxonomy, children)
+
+      %Link{children: children} = taxonomy ->
+        do_update.(taxonomy, children)
+    end)
   end
 
   # TODO: For the initial purpose of this project, this solution is ok,
@@ -195,7 +228,8 @@ defmodule LiveMarkdown.Content.Cache do
             title: post.title,
             level: level_for_joined_post(taxonomy.slug, taxonomy.level),
             parents: parents,
-            type: :post
+            type: :post,
+            position: post.position
           }
         end)
       )

@@ -5,7 +5,7 @@ defmodule LiveMarkdown.Post do
   @primary_key {:slug, :string, autogenerate: false}
   @foreign_key_type :string
   embedded_schema do
-    field :type, Ecto.Enum, values: [:post, :page], default: :post
+    field :type, Ecto.Enum, values: [:post, :page, :index], default: :post
     field :title, :string
     field :summary, :string
     field :content, :string

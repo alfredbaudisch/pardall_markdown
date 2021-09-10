@@ -30,8 +30,8 @@ defmodule LiveMarkdownWeb.Live.Index do
         %{id: post_id} when post_id == id -> post
         i_post -> i_post
       end)
-      |> Repository.Filters.filter_by_is_published()
-      |> Repository.Filters.sort_by_published_date()
+      |> filter_by_is_published()
+      |> sort_by_published_date()
 
     {:noreply, socket |> assign(:posts, posts)}
   end

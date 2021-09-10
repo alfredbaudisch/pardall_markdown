@@ -49,6 +49,7 @@ defmodule LiveMarkdownWeb do
 
       alias LiveMarkdownWeb.Endpoint
       alias LiveMarkdown.Content.Repository
+      import LiveMarkdown.Content.Filters
 
       unquote(view_helpers())
     end
