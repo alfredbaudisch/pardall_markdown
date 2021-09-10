@@ -232,9 +232,15 @@ defmodule LiveMarkdown.Content.Cache do
       taxonomy
       |> Map.put(:children, posts)
     end)
-    |> Enum.map(fn %Link{children: posts, parents: parents} = taxonomy ->
-      root_taxonomy = if Enum.count(parents) == 1, do: "/", else: Enum.at(parents, 1)
-      {sort_by, sort_order} = sorting_methods[root_taxonomy]
+    |> Enum.map(fn %Link{children: posts, parents: parents, slug: slug} = taxonomy ->
+      target_sort_taxonomy =
+        cond do
+          Enum.count(parents) == 1 and slug != "/" -> slug
+          Enum.count(parents) == 1 -> "/"
+          true -> Enum.at(parents, 1)
+        end
+
+      {sort_by, sort_order} = sorting_methods[target_sort_taxonomy]
 
       taxonomy
       |> Map.put(:children, posts |> sort_by_custom(sort_by, sort_order))
@@ -298,9 +304,15 @@ defmodule LiveMarkdown.Content.Cache do
     sorting_methods = get_sorting_methods_for_topmost_taxonomies()
 
     taxonomies
-    |> Enum.map(fn %Link{children: posts, parents: parents} = taxonomy ->
-      root_taxonomy = if Enum.count(parents) == 1, do: "/", else: Enum.at(parents, 1)
-      {sort_by, sort_order} = sorting_methods[root_taxonomy]
+    |> Enum.map(fn %Link{children: posts, parents: parents, slug: slug} = taxonomy ->
+      target_sort_taxonomy =
+        cond do
+          Enum.count(parents) == 1 and slug != "/" -> slug
+          Enum.count(parents) == 1 -> "/"
+          true -> Enum.at(parents, 1)
+        end
+
+      {sort_by, sort_order} = sorting_methods[target_sort_taxonomy]
 
       taxonomy
       |> Map.put(:children, posts |> sort_by_custom(sort_by, sort_order))
