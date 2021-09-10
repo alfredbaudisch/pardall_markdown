@@ -498,4 +498,33 @@ defmodule LiveMarkdown.Content.Tree do
   end
 
   def get_all_posts_from_tree([], all, _), do: all
+
+  def build_posts_tree_navigation(tree) do
+    tree_size = Enum.count(tree)
+
+    tree
+    |> Enum.with_index()
+    |> Enum.map(fn
+      {%Post{link: %Link{type: :post} = link} = post, 0} ->
+        %{post | link: Map.put(link, :next, Enum.at(tree, 1).link)}
+
+      {%Post{link: %Link{type: :post} = link} = post, pos} when pos == tree_size - 1 ->
+        %{
+          post
+          | link:
+              link
+              |> Map.put(:previous, Enum.at(tree, pos - 1).link)
+              |> Map.put(:next, nil)
+        }
+
+      {%Post{link: %Link{type: :post} = link} = post, pos} ->
+        %{
+          post
+          | link:
+              link
+              |> Map.put(:previous, Enum.at(tree, pos - 1).link)
+              |> Map.put(:next, Enum.at(tree, pos + 1).link)
+        }
+    end)
+  end
 end

@@ -21,8 +21,8 @@ defmodule LiveMarkdown.RepositoryTest do
   test "post must have its related link" do
     post = Repository.get_by_slug!("/blog/dailies/3d/blender/default-cube-not-deleted")
     assert post.link.slug == "/blog/dailies/3d/blender/default-cube-not-deleted"
-    assert post.link.previous.slug == "/blog/dailies/3d/blender"
-    assert post.link.next.slug == "/docs"
+    assert post.link.previous.slug == "/blog/dailies/2d/dachshund-painting"
+    assert post.link.next.slug == "/docs/start-here"
   end
 
   def print_tree(links, all \\ "<ul>", previous_level \\ -1)

@@ -25,6 +25,9 @@ defmodule LiveMarkdownWeb.ContentViewTest do
     assert List.first(dailies_cat).slug == "/blog/dailies/2d"
     assert List.last(dailies_cat).slug == "/blog/dailies/3d"
 
+    three_d = List.last(dailies.children_links).children_links
+    assert List.first(three_d).slug == "/blog/dailies/3d/blender"
+
     #  assert List.first(tree).title == "Blog"
     generated = link_tree_list(tree)
 

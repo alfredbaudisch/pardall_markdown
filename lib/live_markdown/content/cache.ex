@@ -44,12 +44,12 @@ defmodule LiveMarkdown.Content.Cache do
     end
   end
 
-  def get_content_tree() do
-    get = fn -> ConCache.get(@index_cache_name, content_tree_key()) end
+  def get_content_tree(slug \\ "/") do
+    get = fn -> ConCache.get(@index_cache_name, content_tree_key(slug)) end
 
     case get.() do
       nil ->
-        build_content_tree()
+        build_content_tree(slug)
         get.()
 
       tree ->
@@ -68,7 +68,8 @@ defmodule LiveMarkdown.Content.Cache do
 
   def save_post_pure(%Post{type: type, slug: slug} = post) when type != :index do
     key = slug_key(slug)
-    ConCache.put(@cache_name, key, post)
+    :ok = ConCache.put(@cache_name, key, post)
+    post
   end
 
   def update_post_field(slug, field, value) do
@@ -84,14 +85,16 @@ defmodule LiveMarkdown.Content.Cache do
     tree
   end
 
-  def build_content_tree do
+  def build_content_tree(slug \\ "/") do
     tree =
       get_all_links()
       |> Tree.build_content_tree()
 
     # Update each post in cache with their related link
+    # and navigation links
     tree
     |> Tree.get_all_posts_from_tree()
+    |> Tree.build_posts_tree_navigation()
     |> Enum.each(fn
       %Post{link: %Link{type: :post, slug: slug} = link} ->
         update_post_field(slug, :link, link)
@@ -99,6 +102,8 @@ defmodule LiveMarkdown.Content.Cache do
       _ ->
         :ignore
     end)
+
+    # TODO: Save each node of the content tree independently in the cache, per slug (content_tree_key(slug)). While also keeping the tree.
 
     ConCache.put(@index_cache_name, content_tree_key(), tree)
     tree
@@ -173,5 +178,5 @@ defmodule LiveMarkdown.Content.Cache do
 
   defp slug_key(slug), do: {:slug, slug}
   defp taxonomy_tree_key, do: :taxonomy_tree
-  defp content_tree_key, do: :content_tree
+  defp content_tree_key(slug \\ "/"), do: {:content_tree, slug}
 end
