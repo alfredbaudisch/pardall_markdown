@@ -9,15 +9,18 @@ defmodule KodaMarkdown.Content.FileParser do
   end
 
   def extract!(path) do
-    # Static assets are not parsed nor indexed
-    if not is_path_from_static_assets?(path) do
-      if File.exists?(path) do
-        if File.dir?(path),
-          do: extract_folder!(path),
-          else: extract_file!(path)
-      end
+    if not should_extract_path?(path) do
+      if File.dir?(path),
+        do: extract_folder!(path),
+        else: extract_file!(path)
     end
   end
+
+  # Static assets are not parsed nor indexed, neither files and folders that start with "."
+  defp should_extract_path?(path),
+    do:
+      File.exists?(path) and not is_path_from_static_assets?(path) and
+        not String.starts_with?(".", Path.basename(path))
 
   defp extract_folder_if_valid!(path),
     do: if(not is_path_from_static_assets?(path), do: extract_folder!(path))
