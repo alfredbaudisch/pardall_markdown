@@ -21,17 +21,22 @@ defmodule PardallMarkdown.Content.FileParser do
   defp should_extract_path?(path),
     do:
       File.exists?(path) and not is_path_from_static_assets?(path) and
-        not String.starts_with?(".", Path.basename(path))
+        not is_file_hidden?(path)
+
+  defp is_file_hidden?(path), do: String.starts_with?(".", Path.basename(path))
 
   defp extract_folder_if_valid!(path),
-    do: if(not is_path_from_static_assets?(path), do: extract_folder!(path))
+    do: if(should_extract_path?(path), do: extract_folder!(path))
 
   defp extract_folder!(parent_path) do
     for child <- File.ls!(parent_path),
         path = Path.join(parent_path, child) do
-      if File.dir?(path), do: extract_folder_if_valid!(path), else: extract_file!(path)
+      if File.dir?(path), do: extract_folder_if_valid!(path), else: extract_file_if_valid!(path)
     end
   end
+
+  defp extract_file_if_valid!(path),
+    do: if(should_extract_path?(path), do: extract_file!(path))
 
   defp extract_file!(path) do
     case path |> Path.extname() |> String.downcase() do

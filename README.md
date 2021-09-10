@@ -20,7 +20,16 @@ Ready to run in production? Please [check our deployment guides](https://hexdocs
 - Source: https://github.com/phoenixframework/phoenix
 
 # Stuff to add here
+- Table of contents
+- Custom sorting by top level slug
+- Explain terms (taxonomies, categories, etc)
+- Content setup
+- Content view helpers
+- Post Navigation
+- Infinitely nestable categories
+
 ## Taxonomy and Content Trees
+- Root and per top level slug
 
 ## Does it require a database?
 No.
