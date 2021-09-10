@@ -41,7 +41,7 @@ defmodule LiveMarkdown.MixProject do
       {:phoenix_live_dashboard, "~> 0.5"},
       {:telemetry_metrics, "~> 0.6"},
       {:telemetry_poller, "~> 0.5"},
-      {:floki, ">= 0.30.0", only: :test},
+      {:floki, "~> 0.31.0"},
       {:phoenix_live_reload, "~> 1.2", only: :dev},
       {:gettext, "~> 0.11"},
       {:jason, "~> 1.0"},
@@ -50,6 +50,7 @@ defmodule LiveMarkdown.MixProject do
       {:earmark, "~> 1.4"},
       {:esbuild, "~> 0.2", runtime: Mix.env() == :dev},
       {:slugify, "~> 1.3"},
+      {:html_entities, "~> 0.5"},
       {:con_cache, "~> 0.13"}
     ]
   end
