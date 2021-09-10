@@ -1,4 +1,4 @@
-defmodule KodaMarkdownWeb.ConnCase do
+defmodule PardallMarkdownWeb.ConnCase do
   @moduledoc """
   This module defines the test case to be used by
   tests that require setting up a connection.
@@ -11,7 +11,7 @@ defmodule KodaMarkdownWeb.ConnCase do
   we enable the SQL sandbox, so changes done to the database
   are reverted at the end of every test. If you are using
   PostgreSQL, you can even run database tests asynchronously
-  by setting `use KodaMarkdownWeb.ConnCase, async: true`, although
+  by setting `use PardallMarkdownWeb.ConnCase, async: true`, although
   this option is not recommended for other databases.
   """
 
@@ -22,19 +22,19 @@ defmodule KodaMarkdownWeb.ConnCase do
       # Import conveniences for testing with connections
       import Plug.Conn
       import Phoenix.ConnTest
-      import KodaMarkdownWeb.ConnCase
+      import PardallMarkdownWeb.ConnCase
 
-      alias KodaMarkdownWeb.Router.Helpers, as: Routes
+      alias PardallMarkdownWeb.Router.Helpers, as: Routes
 
-      import KodaMarkdownWeb.ContentHelpers
+      import PardallMarkdownWeb.ContentHelpers
 
       # The default endpoint for testing
-      @endpoint KodaMarkdownWeb.Endpoint
+      @endpoint PardallMarkdownWeb.Endpoint
     end
   end
 
   setup _tags do
-    Application.ensure_all_started(:koda_markdown)
+    Application.ensure_all_started(:pardall_markdown)
     # wait the Markdown content to be parsed and built
     Process.sleep(100)
 

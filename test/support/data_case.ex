@@ -1,4 +1,4 @@
-defmodule KodaMarkdown.DataCase do
+defmodule PardallMarkdown.DataCase do
   @moduledoc """
   This module defines the setup for tests requiring
   access to the application's data layer.
@@ -10,7 +10,7 @@ defmodule KodaMarkdown.DataCase do
   we enable the SQL sandbox, so changes done to the database
   are reverted at the end of every test. If you are using
   PostgreSQL, you can even run database tests asynchronously
-  by setting `use KodaMarkdown.DataCase, async: true`, although
+  by setting `use PardallMarkdown.DataCase, async: true`, although
   this option is not recommended for other databases.
   """
 
@@ -21,7 +21,7 @@ defmodule KodaMarkdown.DataCase do
       import Ecto
       import Ecto.Changeset
       import Ecto.Query
-      import KodaMarkdown.DataCase
+      import PardallMarkdown.DataCase
     end
   end
 

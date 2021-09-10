@@ -1,9 +1,9 @@
-defmodule KodaMarkdown.MixProject do
+defmodule PardallMarkdown.MixProject do
   use Mix.Project
 
   def project do
     [
-      app: :koda_markdown,
+      app: :pardall_markdown,
       version: "0.1.0",
       elixir: "~> 1.7",
       elixirc_paths: elixirc_paths(Mix.env()),
@@ -19,7 +19,7 @@ defmodule KodaMarkdown.MixProject do
   # Type `mix help compile.app` for more information.
   def application do
     [
-      mod: {KodaMarkdown.Application, []},
+      mod: {PardallMarkdown.Application, []},
       extra_applications: [:logger, :runtime_tools, :con_cache]
     ]
   end
