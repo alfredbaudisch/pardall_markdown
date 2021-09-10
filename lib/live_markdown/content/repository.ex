@@ -33,7 +33,6 @@ defmodule LiveMarkdown.Content.Repository do
   def get_all_published do
     get_all_posts()
     |> filter_by_is_published()
-    |> sort_by_published_date()
   end
 
   def get_by_slug(slug), do: Cache.get_by_slug(slug)
