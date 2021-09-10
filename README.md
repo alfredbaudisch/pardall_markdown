@@ -1,4 +1,4 @@
-# LiveMarkdown
+# KodaMarkdown
 
 To start your Phoenix server:
 
