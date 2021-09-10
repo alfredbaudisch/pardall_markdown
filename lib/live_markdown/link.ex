@@ -13,6 +13,8 @@ defmodule LiveMarkdown.Link do
     embeds_one :previous, __MODULE__
     embeds_one :next, __MODULE__
     embeds_many :children, LiveMarkdown.Post
+    # the taxonomy own post/custom page
+    embeds_one :post, LiveMarkdown.Post
   end
 
   def changeset(model, params) do
@@ -22,5 +24,6 @@ defmodule LiveMarkdown.Link do
     |> cast_embed(:children)
     |> cast_embed(:previous)
     |> cast_embed(:next)
+    |> cast_embed(:post)
   end
 end

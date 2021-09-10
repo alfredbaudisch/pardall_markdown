@@ -1,7 +1,7 @@
 defmodule LiveMarkdown.Content.Cache do
   require Logger
   alias LiveMarkdown.{Post, Link}
-  import LiveMarkdown.Content.Repository.Filters
+  import LiveMarkdown.Content.Filters
 
   @cache_name Application.compile_env!(:live_markdown, [LiveMarkdown.Content, :cache_name])
   @index_cache_name Application.compile_env!(:live_markdown, [
