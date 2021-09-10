@@ -475,6 +475,16 @@ defmodule LiveMarkdown.Content.Tree do
     end)
   end
 
+  def get_all_nodes_from_tree(links, all \\ [])
+
+  def get_all_nodes_from_tree([%Link{children_links: children} = link | tail], all) do
+    all = all ++ [link]
+    all_children = get_all_nodes_from_tree(children)
+    get_all_nodes_from_tree(tail, all ++ all_children)
+  end
+
+  def get_all_nodes_from_tree([], all), do: all
+
   def get_all_posts_from_tree(links, all \\ [], previous_level \\ -1)
 
   def get_all_posts_from_tree(

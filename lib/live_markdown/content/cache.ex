@@ -49,7 +49,7 @@ defmodule LiveMarkdown.Content.Cache do
 
     case get.() do
       nil ->
-        build_content_tree(slug)
+        build_content_tree()
         get.()
 
       tree ->
@@ -85,7 +85,7 @@ defmodule LiveMarkdown.Content.Cache do
     tree
   end
 
-  def build_content_tree(slug \\ "/") do
+  def build_content_tree() do
     tree =
       get_all_links()
       |> Tree.build_content_tree()
@@ -103,9 +103,21 @@ defmodule LiveMarkdown.Content.Cache do
         :ignore
     end)
 
-    # TODO: Save each node of the content tree independently in the cache, per slug (content_tree_key(slug)). While also keeping the tree.
-
     ConCache.put(@index_cache_name, content_tree_key(), tree)
+
+    tree
+    |> Tree.get_all_nodes_from_tree()
+    |> Enum.each(fn
+      # The root is already saved above, with all the links as a list,
+      # even tho in most scenarios the main list will always contain a single item,
+      # the root itself
+      %Link{type: :taxonomy, slug: "/"} ->
+        :ignore
+
+      %Link{type: :taxonomy, slug: slug} = link ->
+        ConCache.put(@index_cache_name, content_tree_key(slug), link)
+    end)
+
     tree
   end
 

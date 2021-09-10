@@ -1,6 +1,6 @@
 defmodule LiveMarkdown.RepositoryTest do
   use ExUnit.Case, async: true
-  alias LiveMarkdown.Content.{Cache, Repository}
+  alias LiveMarkdown.Content.Repository
   alias LiveMarkdown.Link
 
   setup do
@@ -9,9 +9,20 @@ defmodule LiveMarkdown.RepositoryTest do
     Process.sleep(100)
   end
 
+  test "content tree should be split per slug into cache" do
+    tree = Repository.get_content_tree("/docs/getting-started")
+    assert tree.slug == "/docs/getting-started"
+    assert Enum.count(tree.children_links) == 1
+
+    tree = Repository.get_content_tree("/docs/getting-started")
+    assert tree.slug == "/docs/getting-started"
+    assert Enum.count(tree.children_links) == 1
+    assert Enum.count(tree.children) == 3
+  end
+
   test "taxonomies should be sorted by their closest sorting method" do
     tree =
-      Cache.get_taxonomy_tree()
+      Repository.get_taxonomy_tree()
       |> Enum.filter(fn %{type: type} -> type == :taxonomy end)
 
     assert Enum.count(tree) == 2
