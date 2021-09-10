@@ -75,6 +75,7 @@ defmodule LiveMarkdown.Content.Repository do
   def rebuild_indexes do
     Cache.build_taxonomy_tree()
     Cache.build_content_tree()
+    Endpoint.broadcast!("live_markdown", "content_reloaded", :all)
   end
 
   #
@@ -90,12 +91,6 @@ defmodule LiveMarkdown.Content.Repository do
   defp get_post_type_from_taxonomies(_, _), do: :post
 
   defp save_post(%Post{} = model), do: Cache.save_post(model)
-
-  defp save_content_and_broadcast!(%Post{slug: slug} = model) do
-    Cache.save_post(model)
-    Endpoint.broadcast!("content", "post_updated", model)
-    Endpoint.broadcast!("post_" <> slug, "post_updated", model)
-  end
 
   defp remove_default_attributes(attrs) do
     attrs

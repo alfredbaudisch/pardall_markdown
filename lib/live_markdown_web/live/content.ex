@@ -7,13 +7,11 @@ defmodule LiveMarkdownWeb.Live.Content do
       slug
       |> slug_params_to_slug()
 
-    content = Repository.get_by_slug!(slug)
-
     if connected?(socket) do
-      Endpoint.subscribe("content_" <> slug)
+      Endpoint.subscribe("live_markdown")
     end
 
-    {:ok, socket |> assign(:content, content) |> assign_page_title(content)}
+    {:ok, socket |> assign(:slug, slug) |> load_content()}
   end
 
   def render(%{content: %Post{}} = assigns),
@@ -22,12 +20,16 @@ defmodule LiveMarkdownWeb.Live.Content do
   def render(%{content: %Link{}} = assigns),
     do: Phoenix.View.render(LiveMarkdownWeb.ContentView, "single_taxonomy.html", assigns)
 
-  def handle_info(%{event: "post_updated", payload: content}, socket) do
-    {:noreply, socket |> assign(:content, content) |> assign_page_title(content)}
+  def handle_info(%{event: "content_reloaded", payload: :all}, socket) do
+    {:noreply, socket |> load_content()}
   end
 
-  def handle_info(%{event: "post_deleted", payload: _}, socket) do
-    {:noreply, socket |> put_flash(:error, "This post has been deleted or moved to another URL.")}
+  defp load_content(%{assigns: %{slug: slug}} = socket) do
+    content = Repository.get_by_slug!(slug)
+
+    socket
+    |> assign(:content, content)
+    |> assign_page_title(content)
   end
 
   defp slug_params_to_slug(slug), do: "/" <> Enum.join(slug, "/")

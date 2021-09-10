@@ -4,50 +4,26 @@ defmodule LiveMarkdownWeb.Live.Index do
   @impl true
   def mount(_params, _session, socket) do
     if connected?(socket) do
-      Endpoint.subscribe("content")
+      Endpoint.subscribe("live_markdown")
     end
 
-    {:ok,
-     assign(socket,
-       posts: Repository.get_all_published() |> sort_by_published_date(),
-       content_tree: Repository.get_content_tree(),
-       taxonomy_tree: Repository.get_taxonomy_tree(),
-       docs_tree: Repository.get_content_tree("/docs")
-     )
-     |> assign_page_title()}
+    {:ok, socket |> load_content()}
+  end
+
+  defp load_content(socket) do
+    socket
+    |> assign(
+      posts: Repository.get_all_published() |> sort_by_published_date(),
+      content_tree: Repository.get_content_tree(),
+      taxonomy_tree: Repository.get_taxonomy_tree(),
+      docs_tree: Repository.get_content_tree("/docs")
+    )
+    |> assign_page_title()
   end
 
   @impl true
-  def handle_info(%{event: "post_created", payload: _}, socket) do
-    {:noreply, socket |> assign(:posts, Repository.get_all_published())}
-  end
-
-  @impl true
-  def handle_info(%{event: "post_updated", payload: %{id: id} = post}, socket) do
-    # Isn't it easier to just reload all posts? `Repository.get_all_published()`
-    posts =
-      socket.assigns[:posts]
-      |> Enum.map(fn
-        %{id: post_id} when post_id == id -> post
-        i_post -> i_post
-      end)
-      |> filter_by_is_published()
-      |> sort_by_published_date()
-
-    {:noreply, socket |> assign(:posts, posts)}
-  end
-
-  @impl true
-  def handle_info(%{event: "post_events", payload: payload}, socket) do
-    # One or more posts were deleted, reload all posts
-    if Enum.find(payload, fn
-         {_, :deleted} -> true
-         _ -> false
-       end) do
-      {:noreply, assign(socket, posts: Repository.get_all_published())}
-    else
-      {:noreply, socket}
-    end
+  def handle_info(%{event: "content_reloaded", payload: _}, socket) do
+    {:noreply, socket |> load_content()}
   end
 
   defp assign_page_title(socket),
