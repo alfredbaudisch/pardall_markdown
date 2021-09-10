@@ -8,20 +8,20 @@
 use Mix.Config
 
 # Configures the endpoint
-config :koda_markdown, KodaMarkdownWeb.Endpoint,
+config :pardall_markdown, PardallMarkdownWeb.Endpoint,
   url: [host: "localhost"],
   secret_key_base: "vlzywSsO+2L1dOf6SVsVn7VJPMJ/oyr10wH7jCLcNl++SAuXkPQ20t/qDSefGEgI",
-  render_errors: [view: KodaMarkdownWeb.ErrorView, accepts: ~w(html json), layout: false],
-  pubsub_server: KodaMarkdown.PubSub,
+  render_errors: [view: PardallMarkdownWeb.ErrorView, accepts: ~w(html json), layout: false],
+  pubsub_server: PardallMarkdown.PubSub,
   live_view: [signing_salt: "5fx/EcCU"]
 
-config :koda_markdown, KodaMarkdown.Content,
+config :pardall_markdown, PardallMarkdown.Content,
   root_path: "/home/alfredbaudisch/Documents/content",
   static_assets_folder_name: "static",
   cache_name: :content_cache,
   index_cache_name: :content_index_cache,
   # Site name to be appened into page titles
-  site_name: "Koda Markdown",
+  site_name: "Pardall Markdown",
   recheck_pending_file_events_interval: 10_000,
   content_tree_display_home: false
 
