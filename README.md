@@ -1,6 +1,6 @@
 # PardallMarkdown
 
-# WIP ------- STILL PUBLISHING PACKAGE AND NO README WRITTEN!
+# WIP ------- STILL PUBLISHING PACKAGE AND NO README AND NO DOCS WRITTEN YET!
 
 To start your Phoenix server:
 
