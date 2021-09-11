@@ -93,12 +93,6 @@ config :pardall_markdown, PardallMarkdown.Content,
   notify_content_reloaded: &MyApp.content_reloaded/0
 ```
 
-## Models
-
-- `PardallMarkdown.Post` ([docs](https://hexdocs.pm/pardall_markdown/PardallMarkdown.Post.html))
-- `PardallMarkdown.Link` ([docs](https://hexdocs.pm/pardall_markdown/PardallMarkdown.Link.html))
-- `PardallMarkdown.ContentLink` ([docs](https://hexdocs.pm/pardall_markdown/PardallMarkdown.ContentLink.html))
-
 ## API
 Content is retrieved with `PardallMarkdown.Content.Repository`. Check details and instructions [in the docs](https://hexdocs.pm/pardall_markdown/PardallMarkdown.Content.Repository.html).
 
@@ -112,26 +106,42 @@ def get_by_slug(slug)
 def get_by_slug!(slug)
 ```
 
-## Metadata map / how to write content
-- Published: true
+### Models
+The content returned by the API is of the types:
+
+- `PardallMarkdown.Post` ([docs](https://hexdocs.pm/pardall_markdown/PardallMarkdown.Post.html))
+- `PardallMarkdown.Link` ([docs](https://hexdocs.pm/pardall_markdown/PardallMarkdown.Link.html))
+- `PardallMarkdown.ContentLink` ([docs](https://hexdocs.pm/pardall_markdown/PardallMarkdown.ContentLink.html))
 
 ## Slug: unique identifiers for posts, pages, categories and trees
-Every piece of content has an unique identifier, which is simply the content URL slug, example: `"/blog"`, `"/docs/getting-started/how-to-install`. The slugs always have a prepended slash, but never a trail slash.
+Every piece of content has an unique identifier, which is simply the content URL slug, example: `"/blog"`, `"/docs/getting-started/how-to-install`. Slugs always have a prepended slash, but never a trail slash.
 
-The slug is used to get content in all forms using PardallMarkdown functions: individual pieces of content, trees and archives.
+The slug is used to get content in all forms using `PardallMarkdown.Content.Repository` functions: individual pieces of content, trees and archives. The slug is also how the content is identified in cache.
+
+## The required Metadata Map in every Markdown file
+- Published: true
 
 ## Trees
+content, taxonomy and toc
 
 ## Configuration _index files
 Sorting rules
 
 ## Posts and Pages
 
-## Archives
-- Show inner posts inside outside categories
+## Content Hierarchies, Taxonomies, Categories and Sections
+Categories, Taxonomies and Website Sections all refer to the same thing: the hierarchy of folders in which the posts are contained in, which in turn define post sets or group of posts. 
 
-## Content Hierarchies, Categories and Sections
-Categories (or Sections) are created from folder names. Hierarchies are defined from nested folders. A category name comes from the folder name, where each word is capitalized.
+- A taxonomy/category/section/group name comes from the folder name, where each word is capitalized.
+- Hierarchies are defined from nested folders. 
+- Posts are saved individually (to be retrieved with `PardallMarkdown.Content.Repository.get_by_slug("/a/post/slug")`) and under their taxonomies and taxonomies' hierarchy. A taxonomy archive (all posts of a taxonomy) and its hierarchy are contained in `PardallMarkdown.Link.children` when the taxonomy is retrieved by:
+    - `PardallMarkdown.Content.Repository.get_by_slug("/taxonomy/inner-taxonomy")`
+    - `PardallMarkdown.Content.Repository.get_content_tree("/taxonomy/inner-taxonomy")`
+    - `PardallMarkdown.Content.Repository.get_content_tree("/")` - root, which contains all taxonomies, their posts and hierarchy.
+- **When retrieving a taxonomy by slug** with `PardallMarkdown.Content.Repository.get_by_slug("/taxonomy/inner-taxonomy")` the taxonomy `:children` contains all posts from all of its innermost taxonomies `:children`.
+    - For example, the post: "/blog/news/city/foo" appears inside the `:children` of 3 taxonomies: `"/blog"`, `"/blog/news"` and `"/blog/news/city"`.
+- On the other hand, **taxonomies in the content tree** retrieved with `PardallMarkdown.Content.Repository.get_content_tree/1` contains only their immediate children posts.
+    - For example, the post: "/blog/news/city/foo" appears only inside the `:children` its definying taxonomy: `"/blog/news/city"`.
 
 Consider the example content directory structure:
 ```

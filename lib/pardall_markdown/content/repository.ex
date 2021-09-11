@@ -4,6 +4,16 @@ defmodule PardallMarkdown.Content.Repository do
 
   Preferrably, use only the `get_*` functions. The `build_*` and
   `save_*` functions are used by other PardallMarkdown modules.
+
+  ## Understanding taxonomy Post archives (`Link.children`):
+  - Posts are saved individually (to be retrieved with `PardallMarkdown.Content.Repository.get_by_slug("/a/post/slug")`) and under their taxonomies and taxonomies' hierarchy. A taxonomy archive (all posts of a taxonomy) and its hierarchy are contained in `PardallMarkdown.Link.children` when the taxonomy is retrieved by:
+    - `PardallMarkdown.Content.Repository.get_by_slug("/taxonomy/inner-taxonomy")`
+    - `PardallMarkdown.Content.Repository.get_content_tree("/taxonomy/inner-taxonomy")`
+    - `PardallMarkdown.Content.Repository.get_content_tree("/")` - root, which contains all taxonomies, their posts and hierarchy.
+  - **When retrieving a taxonomy by slug** with `PardallMarkdown.Content.Repository.get_by_slug("/taxonomy/name")` the taxonomy `:children` contains all posts from all of its innermost taxonomies `:children`.
+    - For example, the post: "/blog/news/city/foo" appears inside the `:children` of 3 taxonomies: `"/blog"`, `"/blog/news"` and `"/blog/news/city"`.
+  - On the other hand, **taxonomies in the content tree** retrieved with `PardallMarkdown.Content.Repository.get_content_tree/1` contains only their immediate children posts.
+    - For example, the post: "/blog/news/city/foo" appears only inside the `:children` its definying taxonomy: `"/blog/news/city"`.
   """
 
   alias PardallMarkdown.Post
@@ -75,8 +85,9 @@ defmodule PardallMarkdown.Content.Repository do
   end
 
   @doc """
-  Gets a single post or taxonomy archive by slug.
-  Returns `Post` (single post) or `Link` (taxonomy archive)
+  Gets a single post or taxonomy by slug.
+
+  Returns `Post` (single post) or `Link` (taxonomy and its :children)
   """
   def get_by_slug(slug), do: Cache.get_by_slug(slug)
 
