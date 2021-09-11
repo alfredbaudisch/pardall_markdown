@@ -88,5 +88,12 @@ defmodule PardallMarkdown.Content.Receiver do
   Returns whether a file event should be processed or not. Check
   the description of `PardallMarkdown.Content.Receiver` for more details.
   """
-  def is_event_valid?(_), do: false
+  def is_event_valid?(_) do
+    case :os.type() do
+      # File events from windows are broken, so consider all events as valid,
+      # since all of the contents are reloaded anyway
+      {:win32, _} -> true
+      _ -> false
+    end
+  end
 end

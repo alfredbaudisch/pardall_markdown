@@ -16,7 +16,7 @@ defmodule PardallMarkdown.MixProject do
       deps: deps(),
       package: package(),
       description:
-        "Reactive publishing framework, filesystem based with support for Markdown, nested hierarchies and instant content rebuilding. Written in Elixir."
+        "Reactive publishing framework, filesystem-based with support for Markdown, nested hierarchies, and instant content rebuilding. Written in Elixir."
     ]
   end
 
