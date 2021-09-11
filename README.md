@@ -1,5 +1,7 @@
 # PardallMarkdown
 
+# WIP ------- STILL PUBLISHING PACKAGE AND NO README WRITTEN!
+
 To start your Phoenix server:
 
 - Install dependencies with `mix deps.get`

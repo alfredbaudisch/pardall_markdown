@@ -1,13 +1,16 @@
 defmodule PardallMarkdown.Content.Utils do
   @taxonomy_index_file "_index.md"
-  @root_path Application.compile_env!(:pardall_markdown, [PardallMarkdown.Content, :root_path])
-  @static_assets_folder_name Application.compile_env!(:pardall_markdown, [
-                               PardallMarkdown.Content,
-                               :static_assets_folder_name
-                             ])
 
-  def root_path, do: @root_path
-  def static_assets_folder_name, do: @static_assets_folder_name
+  def root_path,
+    do:
+      Application.get_env(:pardall_markdown, PardallMarkdown.Content)[:root_path] ||
+        raise("root_path not defined")
+
+  def static_assets_folder_name,
+    do:
+      Application.get_env(:pardall_markdown, PardallMarkdown.Content)[:static_assets_folder_name] ||
+        raise("static_assets_folder_name not defined")
+
   def static_assets_path, do: Path.join(root_path(), static_assets_folder_name())
 
   def is_path_from_static_assets?(path), do: String.starts_with?(path, static_assets_path())
