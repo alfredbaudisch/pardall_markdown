@@ -1,4 +1,14 @@
 defmodule PardallMarkdown.Link do
+  @moduledoc """
+  This model has many usages in PardallMarkdown:
+  - Taxonomies/categories are saved as `Link`. A taxonomy `Link` also has all of its `Post` posts embedded into `:children` (notice that the post content is set to `nil` when the post in emdebbed into a `Link`).
+  - Post links for navigation and hierarchisation. A `Post` own `Link` also contains links to the `:previous` and `:next` posts of the content tree.
+
+  Special notes:
+  - `:sort_by` and `:sort_order`: the sorting rule to sort a taxonomy's posts. Used only by links of the `type: :taxonomy`.
+  - `:index_post`: the parsed `_index.md` file as a `Post`. Can be used when showing the archive page of a taxonomy (alongside the taxonomy `Link.children` posts). Used only by links of the `type: :taxonomy`.
+  """
+
   use Ecto.Schema
   import Ecto.Changeset
 
