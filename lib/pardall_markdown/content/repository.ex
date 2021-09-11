@@ -1,7 +1,6 @@
 defmodule PardallMarkdown.Content.Repository do
   alias PardallMarkdown.Post
   alias PardallMarkdown.Content.Cache
-  alias PardallMarkdownWeb.Endpoint
   import PardallMarkdown.Content.Filters
   require Logger
   alias Ecto.Changeset
@@ -73,10 +72,31 @@ defmodule PardallMarkdown.Content.Repository do
         end).()
   end
 
+  @doc """
+  Rebuild indexes and then notify with a custom callback that the content has been reloaded.
+
+  The notification can be used, for example, to perform a Phoenix.Endpoint
+  broadcast, then a website which implements `Phoenix.Channel` or `Phoenix.LiveVew`
+  can react accordingly.
+
+  The notification callback must be put inside the application configuration key `:notify_content_reloaded`.
+
+  Example:
+  ```
+  config :pardall_markdown, PardallMarkdown.Content,
+    notify_content_reloaded: &Website.notify/0
+  ```
+  """
   def rebuild_indexes do
     Cache.build_taxonomy_tree()
     Cache.build_content_tree()
-    Endpoint.broadcast!("pardall_markdown", "content_reloaded", :all)
+
+    notify_content_reloaded = Application.get_env(:pardall_markdown, PardallMarkdown.Content)[:notify_content_reloaded]
+
+    cond do
+      is_function(notify_content_reloaded)  -> notify_content_reloaded.()
+        true -> {:ok, :reloaded}
+    end
   end
 
   #
