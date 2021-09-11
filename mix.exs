@@ -33,7 +33,7 @@ defmodule PardallMarkdown.MixProject do
   # Type `mix help deps` for examples and options.
   defp deps do
     [
-      {:ecto_sql, "~> 3.7", override: true},
+      {:ecto_sql, "~> 3.7"},
       {:floki, "~> 0.31.0"},
       {:gettext, "~> 0.11"},
       {:file_system, "~> 0.2"},
