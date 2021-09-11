@@ -94,52 +94,20 @@ config :pardall_markdown, PardallMarkdown.Content,
 ```
 
 ## Models
-`PardallMarkdown.Post`
 
-`PardallMarkdown.Link`
-
-`PardallMarkdown.ContentLink`
+- `PardallMarkdown.Post` ([docs](https://hexdocs.pm/pardall_markdown/PardallMarkdown.Post.html))
+- `PardallMarkdown.Link` ([docs](https://hexdocs.pm/pardall_markdown/PardallMarkdown.Link.html))
+- `PardallMarkdown.ContentLink` ([docs](https://hexdocs.pm/pardall_markdown/PardallMarkdown.ContentLink.html))
 
 ## API
-Content is retrieved with `PardallMarkdown.Content.Repository`:
+Content is retrieved with `PardallMarkdown.Content.Repository`. Check details and instructions [in the docs](https://hexdocs.pm/pardall_markdown/PardallMarkdown.Content.Repository.html).
 
 ```elixir
-# Gets all posts, unordered.
-# `type`:
-# - `:all`: all posts
-# - `:post`: posts inside taxonomies
-# - `:page`: posts at the root level "/"
 def get_all_posts(type \\ :all)
-
-# Gets all links, ordered by slug
-# `type`:
-# - :all
-# - :taxonomy - only taxonomy links
-# - :post - only post links
 def get_all_links(type \\ :all)
-
-# Gets the content taxonomy tree, ordered
-# and nested by `Link.level`
 def get_taxonomy_tree()
-
-# Gets content trees. The content tree contains 
-# nested taxonomies and their nested posts.
-#
-# Posts are nested inside their innermost taxonomy.
-# Posts are sorted by their outmost taxonomy sorting rules.
-#
-# `slug`:
-# - `"/"`: content tree for all content
-# - `"/taxonomy"`: content tree for the given taxonomy slug.
-#   Any level can be provided and the tree will be returned accordingly, example:
-#   "/any/nesting/level": taxonomies and posts that start at "/any/nesting/level",
-#   including "/any/nesting/level" itself.
 def get_content_tree(slug \\ "/")
-
 def get_all_published
-
-# Gets a single post or taxonomy archive by slug.
-# Returns `Post` (single post) or `Link` (taxonomy archive)
 def get_by_slug(slug)
 def get_by_slug!(slug)
 ```
@@ -155,6 +123,7 @@ The slug is used to get content in all forms using PardallMarkdown functions: in
 ## Trees
 
 ## Configuration _index files
+Sorting rules
 
 ## Posts and Pages
 

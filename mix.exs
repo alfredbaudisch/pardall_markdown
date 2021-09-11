@@ -10,11 +10,11 @@ defmodule PardallMarkdown.MixProject do
       name: "PardallMarkdown",
       version: @version,
       elixir: "~> 1.7",
-      elixirc_paths: elixirc_paths(Mix.env()),
       compilers: Mix.compilers(),
       start_permanent: Mix.env() == :prod,
       deps: deps(),
       package: package(),
+      docs: docs(),
       description:
         "Reactive publishing framework, filesystem-based with support for Markdown, nested hierarchies, and instant content rebuilding. Written in Elixir."
     ]
@@ -26,9 +26,6 @@ defmodule PardallMarkdown.MixProject do
       extra_applications: [:logger, :con_cache]
     ]
   end
-
-  defp elixirc_paths(:test), do: ["lib", "test/support"]
-  defp elixirc_paths(_), do: ["lib"]
 
   defp deps do
     [
@@ -50,5 +47,15 @@ defmodule PardallMarkdown.MixProject do
       maintainers: ["Alfred Reinold Baudisch"],
       links: %{"GitHub" => @url}
     }
+  end
+
+  defp docs do
+    [
+      extras: ["README.md"],
+      main: "readme",
+      source_url: @url,
+      source_ref: @version,
+      formatters: ["html"]
+    ]
   end
 end
