@@ -5,11 +5,13 @@
 [![License](https://img.shields.io/hexpm/l/pardall_markdown.svg)](https://github.com/alfredbaudisch/pardall_markdown/blob/master/LICENSE)
 [![Last Updated](https://img.shields.io/github/last-commit/alfredbaudisch/pardall_markdown.svg)](https://github.com/alfredbaudisch/pardall_markdown/commits/master)
 
+# Introduction
+
 PardallMarkdown is a reactive publishing framework and engine written in Elixir. Instant websites and documentation websites.
 
 **As opposed to static website generators** (such as Hugo, Docusaurs and others), with PardallMarkdown, **you don't need to recompile and republish your application everytime you write or modify new content**. The application can be kept running indefinitely in production, and **the new content reactively gets available for consumption** by your application.
 
-## Features
+# Features
 
 - Filesystem-based, with **Markdown** and static files support.
     - Markdown files are parsed as HTML.
@@ -28,7 +30,7 @@ PardallMarkdown is a reactive publishing framework and engine written in Elixir.
 - Hierarchy **archive lists**.
 - All the content and indexes are kept in an **in-memory cache (Elixir's ETS)**.
 
-### Use cases
+## Use cases
 - Blogs
 - Documentation websites
 - Wikis
@@ -37,8 +39,7 @@ PardallMarkdown is a reactive publishing framework and engine written in Elixir.
 - Any application that needs content?
 
 
-## Usage in Elixir OTP applications
-
+# Usage in Elixir OTP applications
 Add dependency and application into your `mix.exs`:
 ```elixir
 defp deps do
@@ -93,7 +94,18 @@ config :pardall_markdown, PardallMarkdown.Content,
   notify_content_reloaded: &MyApp.content_reloaded/0
 ```
 
-## API
+## Usage with Phoenix applications
+Alongside the main required configuration, if you want to serve static files from the content folder, add a `Plug.Static` into your `Phoenix.Endpoint` configuration that refers to the static assets folder (`:static_assets_folder_name`):
+
+```elixir
+plug Plug.Static,
+    at: "/",
+    from: Content.Utils.root_path(),
+    gzip: true,
+    only: [Content.Utils.static_assets_folder_name()]
+```
+
+# API
 Content is retrieved with `PardallMarkdown.Content.Repository`. Check details and instructions [in the docs](https://hexdocs.pm/pardall_markdown/PardallMarkdown.Content.Repository.html).
 
 ```elixir
@@ -106,41 +118,80 @@ def get_by_slug(slug)
 def get_by_slug!(slug)
 ```
 
-### Models
+## Models
 The content returned by the API is of the types:
 
 - `PardallMarkdown.Post` ([docs](https://hexdocs.pm/pardall_markdown/PardallMarkdown.Post.html))
 - `PardallMarkdown.Link` ([docs](https://hexdocs.pm/pardall_markdown/PardallMarkdown.Link.html))
 - `PardallMarkdown.ContentLink` ([docs](https://hexdocs.pm/pardall_markdown/PardallMarkdown.ContentLink.html))
 
-## Slug: unique identifiers for posts, pages, categories and trees
+# Slug: unique identifiers for posts, pages, categories and trees
 Every piece of content has an unique identifier, which is simply the content URL slug, example: `"/blog"`, `"/docs/getting-started/how-to-install`. Slugs always have a prepended slash, but never a trail slash.
 
 The slug is used to get content in all forms using `PardallMarkdown.Content.Repository` functions: individual pieces of content, trees and archives. The slug is also how the content is identified in cache.
 
-## The required Metadata Map in every Markdown file
-- Published: true
+Slugs are automatically generated from file paths. For example, a Markdown file named: `"/blog/news/Top news of_today.md"` will have the slug: `"/blog/news/top-news-of-today"`.
 
-## Trees
-content, taxonomy and toc
+# Required Metadata Map in every Markdown file
+Every Markdown file must contain a metadata/configuration Elixir Map at the top, separated by `---` and a line break, which is similar to [Front Matter](https://jekyllrb.com/docs/front-matter/).
 
-## Configuration _index files
-Sorting rules
+The following configuration properties are available (all optional):
+- `:title`: the post title. If not provided, a title will be generated from the post slug.
+- `:date`: the date or datetime to be considered for the post, string, ISO format. If not provided, the file modification date will be considered as the post date.
+- `:published`: a post without `published: true` set, will be considered draft.
+- `:summary`: post description or short content.
+- `:position`: if the post topmost taxonomy has a `:sort_by` rule set to `:position`, this is the value that will be used to sort the post (see below).
+- Any other extra property, which will be saved into the post's `Post.metadata` field.
 
-## Posts and Pages
+Example:
+```elixir
+%{
+    title: "PardallMarkdown public release",
+    date: "2021-09-11", # or "2021-09-11T14:40:00Z"
+    published: true,
+    summary: "This post announces the launch of the project",
+    position: 0,
+    my_custom_data: :used_by_my_custom_application
+}
+---
+Content goes here
+```
 
-## Content Hierarchies, Taxonomies, Categories and Sections
+If you want to use automatic values, the map can be empty, but it's still mandatory:
+```elixir
+%{
+}
+---
+Content goes here
+```
+
+# Configuration _index.md files
+Inside top level taxonomies, a `_index.md` can be created which can contain taxonomy configuration (via a metadata map) as well an optional `Post` content for the taxonomy archive page, the contents of this file are saved into `Link.index_post`.
+
+The `_index` metadata map may contain:
+
+- `:title`: override taxonomy title/name.
+- `:sort_by`: children posts sorting rules (for all posts inside all levels down inside this taxonomy). Accepted values: `:title | :date | :position`.
+- `:sort_order`: accepted values: `:desc | :asc`.
+- Any other extra property, which will be saved into the taxonomy's `Link.index_post.metadata` field.
+
+Notice that `_index` files are not available via a slug call, i.e. `"/taxonomy/-index"`, instead you must get the taxonomy slug and access the file and post data via `Link.index_post`.
+
+# Posts and Pages
+
+# Content Hierarchies, Taxonomies, Categories and Sections
 Categories, Taxonomies and Website Sections all refer to the same thing: the hierarchy of folders in which the posts are contained in, which in turn define post sets or group of posts. 
 
 - A taxonomy/category/section/group name comes from the folder name, where each word is capitalized.
 - Hierarchies are defined from nested folders. 
-- Posts are saved individually (to be retrieved with `PardallMarkdown.Content.Repository.get_by_slug("/a/post/slug")`) and under their taxonomies and taxonomies' hierarchy. A taxonomy archive (all posts of a taxonomy) and its hierarchy are contained in `PardallMarkdown.Link.children` when the taxonomy is retrieved by:
-    - `PardallMarkdown.Content.Repository.get_by_slug("/taxonomy/inner-taxonomy")`
-    - `PardallMarkdown.Content.Repository.get_content_tree("/taxonomy/inner-taxonomy")`
-    - `PardallMarkdown.Content.Repository.get_content_tree("/")` - root, which contains all taxonomies, their posts and hierarchy.
-- **When retrieving a taxonomy by slug** with `PardallMarkdown.Content.Repository.get_by_slug("/taxonomy/inner-taxonomy")` the taxonomy `:children` contains all posts from all of its innermost taxonomies `:children`.
+- A top level taxonomy is a first level folder, example: `"/blog"`, hence the example `"/blog/news/art"` has `"/blog"` as its top level taxonomy/parent.
+- Posts are saved individually (to be retrieved with `Repository.get_by_slug("/a/post/slug")`) and under their taxonomies and taxonomies' hierarchy. A taxonomy archive (all posts of a taxonomy) and its hierarchy are contained in `PardallMarkdown.Link.children` when the taxonomy is retrieved by:
+    - `Repository.get_by_slug("/taxonomy/inner-taxonomy")`
+    - `Repository.get_content_tree("/taxonomy/inner-taxonomy")`
+    - `Repository.get_content_tree("/")` - root, which contains all taxonomies, their posts and hierarchy.
+- **When retrieving a taxonomy by slug** with `Repository.get_by_slug("/taxonomy/inner-taxonomy")` the taxonomy `:children` contains all posts from all of its innermost taxonomies `:children`.
     - For example, the post: "/blog/news/city/foo" appears inside the `:children` of 3 taxonomies: `"/blog"`, `"/blog/news"` and `"/blog/news/city"`.
-- On the other hand, **taxonomies in the content tree** retrieved with `PardallMarkdown.Content.Repository.get_content_tree/1` contains only their immediate children posts.
+- On the other hand, **taxonomies in the content tree** retrieved with `Repository.get_content_tree/1` contains only their immediate children posts.
     - For example, the post: "/blog/news/city/foo" appears only inside the `:children` its definying taxonomy: `"/blog/news/city"`.
 
 Consider the example content directory structure:
@@ -189,6 +240,34 @@ The following categories will be created:
 ["Documentation"]["Setup]
 ```
 
+# Trees
+Three types of trees are generated everytime the content is recompiled.
+
+Those trees can be used to navigate content, can be printed as a list of links, etc. Check the [demo project](https://github.com/alfredbaudisch/pardall-markdown-phoenix-demo) for multiple examples of how to use the trees and HTML helpers to generate links from the trees.
+
+The trees are:
+
+## Taxonomy Tree
+A tree with all the taxonomies, sorted by title, and nested accordingly.
+
+The taxonomy tree can be retrieved via `Repository.get_taxonomy_tree/0`.
+
+## Content Trees
+A tree containing all the taxonomies, but with their children posts nested:
+
+- Posts are placed below their innermost taxonomy.
+- Posts are sorted by their topmost taxonomy sorting rules.
+
+Multiple content trees are created. A single "master" content tree, available by the root slug `"/"` and a content tree for each taxonomy level. For example, a content tree for the *Documentation* hierarchy, which contains links to all sub-hierarchies and posts.
+
+Content trees can be retrieved via `Repository.get_content_tree/1`.
+
+## Post navigation
+Inside all posts is inserted a link the the previous and the next posts in the tree, after the current post. The links are in `Post.link.previous` and `Post.link.next`.
+
+## Table of Contents
+Each post contain their own automatically generated Table of Contents tree, available inside the post's `Post.toc` field.
+
 # FAQ
 ## How to integrate it with Phoenix and Phoenix LiveView?
 There is a demo project in a separate repository: [PardallMarkdown Phoenix Demo](https://github.com/alfredbaudisch/pardall-markdown-phoenix-demo).
@@ -233,44 +312,10 @@ No.
 - Being used for Post validation and a lot of `embedded_schemas` and the power of `cast_embed`.
 - If needed, an optional database layer may be added in the future.
 
-## Writing locally
+# Copyright License
+Copyright (c) 2021 Alfred Reinold Baudisch (alfredbaudisch, pardall)
 
-# WIP ------- STILL PUBLISHING PACKAGE AND NO README AND NO DOCS WRITTEN YET!
+Released under the MIT License, which can be found in the repository in [LICENSE](./LICENSE).
 
-To start your Phoenix server:
-
-- Install dependencies with `mix deps.get`
-- Create and migrate your database with `mix ecto.setup`
-- Install Node.js dependencies with `npm install` inside the `assets` directory
-- Start Phoenix endpoint with `mix phx.server`
-
-Now you can visit [`localhost:4000`](http://localhost:4000) from your browser.
-
-Ready to run in production? Please [check our deployment guides](https://hexdocs.pm/phoenix/deployment.html).
-
-## Learn more
-
-- Official website: https://www.phoenixframework.org/
-- Guides: https://hexdocs.pm/phoenix/overview.html
-- Docs: https://hexdocs.pm/phoenix
-- Forum: https://elixirforum.com/c/phoenix-forum
-- Source: https://github.com/phoenixframework/phoenix
-
-# Stuff to add here
-- Table of contents
-- Custom sorting by top level slug
-- Explain terms (taxonomies, categories, etc)
-- Content setup
-- Content view helpers
-- Post Navigation
-- Infinitely nestable categories
-
-## Taxonomy and Content Trees
-- Root and per top level slug
-
-
-# TODO: Licenses
-- Dashbit Nimblepublisher
-- This project's license
-
-Filewatcher backpressure
+## Additional notices
+Contains a snippet of code from [nimble_publisher](https://github.com/dashbitco/nimble_publisher), Copyright 2020 Dashbit, licensed under Apache License, Version 2.0.
