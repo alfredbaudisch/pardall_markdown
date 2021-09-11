@@ -1,4 +1,8 @@
 defmodule PardallMarkdown.ContentLink do
+  @moduledoc """
+  Table of contents links. Stored into `PardallMarkdown.Post.toc`.
+  """
+
   use Ecto.Schema
   import Ecto.Changeset
 
