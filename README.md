@@ -5,6 +5,39 @@
 [![License](https://img.shields.io/hexpm/l/pardall_markdown.svg)](https://github.com/alfredbaudisch/pardall_markdown/blob/master/LICENSE)
 [![Last Updated](https://img.shields.io/github/last-commit/alfredbaudisch/pardall_markdown.svg)](https://github.com/alfredbaudisch/pardall_markdown/commits/master)
 
+# Table of Contents
+- [PardallMarkdown](#pardallmarkdown)
+- [Table of Contents](#table-of-contents)
+- [Introduction](#introduction)
+- [Features](#features)
+  - [Use cases](#use-cases)
+- [Usage in Elixir OTP applications](#usage-in-elixir-otp-applications)
+  - [Usage with Phoenix applications](#usage-with-phoenix-applications)
+- [API](#api)
+  - [Models](#models)
+- [Slug: unique identifiers for posts, pages, categories and trees](#slug-unique-identifiers-for-posts-pages-categories-and-trees)
+- [Required Metadata Map in every Markdown file](#required-metadata-map-in-every-markdown-file)
+- [Configuration _index.md files](#configuration-_indexmd-files)
+- [Posts and Pages](#posts-and-pages)
+- [Content Hierarchies, Taxonomies, Categories and Sections](#content-hierarchies-taxonomies-categories-and-sections)
+- [Trees](#trees)
+  - [Taxonomy Tree](#taxonomy-tree)
+  - [Content Trees](#content-trees)
+  - [Post navigation](#post-navigation)
+  - [Table of Contents](#table-of-contents-1)
+- [Back pressure](#back-pressure)
+- [FAQ](#faq)
+  - [How to integrate it with Phoenix and Phoenix LiveView?](#how-to-integrate-it-with-phoenix-and-phoenix-liveview)
+  - [PardallMarkdown vs static website generators (Hugo, Docusaurs, etc)](#pardallmarkdown-vs-static-website-generators-hugo-docusaurs-etc)
+  - [PardallMarkdown vs NimblePublisher](#pardallmarkdown-vs-nimblepublisher)
+  - [How to sync content to PardallMarkdown?](#how-to-sync-content-to-pardallmarkdown)
+  - [How to write Markdown locally in your computer and publish it immediately to a PardallMarkdown application or website?](#how-to-write-markdown-locally-in-your-computer-and-publish-it-immediately-to-a-pardallmarkdown-application-or-website)
+  - [Does it require a database?](#does-it-require-a-database)
+  - [Why does it use Ecto?](#why-does-it-use-ecto)
+- [Roadmap](#roadmap)
+- [Copyright License](#copyright-license)
+  - [Additional notices](#additional-notices)
+
 # Introduction
 
 PardallMarkdown is a reactive publishing framework and engine written in Elixir. Instant websites and documentation websites.
@@ -178,6 +211,13 @@ The `_index` metadata map may contain:
 Notice that `_index` files are not available via a slug call, i.e. `"/taxonomy/-index"`, instead you must get the taxonomy slug and access the file and post data via `Link.index_post`.
 
 # Posts and Pages
+Every Markdown file is a post (a piece of content), but PardallMarkdown considers a file in the root folder `"/"` as a "page" and files inside any folder, at any hierarchy level, a "post". Pages are added to the content tree side by side with root hierarchies.
+
+Structurally they are the same, the only difference is their property is set to `Post.type: :post | :page`.
+
+Examples:
+- Pages: single unique posts that can refer to fixed data, such as a Contact or About page (/contact, /about, etc).
+- Posts: every other piece of content, including blog posts, documentation pages, wiki pages, so on and so forth, which are inside at least one level of taxonomy, example: `"/docs/introduction"` or `"/wiki/languages/english/verbs/to-eat"`.
 
 # Content Hierarchies, Taxonomies, Categories and Sections
 Categories, Taxonomies and Website Sections all refer to the same thing: the hierarchy of folders in which the posts are contained in, which in turn define post sets or group of posts. 
@@ -268,6 +308,9 @@ Inside all posts is inserted a link the the previous and the next posts in the t
 ## Table of Contents
 Each post contain their own automatically generated Table of Contents tree, available inside the post's `Post.toc` field.
 
+# Back pressure
+TODO: describe `FileWatcher` back pressure mechanism.
+
 # FAQ
 ## How to integrate it with Phoenix and Phoenix LiveView?
 There is a demo project in a separate repository: [PardallMarkdown Phoenix Demo](https://github.com/alfredbaudisch/pardall-markdown-phoenix-demo).
@@ -311,6 +354,9 @@ No.
 ## Why does it use Ecto?
 - Being used for Post validation and a lot of `embedded_schemas` and the power of `cast_embed`.
 - If needed, an optional database layer may be added in the future.
+
+# Roadmap
+- Add support for content folders inside a S3 bucket, which will then notify a PardallMarkdown application with webhooks.
 
 # Copyright License
 Copyright (c) 2021 Alfred Reinold Baudisch (alfredbaudisch, pardall)
