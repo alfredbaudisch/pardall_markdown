@@ -76,7 +76,7 @@ PardallMarkdown is a reactive publishing framework and engine written in Elixir.
 Add dependency and application into your `mix.exs`:
 ```elixir
 defp deps do
-[{:pardall_markdown, "~> 0.1.0"} ...]
+[{:pardall_markdown, "~> 0.1.1"} ...]
 end
 
 def application do
