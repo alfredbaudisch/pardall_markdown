@@ -103,8 +103,6 @@ defmodule PardallMarkdown.Content.Cache do
       |> do_build_content_tree()
 
     # Embed each post `%Link{}` into their individual `%Post{}` entities
-    # Notice: this currently breaks the logic of sorting by title or by date,
-    # since the links from "by_date" are inserted into the posts.
     Enum.each(tree, fn
       %Link{type: :post, slug: slug} = link ->
         update_post_field(slug, :link, link)
@@ -281,7 +279,8 @@ defmodule PardallMarkdown.Content.Cache do
             level: level_for_joined_post(taxonomy.slug, taxonomy.level),
             parents: parents,
             type: :post,
-            position: post.position
+            position: post.position,
+            children: [post]
           }
         end)
       )
