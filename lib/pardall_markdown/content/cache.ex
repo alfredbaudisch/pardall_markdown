@@ -270,18 +270,26 @@ defmodule PardallMarkdown.Content.Cache do
     with_home =
       Application.get_env(:pardall_markdown, PardallMarkdown.Content)[:content_tree_display_home]
 
+    parent_for_level1_post = fn
+      ["/"], %Link{slug: slug, parents: parents}
+      when slug != "/" -> parents ++ [slug]
+      _, %Link{parents: parents} -> parents
+    end
+
     tree
-    |> Enum.reduce([], fn %Link{children: posts, parents: parents} = taxonomy, all ->
+    |> Enum.reduce([], fn %Link{children: posts} = taxonomy, all ->
       all
       |> Kernel.++([Map.put(taxonomy, :children, [])])
       |> Kernel.++(
         posts
-        |> Enum.map(fn post ->
+        |> Enum.map(fn %{taxonomies: post_taxonomies} = post ->
+          %{parents: last_taxonomy_parents} = List.last(post_taxonomies)
+
           %Link{
             slug: post.slug,
             title: post.title,
             level: level_for_joined_post(taxonomy.slug, taxonomy.level),
-            parents: parents,
+            parents: parent_for_level1_post.(last_taxonomy_parents, taxonomy),
             type: :post,
             position: post.position,
             children: [post]
