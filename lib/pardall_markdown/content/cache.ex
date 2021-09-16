@@ -4,11 +4,8 @@ defmodule PardallMarkdown.Content.Cache do
   import PardallMarkdown.Content.Filters
   import PardallMarkdown.Content.Utils
 
-  @cache_name Application.compile_env!(:pardall_markdown, [PardallMarkdown.Content, :cache_name])
-  @index_cache_name Application.compile_env!(:pardall_markdown, [
-                      PardallMarkdown.Content,
-                      :index_cache_name
-                    ])
+  @cache_name Application.get_env(:pardall_markdown, PardallMarkdown.Content)[:cache_name]
+  @index_cache_name Application.get_env(:pardall_markdown, PardallMarkdown.Content)[:index_cache_name]
 
   def get_by_slug(slug), do: ConCache.get(@cache_name, slug_key(slug))
 
