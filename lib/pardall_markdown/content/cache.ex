@@ -32,6 +32,13 @@ defmodule PardallMarkdown.Content.Cache do
     |> Enum.map(fn {_, %Link{} = link} -> link end)
   end
 
+  def get_all_links_indexed_by_slug(type \\ :all) do
+    get_all_links(type)
+    |> Enum.reduce(%{}, fn %Link{slug: slug} = link, acc ->
+      Map.put(acc, slug, link)
+    end)
+  end
+
   def get_taxonomy_tree do
     get = fn -> ConCache.get(@index_cache_name, taxonomy_tree_key()) end
 
@@ -294,6 +301,7 @@ defmodule PardallMarkdown.Content.Cache do
         end).()
     |> sort_taxonomies_embedded_posts()
     |> build_tree_navigation()
+    |> update_embedded_taxonomies()
   end
 
   defp build_tree_navigation(tree) do
@@ -394,6 +402,42 @@ defmodule PardallMarkdown.Content.Cache do
       end
 
     sorting_methods[target_sort_taxonomy]
+  end
+
+  # Updates taxonomies that are embedded into all posts's `Post.taxonomies`,
+  # since after the content tree is built, there may be taxonomies
+  # that have overriden data with their related _index.md files.
+  defp update_embedded_taxonomies(tree) do
+    taxonomies = get_all_links_indexed_by_slug(:taxonomy)
+    posts = get_all_posts()
+
+    for post <- posts do
+      do_update_post_embedded_taxonomies(post, taxonomies)
+      |> save_post_pure()
+    end
+
+    for {_, %Link{children: children_posts} = link} <- taxonomies do
+      updated =
+        for post <- children_posts do
+          do_update_post_embedded_taxonomies(post, taxonomies)
+        end
+
+      save_slug(%{link | children: updated})
+    end
+
+    tree
+  end
+
+  defp do_update_post_embedded_taxonomies(
+         %Post{taxonomies: post_taxonomies} = post,
+         taxonomies_by_slug
+       ) do
+    updated =
+      Enum.map(post_taxonomies, fn %Link{slug: slug} = taxonomy ->
+        %{taxonomy | title: taxonomies_by_slug[slug].title}
+      end)
+
+    %{post | taxonomies: updated}
   end
 
   defp slug_key(slug), do: {:slug, slug}

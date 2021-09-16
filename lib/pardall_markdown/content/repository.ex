@@ -45,12 +45,23 @@ defmodule PardallMarkdown.Content.Repository do
   @doc """
   Gets all links, ordered by slug
   `type`:
-  - :all
-  - :taxonomy - only taxonomy links
-  - :post - only post links
+  - `:all`
+  - `:taxonomy`: only taxonomy links
+  - `:post`: only post links
   """
   def get_all_links(type \\ :all) do
     Cache.get_all_links(type)
+  end
+
+  @doc """
+  Gets a map with all links, where the map keys are the links' slugs.
+  `type`:
+  - `:all`
+  - `:taxonomy`: only taxonomy links
+  - `:post`: only post links
+  """
+  def get_all_links_indexed_by_slug(type \\ :all) do
+    Cache.get_all_links_indexed_by_slug(type)
   end
 
   @doc """
