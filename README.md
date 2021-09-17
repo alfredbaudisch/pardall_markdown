@@ -40,13 +40,13 @@
 
 PardallMarkdown is a reactive publishing framework and engine written in Elixir. Instant websites and documentation websites.
 
-**As opposed to static website generators** (such as Hugo, Docusaurs and others), with PardallMarkdown, **you don't need to recompile and republish your application everytime you write or modify new content**. The application can be kept running indefinitely in production, and **the new content reactively gets available for consumption** by your application.
+**As opposed to static website generators** (such as Hugo, Docusaurs and others), with PardallMarkdown, **you don't need to recompile and republish your application every time you write or modify new content**. The application can be kept running indefinitely in production, and **the new content re-actively gets available for consumption** by your application.
 
 # Features
 
 - Filesystem-based, with **Markdown** and static files support.
     - Markdown files are parsed as HTML.
-- FileWatcher, that **detects new content and modification of existing content**, which then **automatically reparses and rebuilds the content**.
+- FileWatcher, that **detects new content and modification of existing content**, which then **automatically re-parses and rebuilds the content**.
     - There is **no need to recompile** and redeploy the application nor the website, the **new content is available immediately** (depends on the interval set via `:recheck_pending_file_events_interval`, see below).
     - Created with [Phoenix LiveView](https://hexdocs.pm/phoenix_live_view/Phoenix.LiveView.html) and Phoenix Channels in mind: **create or modify a post** or a whole new **set of posts** and they are **immediately published in a website**. Check out [the demo](https://github.com/alfredbaudisch/pardall-markdown-phoenix-demo) repository.
 - Support for the content folders outside of the application, this way, **new content files can be synced immediately from a source location** (for example, your computer), and then picked up by the FileWatcher.
@@ -82,7 +82,7 @@ def application do
 end
 ```
 
-Add the configuration (all keys are required) into `config.exs` or in any of the enviroment specific configuration files:
+Add the configuration (all keys are required) into `config.exs` or in any of the environment specific configuration files:
 
 ```elixir
 config :pardall_markdown, PardallMarkdown.Content,
@@ -102,7 +102,7 @@ config :pardall_markdown, PardallMarkdown.Content,
   cache_name: :content_cache,  
   index_cache_name: :content_index_cache,
 
-  # Site name to be appened into page titles, after the post or page title
+  # Site name to be append into page titles, after the post or page title
   site_name: "Pardall Markdown",
 
   # How often in ms the FileWatcher should check for
@@ -117,7 +117,7 @@ config :pardall_markdown, PardallMarkdown.Content,
   # definitely want this as `true`.
   convert_internal_links_to_live_links: true,
 
-  # Callback to be called everytime the content and the indexes are rebuilt.
+  # Callback to be called every time the content and the indexes are rebuilt.
   #
   # For example, you can put a reference to a function that calls Endpoint.broadcast!:
   # notify_content_reloaded: &MyPhoenixApp.content_reloaded/0
@@ -173,7 +173,7 @@ Every Markdown file must contain a metadata/configuration Elixir Map at the top,
 
 The following configuration properties are available (all optional):
 - `:title`: the post title. If not provided, a title will be generated from the post slug.
-- `:date`: the date or datetime to be considered for the post, string, ISO format. If not provided, the file modification date will be considered as the post date.
+- `:date`: the date or date-time to be considered for the post, string, ISO format. If not provided, the file modification date will be considered as the post date.
 - `:published`: a post without `published: true` set, will be considered draft.
 - `:summary`: post description or short content.
 - `:position`: if the post topmost taxonomy has a `:sort_by` rule set to `:position`, this is the value that will be used to sort the post (see below).
@@ -235,7 +235,7 @@ Categories, Taxonomies and Website Sections all refer to the same thing: the hie
 - **When retrieving a taxonomy by slug** with `PardallMarkdown.Repository.get_by_slug("/taxonomy/inner-taxonomy")` the taxonomy `:children` contains all posts from all of its innermost taxonomies `:children`.
     - For example, the post: "/blog/news/city/foo" appears inside the `:children` of 3 taxonomies: `"/blog"`, `"/blog/news"` and `"/blog/news/city"`.
 - On the other hand, **taxonomies in the content tree** retrieved with `PardallMarkdown.Repository.get_content_tree/1` contains only their immediate children posts.
-    - For example, the post: "/blog/news/city/foo" appears only inside the `:children` its definying taxonomy: `"/blog/news/city"`.
+    - For example, the post: "/blog/news/city/foo" appears only inside the `:children` of its defining taxonomy: `"/blog/news/city"`.
 
 Consider the example content directory structure:
 ```
@@ -284,7 +284,7 @@ The following categories will be created:
 ```
 
 # Trees
-Three types of trees are generated everytime the content is recompiled.
+Three types of trees are generated every time the content is recompiled.
 
 Those trees can be used to navigate content, can be printed as a list of links, etc. Check the [demo project](https://github.com/alfredbaudisch/pardall-markdown-phoenix-demo) for multiple examples of how to use the trees and HTML helpers to generate links from the trees.
 
@@ -318,12 +318,12 @@ TODO: describe `FileWatcher` back pressure mechanism.
 ## How to integrate it with Phoenix and Phoenix LiveView?
 There is a demo project in a separate repository: [PardallMarkdown Phoenix Demo](https://github.com/alfredbaudisch/pardall-markdown-phoenix-demo).
 
-The demo project also has HTML helpers to print the generated tables of contentes, taxonomy and hierarchy trees as HTML `<ul/>>` lists with `<a/>` links.
+The demo project also has HTML helpers to print the generated tables of contents, taxonomy and hierarchy trees as HTML `<ul/>>` lists with `<a/>` links.
 
 ## PardallMarkdown vs static website generators (Hugo, Docusaurs, etc)
 Every time you make a change to the content or add new content, static website generators require you to rebuild and republish the whole application.
 
-As seen in the Introduction, with PardallMarkdown the application can be kept running indefinitely in production, and **the new content reactively gets available for consumption** by your application.
+As seen in the Introduction, with PardallMarkdown the application can be kept running indefinitely in production, and **the new content re-actively gets available for consumption** by your application.
 
 ## PardallMarkdown vs NimblePublisher
 [NimblePublisher](https://github.com/dashbitco/nimble_publisher) is an Elixir framework that parses Markdown files at compile time and make them available all at once in an Elixir's module attribute.
