@@ -371,9 +371,6 @@ No.
 
     Copyright 2021 Alfred Reinold Baudisch (alfredbaudisch, pardall)
 
-    Applications using this software are also required to
-    mention this project name with a link to this project repository.
-
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
     You may obtain a copy of the License at
@@ -388,5 +385,5 @@ No.
 
 ## Additional notices
 
-- For the mention requirement, you can put it anywhere in your application, for example, in the website footer or *About* page: `Powered by [PardallMarkdown](https://github.com/alfredbaudisch/pardall_markdown)`.
+- It's suggested that applications using this software mention this project name with a link to this project repository. You can put it anywhere in your application, for example, in a website footer or *About* page: `Powered by [PardallMarkdown](https://github.com/alfredbaudisch/pardall_markdown)`.
 - PardallMarkdown uses a snippet of code from [nimble_publisher](https://github.com/dashbitco/nimble_publisher), Copyright 2020 Dashbit, licensed under Apache License, Version 2.0.
