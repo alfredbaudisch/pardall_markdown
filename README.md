@@ -6,7 +6,6 @@
 [![Last Updated](https://img.shields.io/github/last-commit/alfredbaudisch/pardall_markdown.svg)](https://github.com/alfredbaudisch/pardall_markdown/commits/master)
 
 # Table of Contents
-- [Table of Contents](#table-of-contents)
 - [Introduction](#introduction)
 - [Features](#features)
   - [Use cases](#use-cases)
@@ -112,6 +111,11 @@ config :pardall_markdown, PardallMarkdown.Content,
 
   # Should the main content tree contain a link to the Home/Root page ("/")?
   content_tree_display_home: false,
+
+  # Should internal <a href/> links be converted to `Phoenix.LiveView` links?
+  # If you are using PardallMarkdown with a `Phoenix.LiveView` application, you
+  # definitely want this as `true`.
+  convert_internal_links_to_live_links: true,
 
   # Callback to be called everytime the content and the indexes are rebuilt.
   #

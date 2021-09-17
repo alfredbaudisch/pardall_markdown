@@ -24,6 +24,8 @@ defmodule PardallMarkdown.Content.Utils do
   def default_sort_order, do: :desc
   def default_position, do: 100_000
 
+  def slugify(value), do: value |> Slug.slugify(ignore: ["/", "../", "./"])
+
   @doc """
   Splits a path into a tree of categories, containing both readable category names
   and slugs for all categories in the hierarchy. The categories list is indexed from the
@@ -114,7 +116,7 @@ defmodule PardallMarkdown.Content.Utils do
   def extract_slug_from_path(path) do
     path
     |> String.replace(Path.extname(path), "")
-    |> Slug.slugify(ignore: "/")
+    |> slugify()
   end
 
   @doc """

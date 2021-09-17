@@ -18,6 +18,7 @@ config :pardall_markdown, PardallMarkdown.Content,
   site_name: "Pardall Markdown",
   recheck_pending_file_events_interval: 10_000,
   content_tree_display_home: false,
+  convert_internal_links_to_live_links: true,
   notify_content_reloaded: fn -> :ok end
 
 # Configures Elixir's Logger

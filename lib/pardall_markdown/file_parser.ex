@@ -66,6 +66,8 @@ defmodule PardallMarkdown.FileParser do
         |> Map.put(:date, date)
         |> Map.put(:is_index, is_index?)
 
+      body_html = maybe_convert_links(body_html)
+
       {:ok, body_html, toc} = generate_anchors_and_toc(body_html, attrs)
       attrs = attrs |> Map.put(:toc, toc)
 
@@ -153,5 +155,19 @@ defmodule PardallMarkdown.FileParser do
 
     NaiveDateTime.new!(a, b, c, d, e, f)
     |> DateTime.from_naive("Etc/UTC")
+  end
+
+  defp maybe_convert_links(html) do
+    should_convert? =
+      Application.get_env(:pardall_markdown, PardallMarkdown.Content)[
+        :convert_internal_links_to_live_links
+      ]
+
+    if should_convert? do
+      {:ok, html} = convert_internal_links_to_live_links(html)
+      html
+    else
+      html
+    end
   end
 end

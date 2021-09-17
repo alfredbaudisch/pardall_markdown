@@ -1,4 +1,46 @@
 defmodule PardallMarkdown.Content.HtmlUtils do
+  alias PardallMarkdown.Content.Utils
+
+  def convert_internal_links_to_live_links(html) do
+    {updated_tree, _} =
+      Floki.parse_fragment!(html)
+      |> Floki.traverse_and_update(:ok, fn
+        {"a", attrs, children} = el, acc ->
+          with link when not is_nil(link) <- find_attr_href(attrs),
+               true <- is_link_internal?(link) do
+            # Remove current class and href because they are updated below
+            filtered_attrs =
+              attrs
+              |> Enum.reject(fn {attr, _} -> attr == "href" end)
+
+            attrs = [
+              {"data-phx-link", "redirect"},
+              {"data-phx-link-state", "push"},
+              {"href", link |> Utils.slugify()}
+              | filtered_attrs
+            ]
+
+            {{"a", attrs, children}, acc}
+          else
+            _ -> {el, acc}
+          end
+
+        el, acc ->
+          {el, acc}
+      end)
+
+    {:ok, updated_tree |> Floki.raw_html()}
+  end
+
+  defp find_attr_href([{"href", href} | _]), do: href
+  defp find_attr_href([_ | tail]), do: find_attr_href(tail)
+  defp find_attr_href(_), do: nil
+
+  defp is_link_internal?(link),
+    do:
+      not (String.match?(link, ~r/^[a-zA-Z0-9]*:(\/\/)?[^\s]*/) or
+             String.starts_with?(link, "#"))
+
   def generate_anchors_and_toc(html, %{slug: slug}) do
     {updated_tree, %{toc: toc}} =
       Floki.parse_fragment!(html)

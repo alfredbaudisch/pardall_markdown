@@ -2,6 +2,30 @@ defmodule PardallMarkdown.HtmlTest do
   use ExUnit.Case, async: true
   alias PardallMarkdown.Content.HtmlUtils
 
+  test "make internal <a/> links as live links" do
+    html = ~S"""
+    This <a href="docs">is</a> <a href="/blog" class="foo" id="boo">a link</a> to <a href="../../wiki">an</a> internal <a href="v1.0_release">post</a>.
+
+    This <a href="mailto:phoenix@liveview.com">is</a> an <a href="https://elixir-lang.org">external link</a>.
+
+    This is <a name="anchor">an anchor</a>.
+    """
+
+    {:ok, html} = HtmlUtils.convert_internal_links_to_live_links(html)
+
+    target_html =
+      ~S"""
+      This <a data-phx-link="redirect" data-phx-link-state="push" href="docs">is</a><a data-phx-link="redirect" data-phx-link-state="push" href="/blog" class="foo" id="boo">a link</a> to <a data-phx-link="redirect" data-phx-link-state="push" href="../../wiki">an</a> internal <a data-phx-link="redirect" data-phx-link-state="push" href="v1.0-release">post</a>.
+
+      This <a href="mailto:phoenix@liveview.com">is</a> an <a href="https://elixir-lang.org">external link</a>.
+
+      This is <a name="anchor">an anchor</a>.
+      """
+      |> HtmlUtils.strip_in_between_space()
+
+    assert html |> HtmlUtils.strip_in_between_space() == target_html
+  end
+
   test "add ids and anchors to heading, ids and anchors should be unique, even if the title is repeated" do
     html = ~S"""
     <h3>This item should be level 1 in the TOC</h3>
