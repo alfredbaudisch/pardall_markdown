@@ -40,7 +40,7 @@
 
 PardallMarkdown is a reactive publishing framework and engine written in Elixir. Instant websites and documentation websites.
 
-**As opposed to static website generators** (such as Hugo, Docusaurs and others), with PardallMarkdown, **you don't need to recompile and republish your application every time you write or modify new content**. The application can be kept running indefinitely in production, and **the new content re-actively gets available for consumption** by your application.
+**As opposed to static website generators** (such as Hugo, Docusaurs and others), with PardallMarkdown, **you don't need to recompile and republish your application every time you write or modify new content**. The application can be kept running indefinitely in production, while it **watches a content folder for changes** and **the new content re-actively gets available for consumption** by your application.
 
 # Video Demo and Tutorial
 See PardallMarkdown in action and learn how to use it by following this video:
