@@ -1,4 +1,4 @@
-defmodule PardallMarkdown.Link do
+defmodule PardallMarkdown.Content.Link do
   @moduledoc """
   This model has many usages in PardallMarkdown:
   - Taxonomies/categories are saved as `Link`. A taxonomy `Link` also has all of its `Post` posts embedded into `:children` (notice that the post content is set to `nil` when the post in emdebbed into a `Link`).
@@ -23,7 +23,7 @@ defmodule PardallMarkdown.Link do
     field :position, :integer, default: 0
     embeds_one :previous, __MODULE__
     embeds_one :next, __MODULE__
-    embeds_many :children, PardallMarkdown.Post
+    embeds_many :children, PardallMarkdown.Content.Post
 
     #
     # Taxonomy specific fields
@@ -32,7 +32,7 @@ defmodule PardallMarkdown.Link do
     field :sort_by, Ecto.Enum, values: [:title, :date, :slug, :position], default: :date
     field :sort_order, Ecto.Enum, values: [:asc, :desc], default: :desc
     # the taxonomy own post/custom page
-    embeds_one :index_post, PardallMarkdown.Post
+    embeds_one :index_post, PardallMarkdown.Content.Post
   end
 
   def changeset(model, params) do

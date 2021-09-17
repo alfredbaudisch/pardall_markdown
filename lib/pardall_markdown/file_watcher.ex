@@ -1,9 +1,11 @@
 defmodule PardallMarkdown.FileWatcher do
   use GenServer
-  alias PardallMarkdown.Content.Receiver
+  alias PardallMarkdown.Receiver
   require Logger
 
-  @recheck_interval Application.get_env(:pardall_markdown, PardallMarkdown.Content)[:recheck_pending_file_events_interval]
+  @recheck_interval Application.get_env(:pardall_markdown, PardallMarkdown.Content)[
+                      :recheck_pending_file_events_interval
+                    ]
 
   def start_link(args) do
     GenServer.start_link(__MODULE__, args)

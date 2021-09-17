@@ -6,7 +6,6 @@
 [![Last Updated](https://img.shields.io/github/last-commit/alfredbaudisch/pardall_markdown.svg)](https://github.com/alfredbaudisch/pardall_markdown/commits/master)
 
 # Table of Contents
-- [PardallMarkdown](#pardallmarkdown)
 - [Table of Contents](#table-of-contents)
 - [Introduction](#introduction)
 - [Features](#features)
@@ -139,7 +138,7 @@ plug Plug.Static,
 ```
 
 # API
-Content is retrieved with `PardallMarkdown.Content.Repository`. Check details and instructions [in the docs](https://hexdocs.pm/pardall_markdown/PardallMarkdown.Content.Repository.html).
+Content is retrieved with `PardallMarkdown.Repository`. Check details and instructions [in the docs](https://hexdocs.pm/pardall_markdown/PardallMarkdown.Repository.html).
 
 ```elixir
 def get_all_posts(type \\ :all)
@@ -154,14 +153,14 @@ def get_by_slug!(slug)
 ## Models
 The content returned by the API is of the types:
 
-- `PardallMarkdown.Post` ([docs](https://hexdocs.pm/pardall_markdown/PardallMarkdown.Post.html))
-- `PardallMarkdown.Link` ([docs](https://hexdocs.pm/pardall_markdown/PardallMarkdown.Link.html))
-- `PardallMarkdown.ContentLink` ([docs](https://hexdocs.pm/pardall_markdown/PardallMarkdown.ContentLink.html))
+- `PardallMarkdown.Content.Post` ([docs](https://hexdocs.pm/pardall_markdown/PardallMarkdown.Content.Post.html))
+- `PardallMarkdown.Content.Link` ([docs](https://hexdocs.pm/pardall_markdown/PardallMarkdown.Content.Link.html))
+- `PardallMarkdown.Content.AnchorLink` ([docs](https://hexdocs.pm/pardall_markdown/PardallMarkdown.Content.AnchorLink.html))
 
 # Slug: unique identifiers for posts, pages, categories and trees
 Every piece of content has an unique identifier, which is simply the content URL slug, example: `"/blog"`, `"/docs/getting-started/how-to-install`. Slugs always have a prepended slash, but never a trail slash.
 
-The slug is used to get content in all forms using `PardallMarkdown.Content.Repository` functions: individual pieces of content, trees and archives. The slug is also how the content is identified in cache.
+The slug is used to get content in all forms using `PardallMarkdown.Repository` functions: individual pieces of content, trees and archives. The slug is also how the content is identified in cache.
 
 Slugs are automatically generated from file paths. For example, a Markdown file named: `"/blog/news/Top news of_today.md"` will have the slug: `"/blog/news/top-news-of-today"`.
 
@@ -174,7 +173,7 @@ The following configuration properties are available (all optional):
 - `:published`: a post without `published: true` set, will be considered draft.
 - `:summary`: post description or short content.
 - `:position`: if the post topmost taxonomy has a `:sort_by` rule set to `:position`, this is the value that will be used to sort the post (see below).
-- Any other extra property, which will be saved into the post's `Post.metadata` field.
+- Any other extra property, which will be saved into the post's `PardallMarkdown.Content.Post.metadata` field.
 
 Example:
 ```elixir
@@ -199,21 +198,21 @@ Content goes here
 ```
 
 # Configuration _index.md files
-Inside top level taxonomies, a `_index.md` can be created which can contain taxonomy configuration (via a metadata map) as well an optional `Post` content for the taxonomy archive page, the contents of this file are saved into `Link.index_post`.
+Inside top level taxonomies, a `_index.md` can be created which can contain taxonomy configuration (via a metadata map) as well an optional `PardallMarkdown.Content.Post` content for the taxonomy archive page, the contents of this file are saved into `PardallMarkdown.Content.Link.index_post`.
 
 The `_index` metadata map may contain:
 
 - `:title`: override taxonomy title/name.
 - `:sort_by`: children posts sorting rules (for all posts inside all levels down inside this taxonomy). Accepted values: `:title | :date | :position`.
 - `:sort_order`: accepted values: `:desc | :asc`.
-- Any other extra property, which will be saved into the taxonomy's `Link.index_post.metadata` field.
+- Any other extra property, which will be saved into the taxonomy's `PardallMarkdown.Content.Link.index_post.metadata` field.
 
-Notice that `_index` files are not available via a slug call, i.e. `"/taxonomy/-index"`, instead you must get the taxonomy slug and access the file and post data via `Link.index_post`.
+Notice that `_index` files are not available via a slug call, i.e. `"/taxonomy/-index"`, instead you must get the taxonomy slug and access the file and post data via `PardallMarkdown.Content.Link.index_post`.
 
 # Posts and Pages
 Every Markdown file is a post (a piece of content), but PardallMarkdown considers a file in the root folder `"/"` as a "page" and files inside any folder, at any hierarchy level, a "post". Pages are added to the content tree side by side with root hierarchies.
 
-Structurally they are the same, the only difference is their property is set to `Post.type: :post | :page`.
+Structurally they are the same, the only difference is their property is set to `PardallMarkdown.Content.Post.type: :post | :page`.
 
 Examples:
 - Pages: single unique posts that can refer to fixed data, such as a Contact or About page (/contact, /about, etc).
@@ -225,13 +224,13 @@ Categories, Taxonomies and Website Sections all refer to the same thing: the hie
 - A taxonomy/category/section/group name comes from the folder name, where each word is capitalized.
 - Hierarchies are defined from nested folders. 
 - A top level taxonomy is a first level folder, example: `"/blog"`, hence the example `"/blog/news/art"` has `"/blog"` as its top level taxonomy/parent.
-- Posts are saved individually (to be retrieved with `Repository.get_by_slug("/a/post/slug")`) and under their taxonomies and taxonomies' hierarchy. A taxonomy archive (all posts of a taxonomy) and its hierarchy are contained in `PardallMarkdown.Link.children` when the taxonomy is retrieved by:
-    - `Repository.get_by_slug("/taxonomy/inner-taxonomy")`
-    - `Repository.get_content_tree("/taxonomy/inner-taxonomy")`
-    - `Repository.get_content_tree("/")` - root, which contains all taxonomies, their posts and hierarchy.
-- **When retrieving a taxonomy by slug** with `Repository.get_by_slug("/taxonomy/inner-taxonomy")` the taxonomy `:children` contains all posts from all of its innermost taxonomies `:children`.
+- Posts are saved individually (to be retrieved with `PardallMarkdown.Repository.get_by_slug("/a/post/slug")`) and under their taxonomies and taxonomies' hierarchy. A taxonomy archive (all posts of a taxonomy) and its hierarchy are contained in `PardallMarkdown.Content.Link.children` when the taxonomy is retrieved by:
+    - `PardallMarkdown.Repository.get_by_slug("/taxonomy/inner-taxonomy")`
+    - `PardallMarkdown.Repository.get_content_tree("/taxonomy/inner-taxonomy")`
+    - `PardallMarkdown.Repository.get_content_tree("/")` - root, which contains all taxonomies, their posts and hierarchy.
+- **When retrieving a taxonomy by slug** with `PardallMarkdown.Repository.get_by_slug("/taxonomy/inner-taxonomy")` the taxonomy `:children` contains all posts from all of its innermost taxonomies `:children`.
     - For example, the post: "/blog/news/city/foo" appears inside the `:children` of 3 taxonomies: `"/blog"`, `"/blog/news"` and `"/blog/news/city"`.
-- On the other hand, **taxonomies in the content tree** retrieved with `Repository.get_content_tree/1` contains only their immediate children posts.
+- On the other hand, **taxonomies in the content tree** retrieved with `PardallMarkdown.Repository.get_content_tree/1` contains only their immediate children posts.
     - For example, the post: "/blog/news/city/foo" appears only inside the `:children` its definying taxonomy: `"/blog/news/city"`.
 
 Consider the example content directory structure:
@@ -290,7 +289,7 @@ The trees are:
 ## Taxonomy Tree
 A tree with all the taxonomies, sorted by title, and nested accordingly.
 
-The taxonomy tree can be retrieved via `Repository.get_taxonomy_tree/0`.
+The taxonomy tree can be retrieved via `PardallMarkdown.Repository.get_taxonomy_tree/0`.
 
 ## Content Trees
 A tree containing all the taxonomies, but with their children posts nested:
@@ -300,13 +299,13 @@ A tree containing all the taxonomies, but with their children posts nested:
 
 Multiple content trees are created. A single "master" content tree, available by the root slug `"/"` and a content tree for each taxonomy level. For example, a content tree for the *Documentation* hierarchy, which contains links to all sub-hierarchies and posts.
 
-Content trees can be retrieved via `Repository.get_content_tree/1`.
+Content trees can be retrieved via `PardallMarkdown.Repository.get_content_tree/1`.
 
 ## Post navigation
-Inside all posts is inserted a link the the previous and the next posts in the tree, after the current post. The links are in `Post.link.previous` and `Post.link.next`.
+Inside all posts is inserted a link the the previous and the next posts in the tree, after the current post. The links are in `PardallMarkdown.Content.Post.link.previous` and `PardallMarkdown.Content.Post.link.next`.
 
 ## Table of Contents
-Each post contain their own automatically generated Table of Contents tree, available inside the post's `Post.toc` field.
+Each post contain their own automatically generated Table of Contents tree, available inside the post's `PardallMarkdown.Content.Post.toc` field.
 
 # Back pressure
 TODO: describe `FileWatcher` back pressure mechanism.
@@ -329,7 +328,7 @@ If you need to modify or write new content, you have to recompile and republish 
 
 If you intend to have a plain blog page, with few posts, without hierarchies, taxonomies, categories, sorting and navigation, NimblePublisher is more than enough, and PardallMarkdown may be overkill for you.
 
-By the way, the idea of adding an Elixir map with metadata inside Markdown files and the code to parse it comes from a piece of code from NimblePublisher's code (inside `PardallMarkdown.Content.FileParser.parse_contents`).
+By the way, the idea of adding an Elixir map with metadata inside Markdown files and the code to parse it comes from a piece of code from NimblePublisher's code (inside `PardallMarkdown.FileParser.parse_contents`).
 
 ## How to sync content to PardallMarkdown?
 PardallMarkdown watches for changes from a given content folder (configured via `:root_path`), but there's nothing special about the content folder. Just add and sync content to the content folder normally.

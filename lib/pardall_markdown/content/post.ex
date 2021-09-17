@@ -1,8 +1,8 @@
-defmodule PardallMarkdown.Post do
+defmodule PardallMarkdown.Content.Post do
   @moduledoc """
   Fields are self-explanatory. Some special notes:
 
-  - `:is_published`: posts are added to the content trees and archives only when `true`. To retrieve unpublished (draft) posts you have to use `PardallMarkdown.Content.Repository.get_all_posts` or `PardallMarkdown.Content.Repository.get_by_slug`.
+  - `:is_published`: posts are added to the content trees and archives only when `true`. To retrieve unpublished (draft) posts you have to use `PardallMarkdown.Repository.get_all_posts` or `PardallMarkdown.Repository.get_by_slug`.
   - `:toc`: the generated table of content from the post's Markdown headers.
   - `:type`: a `Post` inside a taxonomy (i.e. inside a subfolder or subfolders) is of type `:post` (example: `"/docs/intro"`), a post inside the root folder is of type `:page` (example: `"/about"`).
   - `:metadata`: additional metadata found in the post's Markdown file definition map.
@@ -23,9 +23,9 @@ defmodule PardallMarkdown.Post do
     field :is_published, :boolean, default: false
     field :metadata, :map
     field :position, :integer, default: 0
-    embeds_many :toc, PardallMarkdown.ContentLink
-    embeds_many :taxonomies, PardallMarkdown.Link
-    embeds_one :link, PardallMarkdown.Link
+    embeds_many :toc, PardallMarkdown.Content.AnchorLink
+    embeds_many :taxonomies, PardallMarkdown.Content.Link
+    embeds_one :link, PardallMarkdown.Content.Link
   end
 
   def changeset(model, params) do
