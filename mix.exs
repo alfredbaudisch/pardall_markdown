@@ -2,7 +2,7 @@ defmodule PardallMarkdown.MixProject do
   use Mix.Project
 
   @url "https://github.com/alfredbaudisch/pardall_markdown"
-  @version "0.1.1"
+  @version "0.1.2"
 
   def project do
     [
@@ -43,7 +43,7 @@ defmodule PardallMarkdown.MixProject do
 
   defp package do
     %{
-      licenses: ["MIT"],
+      licenses: ["Apache 2.0"],
       maintainers: ["Alfred Reinold Baudisch"],
       links: %{"GitHub" => @url}
     }

@@ -2,7 +2,6 @@
 
 [![Module Version](https://img.shields.io/hexpm/v/pardall_markdown.svg)](https://hex.pm/packages/pardall_markdown)
 [![Total Download](https://img.shields.io/hexpm/dt/pardall_markdown.svg)](https://hex.pm/packages/pardall_markdown)
-[![License](https://img.shields.io/hexpm/l/pardall_markdown.svg)](https://github.com/alfredbaudisch/pardall_markdown/blob/master/LICENSE)
 [![Last Updated](https://img.shields.io/github/last-commit/alfredbaudisch/pardall_markdown.svg)](https://github.com/alfredbaudisch/pardall_markdown/commits/master)
 
 # Table of Contents
@@ -74,11 +73,11 @@ PardallMarkdown is a reactive publishing framework and engine written in Elixir.
 Add dependency and application into your `mix.exs`:
 ```elixir
 defp deps do
-[{:pardall_markdown, "~> 0.1.1"} ...]
+[{:pardall_markdown, "~> 0.1.2"} ...]
 end
 
 def application do
-[applications: [:pardall_markdown, ...], ...]
+[extra_applications: [:pardall_markdown, ...], ...]
 end
 ```
 
@@ -363,24 +362,22 @@ No.
 
 # Copyright License
 
-```
-Copyright 2021 Alfred Reinold Baudisch (alfredbaudisch, pardall)
+    Copyright 2021 Alfred Reinold Baudisch (alfredbaudisch, pardall)
 
-Applications using this software are also required to
-mention this project name with a link to this project repository.
+    Applications using this software are also required to
+    mention this project name with a link to this project repository.
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
 
-    http://www.apache.org/licenses/LICENSE-2.0
+        http://www.apache.org/licenses/LICENSE-2.0
 
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-```
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
 
 ## Additional notices
 
