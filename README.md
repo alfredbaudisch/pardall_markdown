@@ -362,9 +362,27 @@ No.
 - Add support for content folders inside a S3 bucket, which will then notify a PardallMarkdown application with webhooks.
 
 # Copyright License
-Copyright (c) 2021 Alfred Reinold Baudisch (alfredbaudisch, pardall)
 
-Released under the MIT License, which can be found in the repository in [LICENSE](./LICENSE).
+```
+Copyright 2021 Alfred Reinold Baudisch (alfredbaudisch, pardall)
+
+Applications using this software are also required to
+mention this project name with a link to this project repository.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+```
 
 ## Additional notices
-Contains a snippet of code from [nimble_publisher](https://github.com/dashbitco/nimble_publisher), Copyright 2020 Dashbit, licensed under Apache License, Version 2.0.
+
+- For the mention requirement, you can put it anywhere in your application, for example, in the website footer or *About* page: `Powered by [PardallMarkdown](https://github.com/alfredbaudisch/pardall_markdown)`.
+- PardallMarkdown uses a snippet of code from [nimble_publisher](https://github.com/dashbitco/nimble_publisher), Copyright 2020 Dashbit, licensed under Apache License, Version 2.0.
