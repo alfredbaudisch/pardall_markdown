@@ -1,5 +1,5 @@
-defmodule PardallMarkdown.Content.Receiver do
-  alias PardallMarkdown.Content.FileParser
+defmodule PardallMarkdown.Receiver do
+  alias PardallMarkdown.FileParser
 
   @moduledoc """
   Process `FileSystem` events, directing the paths to their
@@ -86,7 +86,7 @@ defmodule PardallMarkdown.Content.Receiver do
 
   @doc """
   Returns whether a file event should be processed or not. Check
-  the description of `PardallMarkdown.Content.Receiver` for more details.
+  the description of `PardallMarkdown.Receiver` for more details.
   """
   def is_event_valid?(_) do
     case :os.type() do

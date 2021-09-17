@@ -1,6 +1,6 @@
-defmodule PardallMarkdown.Content.FileParser do
+defmodule PardallMarkdown.FileParser do
   require Logger
-  alias PardallMarkdown.Content.Repository
+  alias PardallMarkdown.Repository
   import PardallMarkdown.Content.Utils
   import PardallMarkdown.Content.HtmlUtils
 

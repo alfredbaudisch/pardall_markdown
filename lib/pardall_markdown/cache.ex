@@ -1,11 +1,13 @@
-defmodule PardallMarkdown.Content.Cache do
+defmodule PardallMarkdown.Cache do
   require Logger
-  alias PardallMarkdown.{Post, Link}
+  alias PardallMarkdown.Content.{Post, Link}
   import PardallMarkdown.Content.Filters
   import PardallMarkdown.Content.Utils
 
   @cache_name Application.get_env(:pardall_markdown, PardallMarkdown.Content)[:cache_name]
-  @index_cache_name Application.get_env(:pardall_markdown, PardallMarkdown.Content)[:index_cache_name]
+  @index_cache_name Application.get_env(:pardall_markdown, PardallMarkdown.Content)[
+                      :index_cache_name
+                    ]
 
   def get_by_slug(slug), do: ConCache.get(@cache_name, slug_key(slug))
 
@@ -272,8 +274,11 @@ defmodule PardallMarkdown.Content.Cache do
 
     parent_for_level1_post = fn
       ["/"], %Link{slug: slug, parents: parents}
-      when slug != "/" -> parents ++ [slug]
-      _, %Link{parents: parents} -> parents
+      when slug != "/" ->
+        parents ++ [slug]
+
+      _, %Link{parents: parents} ->
+        parents
     end
 
     tree

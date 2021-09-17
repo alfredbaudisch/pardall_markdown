@@ -1,6 +1,6 @@
-defmodule PardallMarkdown.ContentLink do
+defmodule PardallMarkdown.Content.AnchorLink do
   @moduledoc """
-  Table of contents links. Stored into `PardallMarkdown.Post.toc`.
+  Table of contents links. Stored into `PardallMarkdown.Content.Post.toc`.
   """
 
   use Ecto.Schema

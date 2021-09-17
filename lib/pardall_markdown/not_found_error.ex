@@ -1,3 +1,3 @@
-defmodule PardallMarkdown.NotFoundError do
+defmodule PardallMarkdown.Content.NotFoundError do
   defexception [:message, plug_status: 404]
 end

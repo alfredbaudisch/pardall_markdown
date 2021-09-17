@@ -1,6 +1,6 @@
 defmodule PardallMarkdown.RepositoryTest do
   use ExUnit.Case, async: true
-  alias PardallMarkdown.Content.Repository
+  alias PardallMarkdown.Repository
 
   setup do
     Application.ensure_all_started(:pardall_markdown)

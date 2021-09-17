@@ -1,10 +1,8 @@
 defmodule PardallMarkdown do
-  alias PardallMarkdown.Content
-
   def reload_all do
-    Content.Repository.init()
-    Content.FileParser.load_all!()
-    Content.Repository.rebuild_indexes()
+    PardallMarkdown.Repository.init()
+    PardallMarkdown.FileParser.load_all!()
+    PardallMarkdown.Repository.rebuild_indexes()
     :ok
   end
 end
