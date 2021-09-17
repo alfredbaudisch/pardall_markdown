@@ -6,6 +6,7 @@
 
 # Table of Contents
 - [Introduction](#introduction)
+- [Video Demo and Tutorial](#video-demo-and-tutorial)
 - [Features](#features)
   - [Use cases](#use-cases)
 - [Usage in Elixir OTP applications](#usage-in-elixir-otp-applications)
@@ -40,6 +41,10 @@
 PardallMarkdown is a reactive publishing framework and engine written in Elixir. Instant websites and documentation websites.
 
 **As opposed to static website generators** (such as Hugo, Docusaurs and others), with PardallMarkdown, **you don't need to recompile and republish your application every time you write or modify new content**. The application can be kept running indefinitely in production, and **the new content re-actively gets available for consumption** by your application.
+
+# Video Demo and Tutorial
+See PardallMarkdown in action and learn how to use it by following this video:
+[![](/sample_content/static/images/pardallmarkdown-demo-and-tutorial-with-play.jpg)](https://www.youtube.com/watch?v=FdzqToe3dug)
 
 # Features
 
@@ -139,6 +144,8 @@ plug Plug.Static,
     gzip: true,
     only: [Content.Utils.static_assets_folder_name()]
 ```
+
+Check [the demo](https://github.com/alfredbaudisch/pardall-markdown-phoenix-demo) application for a complete Phoenix application sample, including sample content. Or watch the PardallMarkdown Phoenix LiveView [tutorial video](https://www.youtube.com/watch?v=FdzqToe3dug).
 
 # API
 Content is retrieved with `PardallMarkdown.Repository`. Check details and instructions [in the docs](https://hexdocs.pm/pardall_markdown/PardallMarkdown.Repository.html).
