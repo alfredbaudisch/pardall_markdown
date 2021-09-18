@@ -1,8 +1,6 @@
 # PardallMarkdown
 
-[![Module Version](https://img.shields.io/hexpm/v/pardall_markdown.svg)](https://hex.pm/packages/pardall_markdown)
-[![Total Download](https://img.shields.io/hexpm/dt/pardall_markdown.svg)](https://hex.pm/packages/pardall_markdown)
-[![Last Updated](https://img.shields.io/github/last-commit/alfredbaudisch/pardall_markdown.svg)](https://github.com/alfredbaudisch/pardall_markdown/commits/master)
+[![Module Version](https://img.shields.io/hexpm/v/pardall_markdown.svg)](https://hex.pm/packages/pardall_markdown) [![Total Download](https://img.shields.io/hexpm/dt/pardall_markdown.svg)](https://hex.pm/packages/pardall_markdown) [![Last Updated](https://img.shields.io/github/last-commit/alfredbaudisch/pardall_markdown.svg)](https://github.com/alfredbaudisch/pardall_markdown/commits/master) [![Donate using PayPal](https://raw.githubusercontent.com/laurent22/joplin/dev/Assets/WebsiteAssets/images/badges/Donate-PayPal-green.svg)](https://www.paypal.com/donate?hosted_button_id=FC5FTRRE3548C) [![Become a patron](https://raw.githubusercontent.com/laurent22/joplin/dev/Assets/WebsiteAssets/images/badges/Patreon-Badge.svg)](https://www.patreon.com/alfredbaudisch)
 
 # Table of Contents
 - [Introduction](#introduction)
@@ -33,6 +31,7 @@
   - [Does it require a database?](#does-it-require-a-database)
   - [Why does it use Ecto?](#why-does-it-use-ecto)
 - [Roadmap](#roadmap)
+- [Sponsors and Donations](#sponsors-and-donations)
 - [Copyright License](#copyright-license)
   - [Additional notices](#additional-notices)
 
@@ -44,7 +43,7 @@ PardallMarkdown is a reactive publishing framework and engine written in Elixir.
 
 # Video Demo and Tutorial
 See PardallMarkdown in action and learn how to use it by following this video:
-[![](/sample_content/static/images/pardallmarkdown-demo-and-tutorial-with-play.jpg)](https://www.youtube.com/watch?v=FdzqToe3dug)
+[![](https://github.com/alfredbaudisch/pardall_markdown/blob/master/sample_content/static/images/pardallmarkdown-demo-and-tutorial-with-play.jpg)](https://www.youtube.com/watch?v=FdzqToe3dug)
 
 # Features
 
@@ -365,7 +364,15 @@ No.
 - If needed, an optional database layer may be added in the future.
 
 # Roadmap
-- Add support for content folders inside a S3 bucket, which will then notify a PardallMarkdown application with webhooks.
+- [ ] Add support for content folders inside a S3 bucket, which will then notify a PardallMarkdown application with webhooks.
+- [ ] Add support to watch external sources for new content, such as GitHub repositories ([#31](https://github.com/alfredbaudisch/pardall_markdown/issues/31)).
+- [ ] Add support for FrontMatter post metadata with YAML, alongside Elixir maps ([#30](https://github.com/alfredbaudisch/pardall_markdown/issues/30)).
+
+# Sponsors and Donations
+
+You can support my open-source contributions and this project on [Patreon](https://www.patreon.com/alfredbaudisch) or with a [PayPal donation](https://www.paypal.com/donate?hosted_button_id=FC5FTRRE3548C). Patrons and donors of any tier will have their name listed here. Patrons of the **Sponsors** tier or higher, can also have a link and a logo listed here.
+
+- Mike King
 
 # Copyright License
 
