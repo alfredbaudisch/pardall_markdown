@@ -10,7 +10,7 @@ use Mix.Config
 config :pardall_markdown, PardallMarkdown.Content,
   # This can be any relative or absolute path, including outside of the application,
   # which is actually, the main use case for PardallMarkdown
-  root_path: "/home/alfredbaudisch/Documents/content",
+  root_path: "./sample_content",
   static_assets_folder_name: "static",
   cache_name: :content_cache,
   index_cache_name: :content_index_cache,
