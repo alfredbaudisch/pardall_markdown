@@ -31,7 +31,6 @@ defmodule PardallMarkdown.MixProject do
     [
       {:ecto_sql, "~> 3.7"},
       {:floki, "~> 0.31.0"},
-      {:gettext, "~> 0.11"},
       {:file_system, "~> 0.2"},
       {:earmark, "~> 1.4"},
       {:slugify, "~> 1.3"},
