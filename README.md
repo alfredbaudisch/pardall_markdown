@@ -105,9 +105,6 @@ config :pardall_markdown, PardallMarkdown.Content,
   cache_name: :content_cache,  
   index_cache_name: :content_index_cache,
 
-  # Site name to be append into page titles, after the post or page title
-  site_name: "Pardall Markdown",
-
   # How often in ms the FileWatcher should check for
   # new or modified content in the `root_path:`?
   recheck_pending_file_events_interval: 10_000,

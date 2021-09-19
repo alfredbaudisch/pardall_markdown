@@ -14,8 +14,6 @@ config :pardall_markdown, PardallMarkdown.Content,
   static_assets_folder_name: "static",
   cache_name: :content_cache,
   index_cache_name: :content_index_cache,
-  # Site name to be appened into page titles
-  site_name: "Pardall Markdown",
   recheck_pending_file_events_interval: 10_000,
   content_tree_display_home: false,
   convert_internal_links_to_live_links: true,
