@@ -14,7 +14,7 @@
   - [Models](#models)
 - [Slug: unique identifiers for posts, pages, categories and trees](#slug-unique-identifiers-for-posts-pages-categories-and-trees)
 - [Markdown file metadata or attributes](#markdown-file-metadata-or-attributes)
-- [Configuration _index.md files](#configuration-_indexmd-files)
+- [Taxonomy configuration with _index.md files](#taxonomy-configuration-with-_indexmd-files)
 - [Posts and Pages](#posts-and-pages)
 - [Content Hierarchies, Taxonomies, Categories and Sections](#content-hierarchies-taxonomies-categories-and-sections)
 - [Trees](#trees)
@@ -198,6 +198,9 @@ The following configuration properties are available (all optional):
 - `:published`: a post without `published: true` set will be considered draft. The default can be inverted when the configuration `:is_content_draft_by_default` is set to `false`, this way, posts will always be considered as published, unless they contain: `published: false`.
 - `:summary`: post description or short content.
 - `:position`: if the post topmost taxonomy has a `:sort_by` rule set to `:position`, this is the value that will be used to sort the post (see below).
+- `:slug`: override the post slug. As seem above, by default, slugs are generated from the file names and are the main, unique identifier of posts.
+  - If you override the slug with this property, make sure to put the full path, prepended by a slash, example: `slug: "/my/custom/slug"`.
+  - It's your responsibility to put non-conflicting slugs when overriding slugs with this property.
 - Any other extra property, which will be saved into the post's `PardallMarkdown.Content.Post.metadata` field.
 
 Example:
@@ -222,7 +225,7 @@ If you want to use automatic values, the map can be empty (or you can leave out 
 Content goes here
 ```
 
-# Configuration _index.md files
+# Taxonomy configuration with _index.md files
 Inside top level taxonomies, a `_index.md` can be created which can contain taxonomy configuration (via a metadata map) as well an optional `PardallMarkdown.Content.Post` content for the taxonomy archive page, the contents of this file are saved into `PardallMarkdown.Content.Link.index_post`.
 
 The `_index` metadata map may contain:

@@ -67,4 +67,10 @@ defmodule PardallMarkdown.FileParserTest do
 
     {:ok, %Post{title: "This should work even without the top title", content: "<p>\nContent should be here?</p>"}} = FileParser.extract!("./test/individual_content/joplin/no_title_at_top.md")
   end
+
+  test "override slug" do
+    {:ok, post} = FileParser.extract!("./test/individual_content/custom_slug.md")
+    assert post.slug == "/individual-content/my-slug"
+    assert post.title == "Custom slug"
+  end
 end

@@ -59,7 +59,7 @@ defmodule PardallMarkdown.FileParser do
          {:ok, date} <- parse_or_get_date(attrs, path) do
       attrs =
         attrs
-        |> extract_and_put_slug(path)
+        |> maybe_extract_and_put_slug(path)
         |> extract_and_put_categories(path)
         |> maybe_put_title(path, is_index?)
         |> Map.put(:summary, summary_html)
@@ -152,7 +152,10 @@ defmodule PardallMarkdown.FileParser do
 
   defp markdown_to_html(content), do: content |> Earmark.as_html(escape: false)
 
-  defp extract_and_put_slug(attrs, path),
+  defp maybe_extract_and_put_slug(%{slug: slug} = attrs, _) when is_binary(slug) and slug != "",
+    do: attrs
+
+  defp maybe_extract_and_put_slug(attrs, path),
     do: Map.put(attrs, :slug, path |> remove_root_path() |> extract_slug_from_path())
 
   defp extract_and_put_categories(attrs, path),
