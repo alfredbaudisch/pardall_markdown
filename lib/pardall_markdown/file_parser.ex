@@ -10,7 +10,7 @@ defmodule PardallMarkdown.FileParser do
   end
 
   def extract!(path) do
-    if not should_extract_path?(path) do
+    if should_extract_path?(path) do
       if File.dir?(path),
         do: extract_folder!(path),
         else: extract_file!(path)
@@ -53,13 +53,13 @@ defmodule PardallMarkdown.FileParser do
     is_index? = is_index_file?(path)
 
     with {:ok, raw_content} <- File.read(path),
-         {:ok, attrs, body} <- parse_contents(path, raw_content),
+         {:ok, attrs, body} <- parse_contents(path, raw_content, is_index?),
          {:ok, body_html, _} <- markdown_to_html(body),
          {:ok, summary_html, _} <- maybe_summary_to_html(attrs),
          {:ok, date} <- parse_or_get_date(attrs, path) do
       attrs =
         attrs
-        |> extract_and_put_slug(path)
+        |> maybe_extract_and_put_slug(path)
         |> extract_and_put_categories(path)
         |> maybe_put_title(path, is_index?)
         |> Map.put(:summary, summary_html)
@@ -74,17 +74,60 @@ defmodule PardallMarkdown.FileParser do
       Logger.info("Pushed converted Markdown: #{path}")
       Repository.push_post(path, attrs, body_html)
     else
-      {:error, error} ->
+      {:error, error} = res ->
         Logger.error("Could not parse file #{path}: #{inspect(error)}")
+        res
 
       {:error, _, error} ->
         Logger.error("Could not render Markdown file #{path}: #{inspect(error)}")
+        {:error, error}
+    end
+  end
+
+  defp parse_contents(path, contents, is_index?) do
+    split_first_line? =
+      Application.get_env(:pardall_markdown, PardallMarkdown.Content, false)[
+        :should_try_split_content_title_from_first_line
+      ]
+
+    if split_first_line? do
+      case :binary.split(contents, ["\n\n", "\r\n\r\n"]) do
+        [_] ->
+          parse_metadata_from_contents(path, contents)
+
+        [_, contents] when is_index? ->
+          parse_metadata_from_contents(path, contents)
+
+        [title, contents] ->
+          case parse_metadata_from_contents(path, contents) do
+            # A title from the metadata always has priority
+            {:ok, %{title: custom_title}, _} = parsed
+            when is_binary(custom_title) and custom_title != "" ->
+              parsed
+
+            # Use the title from the first line
+            {:ok, attrs, body} ->
+              {:ok, attrs |> Map.put(:title, title), body}
+
+            other -> other
+          end
+      end
+    else
+      parse_metadata_from_contents(path, contents)
     end
   end
 
   # From https://github.com/dashbitco/nimble_publisher
-  defp parse_contents(path, contents) do
+  defp parse_metadata_from_contents(path, contents) do
+    is_markdown_metadata_required? =
+      Application.get_env(:pardall_markdown, PardallMarkdown.Content, true)[
+        :is_markdown_metadata_required
+      ]
+
     case :binary.split(contents, ["\n---\n", "\r\n---\r\n"]) do
+      [_] when not is_markdown_metadata_required? ->
+        {:ok, %{}, contents}
+
       [_] ->
         {:error, "could not find separator --- in #{inspect(path)}"}
 
@@ -112,7 +155,10 @@ defmodule PardallMarkdown.FileParser do
 
   defp markdown_to_html(content), do: content |> Earmark.as_html(escape: false)
 
-  defp extract_and_put_slug(attrs, path),
+  defp maybe_extract_and_put_slug(%{slug: slug} = attrs, _) when is_binary(slug) and slug != "",
+    do: attrs
+
+  defp maybe_extract_and_put_slug(attrs, path),
     do: Map.put(attrs, :slug, path |> remove_root_path() |> extract_slug_from_path())
 
   defp extract_and_put_categories(attrs, path),

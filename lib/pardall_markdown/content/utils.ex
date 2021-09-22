@@ -6,12 +6,10 @@ defmodule PardallMarkdown.Content.Utils do
       Application.get_env(:pardall_markdown, PardallMarkdown.Content)[:root_path] ||
         raise("root_path not defined")
 
-  def static_assets_folder_name,
-    do:
-      Application.get_env(:pardall_markdown, PardallMarkdown.Content)[:static_assets_folder_name] ||
-        raise("static_assets_folder_name not defined")
-
-  def static_assets_path, do: Path.join(root_path(), static_assets_folder_name())
+  def static_assets_path,
+  do:
+    Application.get_env(:pardall_markdown, PardallMarkdown.Content)[:static_assets_path] ||
+      raise("static_assets_path not defined")
 
   def is_path_from_static_assets?(path), do: String.starts_with?(path, static_assets_path())
 
@@ -24,7 +22,10 @@ defmodule PardallMarkdown.Content.Utils do
   def default_sort_order, do: :desc
   def default_position, do: 100_000
 
-  def slugify(value), do: value |> Slug.slugify(ignore: ["/", "../", "./"])
+  def slugify(value, ignore \\ ["/"]), do: value |> Slug.slugify(ignore: ignore)
+
+  def is_content_draft_by_default?, do:
+    Application.get_env(:pardall_markdown, PardallMarkdown.Content, true)[:is_content_draft_by_default]
 
   @doc """
   Splits a path into a tree of categories, containing both readable category names

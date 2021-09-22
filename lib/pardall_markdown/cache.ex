@@ -66,15 +66,18 @@ defmodule PardallMarkdown.Cache do
 
   def save_post(%Post{type: :index} = post) do
     save_post_taxonomies(post)
+    post
   end
 
   def save_post(%Post{} = post) do
     save_post_pure(post)
     save_post_taxonomies(post)
+    post
   end
 
   def save_post_pure(%Post{slug: _slug} = post) do
-    save_slug(post)
+    :ok = save_slug(post)
+    post
   end
 
   def update_post_field(slug, field, value) do
@@ -432,7 +435,7 @@ defmodule PardallMarkdown.Cache do
           do_update_post_embedded_taxonomies(post, taxonomies)
         end
 
-      save_slug(%{link | children: updated})
+      :ok = save_slug(%{link | children: updated})
     end
 
     tree

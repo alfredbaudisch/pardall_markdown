@@ -16,7 +16,7 @@ defmodule PardallMarkdown.Content.HtmlUtils do
             attrs = [
               {"data-phx-link", "redirect"},
               {"data-phx-link-state", "push"},
-              {"href", link |> Utils.slugify()}
+              {"href", link |> Utils.slugify(["/", "./", "../"])}
               | filtered_attrs
             ]
 

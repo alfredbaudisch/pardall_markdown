@@ -13,8 +13,8 @@
 - [API](#api)
   - [Models](#models)
 - [Slug: unique identifiers for posts, pages, categories and trees](#slug-unique-identifiers-for-posts-pages-categories-and-trees)
-- [Required Metadata Map in every Markdown file](#required-metadata-map-in-every-markdown-file)
-- [Configuration _index.md files](#configuration-_indexmd-files)
+- [Markdown file metadata or attributes](#markdown-file-metadata-or-attributes)
+- [Taxonomy configuration with _index.md files](#taxonomy-configuration-with-_indexmd-files)
 - [Posts and Pages](#posts-and-pages)
 - [Content Hierarchies, Taxonomies, Categories and Sections](#content-hierarchies-taxonomies-categories-and-sections)
 - [Trees](#trees)
@@ -78,7 +78,7 @@ See PardallMarkdown in action and learn how to use it by following this video:
 Add dependency and application into your `mix.exs`:
 ```elixir
 defp deps do
-[{:pardall_markdown, "~> 0.1.3"} ...]
+[{:pardall_markdown, "~> 0.2.0"} ...]
 end
 
 def application do
@@ -98,9 +98,9 @@ config :pardall_markdown, PardallMarkdown.Content,
   # including outside of the application.
   root_path: "/home/documents/content",
 
-  # Name of the folder inside `root_path:`, that contains static assets,
+  # The path that contains static assets,
   # those files won't be parsed.
-  static_assets_folder_name: "static",
+  static_assets_path: "/home/documents/content/static",
 
   # ETS tables names
   cache_name: :content_cache,  
@@ -118,6 +118,23 @@ config :pardall_markdown, PardallMarkdown.Content,
   # definitely want this as `true`.
   convert_internal_links_to_live_links: true,
 
+  # Markdown files can contain a top section with metadata/attributes related
+  # to the file. Is the metadata required?
+  is_markdown_metadata_required: true,
+
+  # Are posts set as draft (unpublished) by default? If true, posts will appear
+  # in the content trees only when they have the attribute `published: true`
+  # (which sets `Post.is_published == true`). Draft posts can be retrieved
+  # only by calling their slug directly with `Repository.get_by_slug/1`
+  is_content_draft_by_default: true,
+
+  # Added for compatibility with Markdown files from Joplin.
+  # When `true`, the parser will consider the first line of text to be
+  # the post title. Even when as `true`, the title can still be overriden
+  # by the metadata. Set to `false` in most cases, unless
+  # you are exporting notes from Joplin.
+  should_try_split_content_title_from_first_line: false,
+
   # Callback to be called every time the content and the indexes are rebuilt.
   #
   # For example, you can put a reference to a function that calls Endpoint.broadcast!:
@@ -132,14 +149,13 @@ config :pardall_markdown, PardallMarkdown.Content,
 ```
 
 ## Usage with Phoenix applications
-Alongside the main required configuration, if you want to serve static files from the content folder, add a `Plug.Static` into your `Phoenix.Endpoint` configuration that refers to the static assets folder (`:static_assets_folder_name`):
+Alongside the main required configuration, if you want to serve static files, add a `Plug.Static` into your `Phoenix.Endpoint` configuration that refers to the static assets folder (`:static_assets_path`):
 
 ```elixir
 plug Plug.Static,
-    at: "/",
-    from: Content.Utils.root_path(),
-    gzip: true,
-    only: [Content.Utils.static_assets_folder_name()]
+    at: "/static/", # if the static assets path ends at "/static", i.e. /path/to/content/static
+    from: Content.Utils.static_assets_path(),
+    gzip: true
 ```
 
 Check [the demo](https://github.com/alfredbaudisch/pardall-markdown-phoenix-demo) application for a complete Phoenix application sample, including sample content. Or watch the PardallMarkdown Phoenix LiveView [tutorial video](https://www.youtube.com/watch?v=FdzqToe3dug).
@@ -152,7 +168,7 @@ def get_all_posts(type \\ :all)
 def get_all_links(type \\ :all)
 def get_taxonomy_tree()
 def get_content_tree(slug \\ "/")
-def get_all_published
+def get_all_published()
 def get_by_slug(slug)
 def get_by_slug!(slug)
 ```
@@ -171,15 +187,20 @@ The slug is used to get content in all forms using `PardallMarkdown.Repository` 
 
 Slugs are automatically generated from file paths. For example, a Markdown file named: `"/blog/news/Top news of_today.md"` will have the slug: `"/blog/news/top-news-of-today"`.
 
-# Required Metadata Map in every Markdown file
-Every Markdown file must contain a metadata/configuration Elixir Map at the top, separated by `---` and a line break, which is similar to [Front Matter](https://jekyllrb.com/docs/front-matter/).
+# Markdown file metadata or attributes
+Markdown files may include a metadata / attribute / configuration Elixir Map at the top, separated by `---` and a line break, which is similar to [Front Matter](https://jekyllrb.com/docs/front-matter/).
+
+By default, the map is required, but it can be made optional by the configuration `:is_markdown_metadata_required`.
 
 The following configuration properties are available (all optional):
 - `:title`: the post title. If not provided, a title will be generated from the post slug.
 - `:date`: the date or date-time to be considered for the post, string, ISO format. If not provided, the file modification date will be considered as the post date.
-- `:published`: a post without `published: true` set, will be considered draft.
+- `:published`: a post without `published: true` set will be considered draft. The default can be inverted when the configuration `:is_content_draft_by_default` is set to `false`, this way, posts will always be considered as published, unless they contain: `published: false`.
 - `:summary`: post description or short content.
 - `:position`: if the post topmost taxonomy has a `:sort_by` rule set to `:position`, this is the value that will be used to sort the post (see below).
+- `:slug`: override the post slug. As seem above, by default, slugs are generated from the file names and are the main, unique identifier of posts.
+  - If you override the slug with this property, make sure to put the full path, prepended by a slash, example: `slug: "/my/custom/slug"`.
+  - It's your responsibility to put non-conflicting slugs when overriding slugs with this property.
 - Any other extra property, which will be saved into the post's `PardallMarkdown.Content.Post.metadata` field.
 
 Example:
@@ -196,7 +217,7 @@ Example:
 Content goes here
 ```
 
-If you want to use automatic values, the map can be empty, but it's still mandatory:
+If you want to use automatic values, the map can be empty (or you can leave out the map when `is_markdown_metadata_required: false`):
 ```elixir
 %{
 }
@@ -204,7 +225,7 @@ If you want to use automatic values, the map can be empty, but it's still mandat
 Content goes here
 ```
 
-# Configuration _index.md files
+# Taxonomy configuration with _index.md files
 Inside top level taxonomies, a `_index.md` can be created which can contain taxonomy configuration (via a metadata map) as well an optional `PardallMarkdown.Content.Post` content for the taxonomy archive page, the contents of this file are saved into `PardallMarkdown.Content.Link.index_post`.
 
 The `_index` metadata map may contain:

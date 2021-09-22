@@ -19,6 +19,7 @@ defmodule PardallMarkdown.Repository do
   alias PardallMarkdown.Content.Post
   alias PardallMarkdown.Cache
   import PardallMarkdown.Content.Filters
+  import PardallMarkdown.Content.Utils
   require Logger
   alias Ecto.Changeset
 
@@ -122,7 +123,7 @@ defmodule PardallMarkdown.Repository do
       slug: attrs.slug,
       date: attrs.date,
       summary: Map.get(attrs, :summary, nil),
-      is_published: Map.get(attrs, :published, false),
+      is_published: Map.get(attrs, :published, not is_content_draft_by_default?()),
       # for now, when a post is pushed to the repository, only "categories" are known
       taxonomies: attrs.categories,
       metadata: attrs |> remove_default_attributes(),
@@ -131,14 +132,16 @@ defmodule PardallMarkdown.Repository do
     })
     |> (fn
           %Changeset{valid?: true} = changeset ->
-            changeset
+            (%Post{} = post) = changeset
             |> Changeset.apply_changes()
             |> save_post()
 
             Logger.info("Saved post #{slug}")
+            {:ok, post}
 
           changeset ->
             Logger.error("Could not save post #{slug}, errors: #{inspect(changeset.errors)}")
+            {:error, changeset}
         end).()
   end
 
