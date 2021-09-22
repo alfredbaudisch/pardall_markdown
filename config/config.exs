@@ -11,7 +11,7 @@ config :pardall_markdown, PardallMarkdown.Content,
   # This can be any relative or absolute path, including outside of the application,
   # which is actually, the main use case for PardallMarkdown
   root_path: "./sample_content",
-  static_assets_folder_name: "static",
+  static_assets_path: "./sample_content/static",
   cache_name: :content_cache,
   index_cache_name: :content_index_cache,
   recheck_pending_file_events_interval: 10_000,

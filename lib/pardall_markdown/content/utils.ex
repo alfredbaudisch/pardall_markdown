@@ -6,12 +6,10 @@ defmodule PardallMarkdown.Content.Utils do
       Application.get_env(:pardall_markdown, PardallMarkdown.Content)[:root_path] ||
         raise("root_path not defined")
 
-  def static_assets_folder_name,
-    do:
-      Application.get_env(:pardall_markdown, PardallMarkdown.Content)[:static_assets_folder_name] ||
-        raise("static_assets_folder_name not defined")
-
-  def static_assets_path, do: Path.join(root_path(), static_assets_folder_name())
+  def static_assets_path,
+  do:
+    Application.get_env(:pardall_markdown, PardallMarkdown.Content)[:static_assets_path] ||
+      raise("static_assets_path not defined")
 
   def is_path_from_static_assets?(path), do: String.starts_with?(path, static_assets_path())
 

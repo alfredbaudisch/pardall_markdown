@@ -98,9 +98,9 @@ config :pardall_markdown, PardallMarkdown.Content,
   # including outside of the application.
   root_path: "/home/documents/content",
 
-  # Name of the folder inside `root_path:`, that contains static assets,
+  # The path that contains static assets,
   # those files won't be parsed.
-  static_assets_folder_name: "static",
+  static_assets_path: "/home/documents/content/static",
 
   # ETS tables names
   cache_name: :content_cache,  
@@ -132,14 +132,13 @@ config :pardall_markdown, PardallMarkdown.Content,
 ```
 
 ## Usage with Phoenix applications
-Alongside the main required configuration, if you want to serve static files from the content folder, add a `Plug.Static` into your `Phoenix.Endpoint` configuration that refers to the static assets folder (`:static_assets_folder_name`):
+Alongside the main required configuration, if you want to serve static files, add a `Plug.Static` into your `Phoenix.Endpoint` configuration that refers to the static assets folder (`:static_assets_path`):
 
 ```elixir
 plug Plug.Static,
-    at: "/",
-    from: Content.Utils.root_path(),
-    gzip: true,
-    only: [Content.Utils.static_assets_folder_name()]
+    at: "/static/", # if the static assets path ends at "/static", i.e. /path/to/content/static
+    from: Content.Utils.static_assets_path(),
+    gzip: true
 ```
 
 Check [the demo](https://github.com/alfredbaudisch/pardall-markdown-phoenix-demo) application for a complete Phoenix application sample, including sample content. Or watch the PardallMarkdown Phoenix LiveView [tutorial video](https://www.youtube.com/watch?v=FdzqToe3dug).
