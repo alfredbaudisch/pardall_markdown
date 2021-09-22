@@ -10,7 +10,7 @@ defmodule PardallMarkdown.FileParser do
   end
 
   def extract!(path) do
-    if not should_extract_path?(path) do
+    if should_extract_path?(path) do
       if File.dir?(path),
         do: extract_folder!(path),
         else: extract_file!(path)
@@ -74,17 +74,27 @@ defmodule PardallMarkdown.FileParser do
       Logger.info("Pushed converted Markdown: #{path}")
       Repository.push_post(path, attrs, body_html)
     else
-      {:error, error} ->
+      {:error, error} = res ->
         Logger.error("Could not parse file #{path}: #{inspect(error)}")
+        res
 
       {:error, _, error} ->
         Logger.error("Could not render Markdown file #{path}: #{inspect(error)}")
+        {:error, error}
     end
   end
 
   # From https://github.com/dashbitco/nimble_publisher
   defp parse_contents(path, contents) do
+    is_markdown_metadata_required? =
+      Application.get_env(:pardall_markdown, PardallMarkdown.Content)[
+        :is_markdown_metadata_required
+      ]
+
     case :binary.split(contents, ["\n---\n", "\r\n---\r\n"]) do
+      [_] when not is_markdown_metadata_required? ->
+        {:ok, %{}, contents}
+
       [_] ->
         {:error, "could not find separator --- in #{inspect(path)}"}
 

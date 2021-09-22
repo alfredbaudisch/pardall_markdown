@@ -13,7 +13,7 @@
 - [API](#api)
   - [Models](#models)
 - [Slug: unique identifiers for posts, pages, categories and trees](#slug-unique-identifiers-for-posts-pages-categories-and-trees)
-- [Required Metadata Map in every Markdown file](#required-metadata-map-in-every-markdown-file)
+- [Markdown file metadata or attributes](#metadata-file-metadata-or-attributes)
 - [Configuration _index.md files](#configuration-_indexmd-files)
 - [Posts and Pages](#posts-and-pages)
 - [Content Hierarchies, Taxonomies, Categories and Sections](#content-hierarchies-taxonomies-categories-and-sections)
@@ -118,6 +118,10 @@ config :pardall_markdown, PardallMarkdown.Content,
   # definitely want this as `true`.
   convert_internal_links_to_live_links: true,
 
+  # Markdown files can contain a top section with metadata/attributes related
+  # to the file. Is the metadata required?
+  is_markdown_metadata_required: true,
+
   # Callback to be called every time the content and the indexes are rebuilt.
   #
   # For example, you can put a reference to a function that calls Endpoint.broadcast!:
@@ -170,8 +174,10 @@ The slug is used to get content in all forms using `PardallMarkdown.Repository` 
 
 Slugs are automatically generated from file paths. For example, a Markdown file named: `"/blog/news/Top news of_today.md"` will have the slug: `"/blog/news/top-news-of-today"`.
 
-# Required Metadata Map in every Markdown file
-Every Markdown file must contain a metadata/configuration Elixir Map at the top, separated by `---` and a line break, which is similar to [Front Matter](https://jekyllrb.com/docs/front-matter/).
+# Markdown file metadata or attributes
+Markdown files may include a metadata / attribute / configuration Elixir Map at the top, separated by `---` and a line break, which is similar to [Front Matter](https://jekyllrb.com/docs/front-matter/).
+
+By default, the map is required, but it can be made optional by the configuration `:is_markdown_metadata_required`.
 
 The following configuration properties are available (all optional):
 - `:title`: the post title. If not provided, a title will be generated from the post slug.
@@ -195,7 +201,7 @@ Example:
 Content goes here
 ```
 
-If you want to use automatic values, the map can be empty, but it's still mandatory:
+If you want to use automatic values, the map can be empty, (not mandatory when `is_markdown_metadata_required: false`):
 ```elixir
 %{
 }

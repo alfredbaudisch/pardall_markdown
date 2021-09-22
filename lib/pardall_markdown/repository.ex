@@ -131,14 +131,16 @@ defmodule PardallMarkdown.Repository do
     })
     |> (fn
           %Changeset{valid?: true} = changeset ->
-            changeset
+            (%Post{} = post) = changeset
             |> Changeset.apply_changes()
             |> save_post()
 
             Logger.info("Saved post #{slug}")
+            {:ok, post}
 
           changeset ->
             Logger.error("Could not save post #{slug}, errors: #{inspect(changeset.errors)}")
+            {:error, changeset}
         end).()
   end
 

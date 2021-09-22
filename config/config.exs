@@ -14,10 +14,11 @@ config :pardall_markdown, PardallMarkdown.Content,
   static_assets_path: "./sample_content/static",
   cache_name: :content_cache,
   index_cache_name: :content_index_cache,
-  recheck_pending_file_events_interval: 10_000,
+  recheck_pending_file_events_interval: 5_000,
   content_tree_display_home: false,
   convert_internal_links_to_live_links: true,
-  notify_content_reloaded: fn -> :ok end
+  notify_content_reloaded: fn -> :ok end,
+  is_markdown_metadata_required: false
 
 # Configures Elixir's Logger
 config :logger, :console,
