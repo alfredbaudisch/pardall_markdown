@@ -8,8 +8,7 @@
 use Mix.Config
 
 config :pardall_markdown, PardallMarkdown.Content,
-  # This can be any relative or absolute path, including outside of the application,
-  # which is actually, the main use case for PardallMarkdown
+  # Check the README for instructions regarding the configuration
   root_path: "./sample_content",
   static_assets_path: "./sample_content/static",
   cache_name: :content_cache,
@@ -18,8 +17,9 @@ config :pardall_markdown, PardallMarkdown.Content,
   content_tree_display_home: false,
   convert_internal_links_to_live_links: true,
   notify_content_reloaded: fn -> :ok end,
-  is_markdown_metadata_required: false,
-  is_content_draft_by_default: true
+  is_markdown_metadata_required: true,
+  is_content_draft_by_default: true,
+  should_try_split_content_title_from_first_line: false
 
 # Configures Elixir's Logger
 config :logger, :console,

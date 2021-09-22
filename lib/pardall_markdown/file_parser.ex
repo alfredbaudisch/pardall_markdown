@@ -84,10 +84,40 @@ defmodule PardallMarkdown.FileParser do
     end
   end
 
-  # From https://github.com/dashbitco/nimble_publisher
   defp parse_contents(path, contents) do
+    split_first_line? =
+      Application.get_env(:pardall_markdown, PardallMarkdown.Content, false)[
+        :should_try_split_content_title_from_first_line
+      ]
+
+    if split_first_line? do
+      case :binary.split(contents, ["\n\n", "\r\n\r\n"]) do
+        [_] ->
+          parse_metadata_from_contents(path, contents)
+
+        [title, contents] ->
+          case parse_metadata_from_contents(path, contents) do
+            # A title from the metadata always has priority
+            {:ok, %{title: custom_title}, _} = parsed
+            when is_binary(custom_title) and custom_title != "" ->
+              parsed
+
+            # Use the title from the first line
+            {:ok, attrs, body} ->
+              {:ok, attrs |> Map.put(:title, title), body}
+
+            other -> other
+          end
+      end
+    else
+      parse_metadata_from_contents(path, contents)
+    end
+  end
+
+  # From https://github.com/dashbitco/nimble_publisher
+  defp parse_metadata_from_contents(path, contents) do
     is_markdown_metadata_required? =
-      Application.get_env(:pardall_markdown, PardallMarkdown.Content)[
+      Application.get_env(:pardall_markdown, PardallMarkdown.Content, true)[
         :is_markdown_metadata_required
       ]
 

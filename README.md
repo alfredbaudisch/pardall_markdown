@@ -128,6 +128,13 @@ config :pardall_markdown, PardallMarkdown.Content,
   # only by calling their slug directly with `Repository.get_by_slug/1`
   is_content_draft_by_default: true,
 
+  # Added for compatibility with Markdown files from Joplin.
+  # When `true`, the parser will consider the first line of text to be
+  # the post title. Even when as `true`, the title can still be overriden
+  # by the metadata. Set to `false` in most cases, unless
+  # you are exporting notes from Joplin.
+  should_try_split_content_title_from_first_line: false,
+
   # Callback to be called every time the content and the indexes are rebuilt.
   #
   # For example, you can put a reference to a function that calls Endpoint.broadcast!:
