@@ -18,7 +18,8 @@ config :pardall_markdown, PardallMarkdown.Content,
   content_tree_display_home: false,
   convert_internal_links_to_live_links: true,
   notify_content_reloaded: fn -> :ok end,
-  is_markdown_metadata_required: false
+  is_markdown_metadata_required: false,
+  is_content_draft_by_default: true
 
 # Configures Elixir's Logger
 config :logger, :console,

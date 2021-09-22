@@ -24,6 +24,9 @@ defmodule PardallMarkdown.Content.Utils do
 
   def slugify(value), do: value |> Slug.slugify(ignore: ["/"])
 
+  def is_content_draft_by_default?, do:
+    Application.get_env(:pardall_markdown, PardallMarkdown.Content, true)[:is_content_draft_by_default]
+
   @doc """
   Splits a path into a tree of categories, containing both readable category names
   and slugs for all categories in the hierarchy. The categories list is indexed from the

@@ -122,6 +122,12 @@ config :pardall_markdown, PardallMarkdown.Content,
   # to the file. Is the metadata required?
   is_markdown_metadata_required: true,
 
+  # Are posts set as draft (unpublished) by default? If true, posts will appear
+  # in the content trees only when they have the attribute `published: true`
+  # (which sets `Post.is_published == true`). Draft posts can be retrieved
+  # only by calling their slug directly with `Repository.get_by_slug/1`
+  is_content_draft_by_default: true,
+
   # Callback to be called every time the content and the indexes are rebuilt.
   #
   # For example, you can put a reference to a function that calls Endpoint.broadcast!:
@@ -155,7 +161,7 @@ def get_all_posts(type \\ :all)
 def get_all_links(type \\ :all)
 def get_taxonomy_tree()
 def get_content_tree(slug \\ "/")
-def get_all_published
+def get_all_published()
 def get_by_slug(slug)
 def get_by_slug!(slug)
 ```
@@ -182,7 +188,7 @@ By default, the map is required, but it can be made optional by the configuratio
 The following configuration properties are available (all optional):
 - `:title`: the post title. If not provided, a title will be generated from the post slug.
 - `:date`: the date or date-time to be considered for the post, string, ISO format. If not provided, the file modification date will be considered as the post date.
-- `:published`: a post without `published: true` set, will be considered draft.
+- `:published`: a post without `published: true` set will be considered draft. The default can be inverted when the configuration `:is_content_draft_by_default` is set to `false`, this way, posts will always be considered as published, unless they contain: `published: false`.
 - `:summary`: post description or short content.
 - `:position`: if the post topmost taxonomy has a `:sort_by` rule set to `:position`, this is the value that will be used to sort the post (see below).
 - Any other extra property, which will be saved into the post's `PardallMarkdown.Content.Post.metadata` field.
