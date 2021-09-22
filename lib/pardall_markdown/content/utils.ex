@@ -22,7 +22,7 @@ defmodule PardallMarkdown.Content.Utils do
   def default_sort_order, do: :desc
   def default_position, do: 100_000
 
-  def slugify(value), do: value |> Slug.slugify(ignore: ["/"])
+  def slugify(value, ignore \\ ["/"]), do: value |> Slug.slugify(ignore: ignore)
 
   def is_content_draft_by_default?, do:
     Application.get_env(:pardall_markdown, PardallMarkdown.Content, true)[:is_content_draft_by_default]
