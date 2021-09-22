@@ -22,7 +22,7 @@ defmodule PardallMarkdown.Content.Utils do
   def default_sort_order, do: :desc
   def default_position, do: 100_000
 
-  def slugify(value), do: value |> Slug.slugify(ignore: ["/", "../", "./"])
+  def slugify(value), do: value |> Slug.slugify(ignore: ["/"])
 
   @doc """
   Splits a path into a tree of categories, containing both readable category names
