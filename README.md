@@ -13,7 +13,7 @@
 - [API](#api)
   - [Models](#models)
 - [Slug: unique identifiers for posts, pages, categories and trees](#slug-unique-identifiers-for-posts-pages-categories-and-trees)
-- [Markdown file metadata or attributes](#metadata-file-metadata-or-attributes)
+- [Markdown file metadata or attributes](#markdown-file-metadata-or-attributes)
 - [Configuration _index.md files](#configuration-_indexmd-files)
 - [Posts and Pages](#posts-and-pages)
 - [Content Hierarchies, Taxonomies, Categories and Sections](#content-hierarchies-taxonomies-categories-and-sections)
@@ -214,7 +214,7 @@ Example:
 Content goes here
 ```
 
-If you want to use automatic values, the map can be empty, (not mandatory when `is_markdown_metadata_required: false`):
+If you want to use automatic values, the map can be empty (or you can leave out the map when `is_markdown_metadata_required: false`):
 ```elixir
 %{
 }
