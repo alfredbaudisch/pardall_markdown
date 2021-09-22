@@ -53,7 +53,7 @@ defmodule PardallMarkdown.FileParser do
     is_index? = is_index_file?(path)
 
     with {:ok, raw_content} <- File.read(path),
-         {:ok, attrs, body} <- parse_contents(path, raw_content),
+         {:ok, attrs, body} <- parse_contents(path, raw_content, is_index?),
          {:ok, body_html, _} <- markdown_to_html(body),
          {:ok, summary_html, _} <- maybe_summary_to_html(attrs),
          {:ok, date} <- parse_or_get_date(attrs, path) do
@@ -84,7 +84,7 @@ defmodule PardallMarkdown.FileParser do
     end
   end
 
-  defp parse_contents(path, contents) do
+  defp parse_contents(path, contents, is_index?) do
     split_first_line? =
       Application.get_env(:pardall_markdown, PardallMarkdown.Content, false)[
         :should_try_split_content_title_from_first_line
@@ -93,6 +93,9 @@ defmodule PardallMarkdown.FileParser do
     if split_first_line? do
       case :binary.split(contents, ["\n\n", "\r\n\r\n"]) do
         [_] ->
+          parse_metadata_from_contents(path, contents)
+
+        [_, contents] when is_index? ->
           parse_metadata_from_contents(path, contents)
 
         [title, contents] ->
