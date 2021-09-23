@@ -13,7 +13,11 @@
 - [API](#api)
   - [Models](#models)
 - [Slug: unique identifiers for posts, pages, categories and trees](#slug-unique-identifiers-for-posts-pages-categories-and-trees)
-- [Markdown file metadata or attributes](#markdown-file-metadata-or-attributes)
+- [Markdown file metadata and attributes](#markdown-file-metadata-and-attributes)
+  - [Metadata parsers](#metadata-parsers)
+    - [Elixir map](#elixir-map)
+    - [Joplin notes](#joplin-notes)
+    - [Custom parsers](#custom-parsers)
 - [Taxonomy configuration with _index.md files](#taxonomy-configuration-with-_indexmd-files)
 - [Posts and Pages](#posts-and-pages)
 - [Content Hierarchies, Taxonomies, Categories and Sections](#content-hierarchies-taxonomies-categories-and-sections)
@@ -61,7 +65,7 @@ See PardallMarkdown in action and learn how to use it by following this video:
 - Automatic creation of **taxonomy trees and content tress**.
     - Separate content trees, per root hierarchy are also created. For example, a content tree for the *Documentation* hierarchy, which contains links to all sub-hierarchies and posts.
 - Automatic creation of **post navigation links** (next and previous posts).
-- Freely embeddable **metadata into posts** as Elixir maps.
+- Freely embeddable **metadata into posts**, with the option to choose a parser (or a custom one) for the metadata (Elixir map, Joplin notes, YAML FrontMatter, etc).
 - Hierarchy **archive lists**.
 - All the content and indexes are kept in an **in-memory cache (Elixir's ETS)**.
 
@@ -128,12 +132,9 @@ config :pardall_markdown, PardallMarkdown.Content,
   # only by calling their slug directly with `Repository.get_by_slug/1`
   is_content_draft_by_default: true,
 
-  # Added for compatibility with Markdown files from Joplin.
-  # When `true`, the parser will consider the first line of text to be
-  # the post title. Even when as `true`, the title can still be overriden
-  # by the metadata. Set to `false` in most cases, unless
-  # you are exporting notes from Joplin.
-  should_try_split_content_title_from_first_line: false,
+  # Which parser to use to parse a Markdown file's metadata?
+  # See the documentation section *Markdown file metadata and attributes*
+  metadata_parser: PardallMarkdown.MetadataParser.ElixirMap,
 
   # Callback to be called every time the content and the indexes are rebuilt.
   #
@@ -187,21 +188,27 @@ The slug is used to get content in all forms using `PardallMarkdown.Repository` 
 
 Slugs are automatically generated from file paths. For example, a Markdown file named: `"/blog/news/Top news of_today.md"` will have the slug: `"/blog/news/top-news-of-today"`.
 
-# Markdown file metadata or attributes
-Markdown files may include a metadata / attribute / configuration Elixir Map at the top, separated by `---` and a line break, which is similar to [Front Matter](https://jekyllrb.com/docs/front-matter/).
+# Markdown file metadata and attributes
+Markdown files may include post metadata / attributes / configuration at the top, which follows the same purpose as [Front Matter](https://jekyllrb.com/docs/front-matter/).
 
-By default, the map is required, but it can be made optional by the configuration `:is_markdown_metadata_required`.
+The metadata must follow the pattern and specs of the chose `PardallMarkdown.MetadataParser` parser for the application. The parser is defined with the configuration key `:metadata_parser`.
+
+By default, the metadata is required, but it can be made optional by the configuration `:is_markdown_metadata_required`.
 
 The following configuration properties are available (all optional):
-- `:title`: the post title. If not provided, a title will be generated from the post slug.
-- `:date`: the date or date-time to be considered for the post, string, ISO format. If not provided, the file modification date will be considered as the post date.
-- `:published`: a post without `published: true` set will be considered draft. The default can be inverted when the configuration `:is_content_draft_by_default` is set to `false`, this way, posts will always be considered as published, unless they contain: `published: false`.
-- `:summary`: post description or short content.
-- `:position`: if the post topmost taxonomy has a `:sort_by` rule set to `:position`, this is the value that will be used to sort the post (see below).
-- `:slug`: override the post slug. As seem above, by default, slugs are generated from the file names and are the main, unique identifier of posts.
+- `title`: the post title. If not provided, a title will be generated from the post slug.
+- `date`: the date or date-time to be considered for the post, string, ISO format. If not provided, the file modification date will be considered as the post date.
+- `published`: a post without `published: true` set will be considered draft. The default can be inverted when the configuration `:is_content_draft_by_default` is set to `false`, this way, posts will always be considered as published, unless they contain: `published: false`.
+- `summary`: post description or short content.
+- `position`: if the post topmost taxonomy has a `:sort_by` rule set to `:position`, this is the value that will be used to sort the post (see below).
+- `slug`: override the post slug. As seem above, by default, slugs are generated from the file names and are the main, unique identifier of posts.
   - If you override the slug with this property, make sure to put the full path, prepended by a slash, example: `slug: "/my/custom/slug"`.
   - It's your responsibility to put non-conflicting slugs when overriding slugs with this property.
 - Any other extra property, which will be saved into the post's `PardallMarkdown.Content.Post.metadata` field.
+
+## Metadata parsers
+### Elixir map
+The metadata is defined with an Elixir Map, separated by `---` and a line break. The properties are Map keys as atoms.
 
 Example:
 ```elixir
@@ -224,6 +231,48 @@ If you want to use automatic values, the map can be empty (or you can leave out 
 ---
 Content goes here
 ```
+
+### Joplin notes
+Markdown posts exported from [Joplin](https://joplinapp.org/) notes always contain the title of the post at the top, separated by a blank line, example:
+
+```
+Post title
+
+... content goes here
+```
+
+The parser `PardallMarkdown.MetadataParser.JoplinNote` is available to deal with Joplin notes. Note that you can also add metadata to Joplin notes, even inside Joplin. The metadata format has to be in a chosen parser and then you just add it at the top of the note in Joplin itself, example:
+
+Note title: "Post title"
+
+```
+%{
+  position: 0
+}
+---
+Content goes here.
+```
+
+Joplin will export it as:
+```
+Post title
+
+%{
+  position: 0
+}
+---
+Content goes here.
+```
+
+You can use any metadata parser for Joplin notes (by default, elixir maps with `PardallMarkdown.MetadataParser.ElixirMap`) with the configuration:
+
+```
+config :pardall_markdown, PardallMarkdown.MetadataParser.JoplinNote,
+  metadata_parser_after_title: PardallMarkdown.MetadataParser.ElixirMap
+```
+
+### Custom parsers
+To implement a parser, check the behaviour `PardallMarkdown.MetadataParser` and the existing [including parsers](./lib/pardall_markdown/metadata_parser).
 
 # Taxonomy configuration with _index.md files
 Inside top level taxonomies, a `_index.md` can be created which can contain taxonomy configuration (via a metadata map) as well an optional `PardallMarkdown.Content.Post` content for the taxonomy archive page, the contents of this file are saved into `PardallMarkdown.Content.Link.index_post`.
