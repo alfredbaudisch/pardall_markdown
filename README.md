@@ -3,7 +3,7 @@
 [![Build Status](https://github.com/alfredbaudisch/pardall_markdown/actions/workflows/elixir.yml/badge.svg)](https://github.com/alfredbaudisch/pardall_markdown/actions/workflows/elixir.yml)
 [![Module Version](https://img.shields.io/hexpm/v/pardall_markdown.svg)](https://hex.pm/packages/pardall_markdown) [![Total Download](https://img.shields.io/hexpm/dt/pardall_markdown.svg)](https://hex.pm/packages/pardall_markdown) [![Last Updated](https://img.shields.io/github/last-commit/alfredbaudisch/pardall_markdown.svg)](https://github.com/alfredbaudisch/pardall_markdown/commits/master) [![Donate using PayPal](https://raw.githubusercontent.com/laurent22/joplin/dev/Assets/WebsiteAssets/images/badges/Donate-PayPal-green.svg)](https://www.paypal.com/donate?hosted_button_id=FC5FTRRE3548C) [![Become a patron](https://raw.githubusercontent.com/laurent22/joplin/dev/Assets/WebsiteAssets/images/badges/Patreon-Badge.svg)](https://www.patreon.com/alfredbaudisch)
 
-# Table of Contents
+## Table of Contents
 - [Introduction](#introduction)
 - [Video Demo and Tutorial](#video-demo-and-tutorial)
 - [Features](#features)
@@ -40,17 +40,17 @@
 - [Copyright License](#copyright-license)
   - [Additional notices](#additional-notices)
 
-# Introduction
+## Introduction
 
 PardallMarkdown is a reactive publishing framework and engine written in Elixir. Instant websites and documentation websites.
 
 **As opposed to static website generators** (such as Hugo, Docusaurs and others), with PardallMarkdown, **you don't need to recompile and republish your application every time you write or modify new content**. The application can be kept running indefinitely in production, while it **watches a content folder for changes** and **the new content re-actively gets available for consumption** by your application.
 
-# Video Demo and Tutorial
+## Video Demo and Tutorial
 See PardallMarkdown in action and learn how to use it by following this video:
 [![](https://github.com/alfredbaudisch/pardall_markdown/blob/master/sample_content/static/images/pardallmarkdown-demo-and-tutorial-with-play.jpg)](https://www.youtube.com/watch?v=FdzqToe3dug)
 
-# Features
+## Features
 
 - Filesystem-based, with **Markdown** and static files support.
     - Markdown files are parsed as HTML.
@@ -69,7 +69,7 @@ See PardallMarkdown in action and learn how to use it by following this video:
 - Hierarchy **archive lists**.
 - All the content and indexes are kept in an **in-memory cache (Elixir's ETS)**.
 
-## Use cases
+### Use cases
 - Blogs
 - Documentation websites
 - Wikis
@@ -78,11 +78,11 @@ See PardallMarkdown in action and learn how to use it by following this video:
 - Any application that needs content?
 
 
-# Usage in Elixir OTP applications
+## Usage in Elixir OTP applications
 Add dependency and application into your `mix.exs`:
 ```elixir
 defp deps do
-[{:pardall_markdown, "~> 0.2.0"} ...]
+[{:pardall_markdown, "~> 0.3.0"} ...]
 end
 
 def application do
@@ -149,7 +149,7 @@ config :pardall_markdown, PardallMarkdown.Content,
   notify_content_reloaded: &MyApp.content_reloaded/0
 ```
 
-## Usage with Phoenix applications
+### Usage with Phoenix applications
 Alongside the main required configuration, if you want to serve static files, add a `Plug.Static` into your `Phoenix.Endpoint` configuration that refers to the static assets folder (`:static_assets_path`):
 
 ```elixir
@@ -161,7 +161,7 @@ plug Plug.Static,
 
 Check [the demo](https://github.com/alfredbaudisch/pardall-markdown-phoenix-demo) application for a complete Phoenix application sample, including sample content. Or watch the PardallMarkdown Phoenix LiveView [tutorial video](https://www.youtube.com/watch?v=FdzqToe3dug).
 
-# API
+## API
 Content is retrieved with `PardallMarkdown.Repository`. Check details and instructions [in the docs](https://hexdocs.pm/pardall_markdown/PardallMarkdown.Repository.html).
 
 ```elixir
@@ -174,21 +174,21 @@ def get_by_slug(slug)
 def get_by_slug!(slug)
 ```
 
-## Models
+### Models
 The content returned by the API is of the types:
 
 - `PardallMarkdown.Content.Post` ([docs](https://hexdocs.pm/pardall_markdown/PardallMarkdown.Content.Post.html))
 - `PardallMarkdown.Content.Link` ([docs](https://hexdocs.pm/pardall_markdown/PardallMarkdown.Content.Link.html))
 - `PardallMarkdown.Content.AnchorLink` ([docs](https://hexdocs.pm/pardall_markdown/PardallMarkdown.Content.AnchorLink.html))
 
-# Slug: unique identifiers for posts, pages, categories and trees
+## Slug: unique identifiers for posts, pages, categories and trees
 Every piece of content has an unique identifier, which is simply the content URL slug, example: `"/blog"`, `"/docs/getting-started/how-to-install`. Slugs always have a prepended slash, but never a trail slash.
 
 The slug is used to get content in all forms using `PardallMarkdown.Repository` functions: individual pieces of content, trees and archives. The slug is also how the content is identified in cache.
 
 Slugs are automatically generated from file paths. For example, a Markdown file named: `"/blog/news/Top news of_today.md"` will have the slug: `"/blog/news/top-news-of-today"`.
 
-# Markdown file metadata and attributes
+## Markdown file metadata and attributes
 Markdown files may include post metadata / attributes / configuration at the top, which follows the same purpose as [Front Matter](https://jekyllrb.com/docs/front-matter/).
 
 The metadata must follow the pattern and specs of the chose `PardallMarkdown.MetadataParser` parser for the application. The parser is defined with the configuration key `:metadata_parser`.
@@ -206,8 +206,8 @@ The following configuration properties are available (all optional):
   - It's your responsibility to put non-conflicting slugs when overriding slugs with this property.
 - Any other extra property, which will be saved into the post's `PardallMarkdown.Content.Post.metadata` field.
 
-## Metadata parsers
-### Elixir map
+### Metadata parsers
+#### Elixir map
 The metadata is defined with an Elixir Map, separated by `---` and a line break. The properties are Map keys as atoms.
 
 Example:
@@ -232,7 +232,7 @@ If you want to use automatic values, the map can be empty (or you can leave out 
 Content goes here
 ```
 
-### Joplin notes
+#### Joplin notes
 Markdown posts exported from [Joplin](https://joplinapp.org/) notes always contain the title of the post at the top, separated by a blank line, example:
 
 ```
@@ -271,10 +271,10 @@ config :pardall_markdown, PardallMarkdown.MetadataParser.JoplinNote,
   metadata_parser_after_title: PardallMarkdown.MetadataParser.ElixirMap
 ```
 
-### Custom parsers
-To implement a parser, check the behaviour `PardallMarkdown.MetadataParser` and the existing [including parsers](./lib/pardall_markdown/metadata_parser).
+#### Custom parsers
+To implement a parser, check the behaviour `PardallMarkdown.MetadataParser` and the existing [including parsers](./lib/pardall_markdown/metadata_parser.ex).
 
-# Taxonomy configuration with _index.md files
+## Taxonomy configuration with _index.md files
 Inside top level taxonomies, a `_index.md` can be created which can contain taxonomy configuration (via a metadata map) as well an optional `PardallMarkdown.Content.Post` content for the taxonomy archive page, the contents of this file are saved into `PardallMarkdown.Content.Link.index_post`.
 
 The `_index` metadata map may contain:
@@ -286,7 +286,7 @@ The `_index` metadata map may contain:
 
 Notice that `_index` files are not available via a slug call, i.e. `"/taxonomy/-index"`, instead you must get the taxonomy slug and access the file and post data via `PardallMarkdown.Content.Link.index_post`.
 
-# Posts and Pages
+## Posts and Pages
 Every Markdown file is a post (a piece of content), but PardallMarkdown considers a file in the root folder `"/"` as a "page" and files inside any folder, at any hierarchy level, a "post". Pages are added to the content tree side by side with root hierarchies.
 
 Structurally they are the same, the only difference is their property is set to `PardallMarkdown.Content.Post.type: :post | :page`.
@@ -295,7 +295,7 @@ Examples:
 - Pages: single unique posts that can refer to fixed data, such as a Contact or About page (/contact, /about, etc).
 - Posts: every other piece of content, including blog posts, documentation pages, wiki pages, so on and so forth, which are inside at least one level of taxonomy, example: `"/docs/introduction"` or `"/wiki/languages/english/verbs/to-eat"`.
 
-# Content Hierarchies, Taxonomies, Categories and Sections
+## Content Hierarchies, Taxonomies, Categories and Sections
 Categories, Taxonomies and Website Sections all refer to the same thing: the hierarchy of folders in which the posts are contained in, which in turn define post sets or group of posts. 
 
 - A taxonomy/category/section/group name comes from the folder name, where each word is capitalized.
@@ -356,19 +356,19 @@ The following categories will be created:
 ["Documentation"]["Setup]
 ```
 
-# Trees
+## Trees
 Three types of trees are generated every time the content is recompiled.
 
 Those trees can be used to navigate content, can be printed as a list of links, etc. Check the [demo project](https://github.com/alfredbaudisch/pardall-markdown-phoenix-demo) for multiple examples of how to use the trees and HTML helpers to generate links from the trees.
 
 The trees are:
 
-## Taxonomy Tree
+### Taxonomy Tree
 A tree with all the taxonomies, sorted by title, and nested accordingly.
 
 The taxonomy tree can be retrieved via `PardallMarkdown.Repository.get_taxonomy_tree/0`.
 
-## Content Trees
+### Content Trees
 A tree containing all the taxonomies, but with their children posts nested:
 
 - Posts are placed below their innermost taxonomy.
@@ -378,27 +378,27 @@ Multiple content trees are created. A single "master" content tree, available by
 
 Content trees can be retrieved via `PardallMarkdown.Repository.get_content_tree/1`.
 
-## Post navigation
+### Post navigation
 Inside all posts is inserted a link the the previous and the next posts in the tree, after the current post. The links are in `PardallMarkdown.Content.Post.link.previous` and `PardallMarkdown.Content.Post.link.next`.
 
-## Table of Contents
+### Table of Contents
 Each post contain their own automatically generated Table of Contents tree, available inside the post's `PardallMarkdown.Content.Post.toc` field.
 
-# Back pressure
+## Back pressure
 TODO: describe `FileWatcher` back pressure mechanism.
 
-# FAQ
-## How to integrate it with Phoenix and Phoenix LiveView?
+## FAQ
+### How to integrate it with Phoenix and Phoenix LiveView?
 There is a demo project in a separate repository: [PardallMarkdown Phoenix Demo](https://github.com/alfredbaudisch/pardall-markdown-phoenix-demo).
 
 The demo project also has HTML helpers to print the generated tables of contents, taxonomy and hierarchy trees as HTML `<ul/>>` lists with `<a/>` links.
 
-## PardallMarkdown vs static website generators (Hugo, Docusaurs, etc)
+### PardallMarkdown vs static website generators (Hugo, Docusaurs, etc)
 Every time you make a change to the content or add new content, static website generators require you to rebuild and republish the whole application.
 
 As seen in the Introduction, with PardallMarkdown the application can be kept running indefinitely in production, and **the new content re-actively gets available for consumption** by your application.
 
-## PardallMarkdown vs NimblePublisher
+### PardallMarkdown vs NimblePublisher
 [NimblePublisher](https://github.com/dashbitco/nimble_publisher) is an Elixir framework that parses Markdown files at compile time and make them available all at once in an Elixir's module attribute.
 
 If you need to modify or write new content, you have to recompile and republish the application. That's the only feature provided by NimblePublisher.
@@ -407,10 +407,10 @@ If you intend to have a plain blog page, with few posts, without hierarchies, ta
 
 By the way, the idea of adding an Elixir map with metadata inside Markdown files and the code to parse it comes from a piece of code from NimblePublisher's code (inside `PardallMarkdown.FileParser.parse_contents`).
 
-## How to sync content to PardallMarkdown?
+### How to sync content to PardallMarkdown?
 PardallMarkdown watches for changes from a given content folder (configured via `:root_path`), but there's nothing special about the content folder. Just add and sync content to the content folder normally.
 
-## How to write Markdown locally in your computer and publish it immediately to a PardallMarkdown application or website?
+### How to write Markdown locally in your computer and publish it immediately to a PardallMarkdown application or website?
 As written above, PardallMarkdown watches for changes in a folder. This way, you can sync content from a local source to a remote destination via any way as you would do with or without PardallMarkdown, for example: Git, SyncThings, scp, etc.
 
 Example:
@@ -424,25 +424,27 @@ Example:
 
 If you don't want to use SyncThings, you can have a custom Git repository just for the content and a hook that mirrors the content to a folder watched by your PardallMarkdown configuration.
 
-## Does it require a database?
+### Does it require a database?
 No.
 
-## Why does it use Ecto?
+### Why does it use Ecto?
 - Being used for Post validation and a lot of `embedded_schemas` and the power of `cast_embed`.
 - If needed, an optional database layer may be added in the future.
 
-# Roadmap
+## Roadmap
+- [x] Add support for custom metadata parsers ([#30](https://github.com/alfredbaudisch/pardall_markdown/issues/30)).
+- [x] Add support for Joplin Notes ([#32](https://github.com/alfredbaudisch/pardall_markdown/issues/32)).
 - [ ] Add support for content folders inside a S3 bucket, which will then notify a PardallMarkdown application with webhooks.
 - [ ] Add support to watch external sources for new content, such as GitHub repositories ([#31](https://github.com/alfredbaudisch/pardall_markdown/issues/31)).
-- [ ] Add support for FrontMatter post metadata with YAML, alongside Elixir maps ([#30](https://github.com/alfredbaudisch/pardall_markdown/issues/30)).
+- [ ] Add support for FrontMatter post metadata with YAML ([#41](https://github.com/alfredbaudisch/pardall_markdown/issues/41)).
 
-# Sponsors and Donations
+## Sponsors and Donations
 
 You can support my open-source contributions and this project on [Patreon](https://www.patreon.com/alfredbaudisch) or with a [PayPal donation](https://www.paypal.com/donate?hosted_button_id=FC5FTRRE3548C). Patrons and donors of any tier will have their name listed here. Patrons of the **Sponsors** tier or higher, can also have a link and a logo listed here.
 
 - Mike King
 
-# Copyright License
+## Copyright License
 
     Copyright 2021 Alfred Reinold Baudisch (alfredbaudisch, pardall)
 
@@ -458,7 +460,7 @@ You can support my open-source contributions and this project on [Patreon](https
     See the License for the specific language governing permissions and
     limitations under the License.
 
-## Additional notices
+### Additional notices
 
 - It's suggested that applications using this software mention this project name with a link to this project repository. You can put it anywhere in your application, for example, in a website footer or *About* page: `Powered by [PardallMarkdown](https://github.com/alfredbaudisch/pardall_markdown)`.
 - PardallMarkdown uses a snippet of code from [nimble_publisher](https://github.com/dashbitco/nimble_publisher), Copyright 2020 Dashbit, licensed under Apache License, Version 2.0.
