@@ -85,67 +85,25 @@ defmodule PardallMarkdown.FileParser do
   end
 
   defp parse_contents(path, contents, is_index?) do
-    split_first_line? =
-      Application.get_env(:pardall_markdown, PardallMarkdown.Content, false)[
-        :should_try_split_content_title_from_first_line
+    parser =
+      Application.get_env(
+        :pardall_markdown,
+        PardallMarkdown.Content,
+        PardallMarkdown.MetadataParser.ElixirMap
+      )[
+        :metadata_parser
       ]
 
-    if split_first_line? do
-      case :binary.split(contents, ["\n\n", "\r\n\r\n"]) do
-        [_] ->
-          parse_metadata_from_contents(path, contents)
-
-        [_, contents] when is_index? ->
-          parse_metadata_from_contents(path, contents)
-
-        [title, contents] ->
-          case parse_metadata_from_contents(path, contents) do
-            # A title from the metadata always has priority
-            {:ok, %{title: custom_title}, _} = parsed
-            when is_binary(custom_title) and custom_title != "" ->
-              parsed
-
-            # Use the title from the first line
-            {:ok, attrs, body} ->
-              {:ok, attrs |> Map.put(:title, title), body}
-
-            other -> other
-          end
-      end
-    else
-      parse_metadata_from_contents(path, contents)
-    end
-  end
-
-  # From https://github.com/dashbitco/nimble_publisher
-  defp parse_metadata_from_contents(path, contents) do
-    is_markdown_metadata_required? =
+    is_required? =
       Application.get_env(:pardall_markdown, PardallMarkdown.Content, true)[
         :is_markdown_metadata_required
       ]
 
-    case :binary.split(contents, ["\n---\n", "\r\n---\r\n"]) do
-      [_] when not is_markdown_metadata_required? ->
-        {:ok, %{}, contents}
-
-      [_] ->
-        {:error, "could not find separator --- in #{inspect(path)}"}
-
-      [code, body] ->
-        try do
-          case Code.eval_string(code, []) do
-            {%{} = attrs, _} ->
-              {:ok, attrs |> atomize_keys(), body}
-
-            {other, _} ->
-              {:error,
-               "expected attributes for #{inspect(path)} to return a map, got: #{inspect(other)}"}
-          end
-        rescue
-          e in SyntaxError ->
-            {:error, e}
-        end
-    end
+    apply(parser, :parse, [
+      path,
+      contents,
+      [is_index?: is_index?, is_required?: is_required?]
+    ])
   end
 
   defp maybe_summary_to_html(%{summary: summary}) when is_binary(summary) and summary != "",

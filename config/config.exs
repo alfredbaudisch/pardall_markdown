@@ -19,7 +19,10 @@ config :pardall_markdown, PardallMarkdown.Content,
   notify_content_reloaded: fn -> :ok end,
   is_markdown_metadata_required: true,
   is_content_draft_by_default: true,
-  should_try_split_content_title_from_first_line: false
+  metadata_parser: PardallMarkdown.MetadataParser.ElixirMap
+
+config :pardall_markdown, PardallMarkdown.MetadataParser.JoplinNote,
+  metadata_parser_after_title: PardallMarkdown.MetadataParser.ElixirMap
 
 # Configures Elixir's Logger
 config :logger, :console,
