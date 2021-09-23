@@ -21,6 +21,9 @@ config :pardall_markdown, PardallMarkdown.Content,
   is_content_draft_by_default: true,
   metadata_parser: PardallMarkdown.MetadataParser.ElixirMap
 
+config :pardall_markdown, PardallMarkdown.MetadataParser.JoplinNote,
+  metadata_parser_after_title: PardallMarkdown.MetadataParser.ElixirMap
+
 # Configures Elixir's Logger
 config :logger, :console,
   format: "$time $metadata[$level] $message\n",
