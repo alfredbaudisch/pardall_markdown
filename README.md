@@ -5,7 +5,7 @@
 
 ## Table of Contents
 - [Introduction](#introduction)
-  - [Looking for Contributors ⚠️](#looking-for-contributors-)
+  - [Looking for Contributors ⚠️](#looking-for-contributors-%EF%B8%8F)
 - [Video Demo and Tutorial](#video-demo-and-tutorial)
 - [Features](#features)
   - [Use cases](#use-cases)
