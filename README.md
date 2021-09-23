@@ -5,6 +5,7 @@
 
 ## Table of Contents
 - [Introduction](#introduction)
+  - [Looking for Contributors ⚠️](#looking-for-contributors-)
 - [Video Demo and Tutorial](#video-demo-and-tutorial)
 - [Features](#features)
   - [Use cases](#use-cases)
@@ -46,6 +47,11 @@
 PardallMarkdown is a reactive publishing framework and engine written in Elixir. Instant websites and documentation websites.
 
 **As opposed to static website generators** (such as Hugo, Docusaurs and others), with PardallMarkdown, **you don't need to recompile and republish your application every time you write or modify new content**. The application can be kept running indefinitely in production, while it **watches a content folder for changes** and **the new content re-actively gets available for consumption** by your application.
+
+### Looking for Contributors ⚠️
+I'm looking for a contributor(s) to make a more elaborate HTML and CSS template for the demo project. Check the [current demo here](https://pardall.xyz/), including its inner sections. It's a mix of Blog + Documentation + Wiki website. Something like [the Docusaurus template](https://docusaurus.io/docs) would be welcome.
+
+The current demo project and that HTML template have their [own repository](https://github.com/alfredbaudisch/pardall-markdown-phoenix-demo). So, you don't even need to know Elixir, just HTML and CSS. Any help will be appreciated!
 
 ## Video Demo and Tutorial
 See PardallMarkdown in action and learn how to use it by following this video:
