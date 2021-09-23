@@ -49,7 +49,9 @@ PardallMarkdown is a reactive publishing framework and engine written in Elixir.
 **As opposed to static website generators** (such as Hugo, Docusaurs and others), with PardallMarkdown, **you don't need to recompile and republish your application every time you write or modify new content**. The application can be kept running indefinitely in production, while it **watches a content folder for changes** and **the new content re-actively gets available for consumption** by your application.
 
 ### Looking for Contributors ⚠️
-I'm looking for a contributor(s) to make a more elaborate HTML and CSS template for the demo project. Check the [current demo here](https://pardall.xyz/), including its inner sections. It's a mix of Blog + Documentation + Wiki website. Something like [the Docusaurus template](https://docusaurus.io/docs) would be welcome.
+I'm looking for a contributor(s) to make a more elaborate HTML and CSS template for the demo project. Check the [current demo here](https://pardall.xyz/), including its inner sections. It's a mix of Blog + Documentation + Wiki website.
+
+Something like [the Docusaurus template](https://docusaurus.io/docs) is perfect for this project. Docusaurus theme is MIT licensed, **so it can even be extracted to be used by PardallMarkdown**. But CSS is a thing that I'm not very fond of, so that's why I'm looking for help (**even if you could just extract Docusaurus theme as a static HTML template**, it would be awesome).
 
 The current demo project and that HTML template have their [own repository](https://github.com/alfredbaudisch/pardall-markdown-phoenix-demo). So, you don't even need to know Elixir, just HTML and CSS. Any help will be appreciated!
 
