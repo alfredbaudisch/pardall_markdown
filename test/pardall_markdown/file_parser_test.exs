@@ -91,6 +91,9 @@ defmodule PardallMarkdown.FileParserTest do
     {:ok, %Post{title: "Overriden title", content: "<p>\nContent should be here!</p>"}} =
       FileParser.extract!("./test/individual_content/joplin/post_title_overriden.md")
 
+    {:ok, %Post{title: "About"}} =
+      FileParser.extract!("./test/individual_content/joplin/about.md")
+
     {:ok,
      %Post{
        title: "This should work even without the top title",

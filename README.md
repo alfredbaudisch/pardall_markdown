@@ -82,7 +82,7 @@ See PardallMarkdown in action and learn how to use it by following this video:
 Add dependency and application into your `mix.exs`:
 ```elixir
 defp deps do
-[{:pardall_markdown, "~> 0.3.1"} ...]
+[{:pardall_markdown, "~> 0.3.2"} ...]
 end
 
 def application do
