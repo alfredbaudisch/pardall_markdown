@@ -1,6 +1,5 @@
 defmodule PardallMarkdown.FileWatcher do
   use GenServer
-  alias PardallMarkdown.Receiver
   require Logger
 
   @recheck_interval Application.get_env(:pardall_markdown, PardallMarkdown.Content)[
@@ -18,17 +17,12 @@ defmodule PardallMarkdown.FileWatcher do
     {:ok, %{watcher_pid: watcher_pid, pending_events: 1, processing_events: 1}}
   end
 
-  def handle_info({:file_event, _, {_path, event} = data}, %{pending_events: pending} = state) do
+  def handle_info({:file_event, _, {_path, _event} = data}, %{pending_events: pending} = state) do
     Logger.info("Received file event: #{inspect(data)}")
+    pending = pending + 1
+    Logger.info("Event is valid. Pending events: #{pending}.")
 
-    if Receiver.is_event_valid?(event) do
-      pending = pending + 1
-      Logger.info("Event is valid. Pending events: #{pending}.")
-
-      {:noreply, put_in(state[:pending_events], pending)}
-    else
-      {:noreply, state}
-    end
+    {:noreply, put_in(state[:pending_events], pending)}
   end
 
   def handle_info({:file_event, _, :stop}, state) do
