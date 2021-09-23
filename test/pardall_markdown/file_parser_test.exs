@@ -99,8 +99,8 @@ defmodule PardallMarkdown.FileParserTest do
   end
 
   test "override slug" do
-    {:ok, post} = FileParser.extract!("./test/individual_content/custom_slug.md")
+    {:ok, post} = FileParser.extract!("test/individual_content/set_custom_slug.md")
     assert post.slug == "/individual-content/my-slug"
-    assert post.title == "Custom slug"
+    assert post.title == "Set custom slug"
   end
 end
