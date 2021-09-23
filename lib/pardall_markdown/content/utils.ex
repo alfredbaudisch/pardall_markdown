@@ -7,9 +7,9 @@ defmodule PardallMarkdown.Content.Utils do
         raise("root_path not defined")
 
   def static_assets_path,
-  do:
-    Application.get_env(:pardall_markdown, PardallMarkdown.Content)[:static_assets_path] ||
-      raise("static_assets_path not defined")
+    do:
+      Application.get_env(:pardall_markdown, PardallMarkdown.Content)[:static_assets_path] ||
+        raise("static_assets_path not defined")
 
   def is_path_from_static_assets?(path), do: String.starts_with?(path, static_assets_path())
 
@@ -24,8 +24,11 @@ defmodule PardallMarkdown.Content.Utils do
 
   def slugify(value, ignore \\ ["/"]), do: value |> Slug.slugify(ignore: ignore)
 
-  def is_content_draft_by_default?, do:
-    Application.get_env(:pardall_markdown, PardallMarkdown.Content, true)[:is_content_draft_by_default]
+  def is_content_draft_by_default?,
+    do:
+      Application.get_env(:pardall_markdown, PardallMarkdown.Content, true)[
+        :is_content_draft_by_default
+      ]
 
   @doc """
   Splits a path into a tree of categories, containing both readable category names
@@ -63,11 +66,41 @@ defmodule PardallMarkdown.Content.Utils do
 
       iex> PardallMarkdown.Content.Utils.extract_categories_from_path("/post.md")
       [%{title: "Home", slug: "/", level: 0, parents: ["/"]}]
+
+      iex> PardallMarkdown.Content.Utils.extract_categories_from_path("./test/relative/path/some-post.md")
+      [
+        %{level: 0, parents: ["/"], slug: "/test", title: "Test"},
+        %{level: 1, parents: ["/", "/test"], slug: "/test/relative", title: "Relative"},
+        %{level: 2, parents: ["/", "/test", "/test/relative"], slug: "/test/relative/path", title: "Path"}
+      ]
+
+      iex> PardallMarkdown.Content.Utils.extract_categories_from_path("test/relative/no_slash.md")
+      [
+        %{level: 0, parents: ["/"], slug: "/test", title: "Test"},
+        %{level: 1, parents: ["/", "/test"], slug: "/test/relative", title: "Relative"}
+      ]
+
+      iex> PardallMarkdown.Content.Utils.extract_categories_from_path("../../test/relative/path/some-post.md")
+      [
+        %{level: 0, parents: ["/"], slug: "/test", title: "Test"},
+        %{level: 1, parents: ["/", "/test"], slug: "/test/relative", title: "Relative"},
+        %{level: 2, parents: ["/", "/test", "/test/relative"], slug: "/test/relative/path", title: "Path"}
+      ]
   """
   def extract_categories_from_path(full_path) do
     full_path
     |> String.replace(Path.basename(full_path), "")
+    |> adjust_relative_path()
     |> do_extract_categories()
+  end
+
+  defp adjust_relative_path(path) do
+    if String.starts_with?(path, ["./", "../"]) do
+      path
+      |> String.replace(~r/^(\.\/|\.\.\/)+(.*)$/, "/\\2")
+    else
+      if not String.starts_with?(path, "/"), do: "/" <> path, else: path
+    end
   end
 
   # Root / Page
