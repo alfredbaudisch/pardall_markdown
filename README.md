@@ -35,6 +35,7 @@
   - [How to write Markdown locally in your computer and publish it immediately to a PardallMarkdown application or website?](#how-to-write-markdown-locally-in-your-computer-and-publish-it-immediately-to-a-pardallmarkdown-application-or-website)
   - [Does it require a database?](#does-it-require-a-database)
   - [Why does it use Ecto?](#why-does-it-use-ecto)
+- [Who's using?](#whos-using)
 - [Roadmap](#roadmap)
 - [Sponsors and Donations](#sponsors-and-donations)
 - [Copyright License](#copyright-license)
@@ -430,6 +431,9 @@ No.
 ### Why does it use Ecto?
 - Being used for Post validation and a lot of `embedded_schemas` and the power of `cast_embed`.
 - If needed, an optional database layer may be added in the future.
+
+## Who's using?
+- [Pardall](https://pardall.xyz/): this is [my own](https://pardall.xyz/about) [Wiki](https://pardall.xyz/wiki), which serves as a proof of concept for a website made with PardallMarkdown and Phoenix.LiveView, with Markdown files created from Joplin notes, and synced automatically from a local folder in my computer, to a production server using SyncThings.
 
 ## Roadmap
 - [x] Add support for custom metadata parsers ([#30](https://github.com/alfredbaudisch/pardall_markdown/issues/30)).
