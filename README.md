@@ -91,7 +91,7 @@ See PardallMarkdown in action and learn how to use it by following this video:
 Add dependency and application into your `mix.exs`:
 ```elixir
 defp deps do
-[{:pardall_markdown, "~> 0.3.2"} ...]
+[{:pardall_markdown, "~> 0.3.3"} ...]
 end
 
 def application do
@@ -208,7 +208,7 @@ The following configuration properties are available (all optional):
 - `title`: the post title. If not provided, a title will be generated from the post slug.
 - `date`: the date or date-time to be considered for the post, string, ISO format. If not provided, the file modification date will be considered as the post date.
 - `published`: a post without `published: true` set will be considered draft. The default can be inverted when the configuration `:is_content_draft_by_default` is set to `false`, this way, posts will always be considered as published, unless they contain: `published: false`.
-- `summary`: post description or short content.
+- `summary`: post description or short content. If `summary` is not provided, a summary will be generated from the Post's content/body.
 - `position`: if the post topmost taxonomy has a `:sort_by` rule set to `:position`, this is the value that will be used to sort the post (see below).
 - `slug`: override the post slug. As seem above, by default, slugs are generated from the file names and are the main, unique identifier of posts.
   - If you override the slug with this property, make sure to put the full path, prepended by a slash, example: `slug: "/my/custom/slug"`.
