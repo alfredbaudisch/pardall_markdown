@@ -2,7 +2,7 @@ defmodule PardallMarkdown.Content.HtmlUtils do
   alias PardallMarkdown.Content.Utils
 
   def generate_summary_from_html(html, expected_length \\ 157)
-  def generate_summary_from_html(html, _) when html == nil or html == "", do: html
+  def generate_summary_from_html(html, _) when html == nil or html == "", do: nil
 
   @doc """
   Extract text from paragraphs `</p>` of a HTML `html` string,
@@ -12,8 +12,7 @@ defmodule PardallMarkdown.Content.HtmlUtils do
   will be appended to it. If the generated string is smaller than `expected_length`,
   then no ellipsis is added.
 
-  If no text could be extracted from the input html,
-  an empty string is returned.
+  If no text could be extracted from the input html, returns nil.
 
   ## Examples
 
@@ -51,7 +50,8 @@ defmodule PardallMarkdown.Content.HtmlUtils do
     end
   end
 
-  defp trim_and_maybe_ellipsis("", _), do: ""
+  defp trim_and_maybe_ellipsis(string, _)
+  when string == "" or is_nil(string), do: nil
   defp trim_and_maybe_ellipsis(string, expected_length) do
     string = String.trim(string)
     if String.length(string) < expected_length,

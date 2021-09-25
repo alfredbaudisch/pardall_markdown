@@ -38,6 +38,10 @@ defmodule PardallMarkdown.HtmlTest do
     """
 
     assert HtmlUtils.generate_summary_from_html(html) == "So, a description will be generated from it. Even a nested span. As you can see, this a long paragraph outside."
+
+    html = "<p>Do not delete Blender's Default Cube!</p>"
+
+    assert HtmlUtils.generate_summary_from_html(html) == "Do not delete Blender's Default Cube!"
   end
 
   test "make internal <a/> links as live links" do

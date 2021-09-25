@@ -108,7 +108,7 @@ defmodule PardallMarkdown.Repository do
   if slug not found.
   """
   def get_by_slug!(slug) do
-    get_by_slug(slug) || raise PardallMarkdown.Content.NotFoundError, "Page not found: #{slug}"
+    get_by_slug(slug) || raise PardallMarkdown.Content.NotFoundError, "Post not found: #{slug}"
   end
 
   def push_post(path, %{slug: slug, is_index: is_index?} = attrs, content, _type \\ :post) do

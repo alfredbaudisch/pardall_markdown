@@ -55,14 +55,14 @@ defmodule PardallMarkdown.FileParser do
     with {:ok, raw_content} <- File.read(path),
          {:ok, attrs, body} <- parse_contents(path, raw_content, is_index?),
          {:ok, body_html, _} <- markdown_to_html(body),
-         {:ok, summary_html, _} <- maybe_summary_to_html(attrs),
+         {:ok, summary} <- get_summary(attrs, body_html),
          {:ok, date} <- parse_or_get_date(attrs, path) do
       attrs =
         attrs
         |> maybe_extract_and_put_slug(path)
         |> extract_and_put_categories(path)
         |> maybe_put_title(path, is_index?)
-        |> Map.put(:summary, summary_html)
+        |> Map.put(:summary, summary)
         |> Map.put(:date, date)
         |> Map.put(:is_index, is_index?)
 
@@ -106,10 +106,10 @@ defmodule PardallMarkdown.FileParser do
     ])
   end
 
-  defp maybe_summary_to_html(%{summary: summary}) when is_binary(summary) and summary != "",
-    do: summary |> markdown_to_html()
+  defp get_summary(%{summary: summary}, _) when is_binary(summary) and summary != "",
+    do: {:ok, summary}
 
-  defp maybe_summary_to_html(_), do: {:ok, nil, :ignore}
+  defp get_summary(_, body_html), do: {:ok, generate_summary_from_html(body_html)}
 
   defp markdown_to_html(content), do: content |> Earmark.as_html(escape: false)
 
