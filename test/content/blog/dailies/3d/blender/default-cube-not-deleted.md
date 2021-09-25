@@ -5,4 +5,4 @@
 }
 ---
 
-Do not delete Blender's Default Cube!
+Do not delete the Default Cube!

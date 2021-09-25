@@ -5,7 +5,18 @@ defmodule PardallMarkdown.RepositoryTest do
   setup do
     Application.ensure_all_started(:pardall_markdown)
     # wait the Markdown content to be parsed and built
-    Process.sleep(100)
+    Process.sleep(300)
+  end
+
+  @tag :post_summary
+  test "custom post summary and generated post summary" do
+    # Custom
+    post = Repository.get_by_slug!("/blog/dailies/first-day")
+    assert post.summary == "Custom post summary"
+
+    # Generated
+    post = Repository.get_by_slug!("/blog/dailies/3d/blender/default-cube-not-deleted")
+    assert post.summary == "Do not delete the Default Cube!"
   end
 
   # still not accounting for per-folder indexing

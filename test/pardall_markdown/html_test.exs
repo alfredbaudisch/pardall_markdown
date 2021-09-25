@@ -2,6 +2,48 @@ defmodule PardallMarkdown.HtmlTest do
   use ExUnit.Case, async: true
   alias PardallMarkdown.Content.HtmlUtils
 
+  @moduletag :html_utils
+  doctest(PardallMarkdown.Content.HtmlUtils)
+
+  @tag :post_summary
+  test "generate post summary" do
+    html = ~S"""
+    <h1>Post Title</h1>
+
+    <main>
+    <article>
+      <div>
+        <p>So, <a href="link">a description</a> will be generated from it. Even a <span>nested span</span>.</p>
+        <p>Another paragraph?</p>
+        <p>Another paragraph 2?</p>
+        <p>Another paragraph 3?</p>
+        <p>As you can see, this a very long paragraph. As you can see, this a very long paragraph. As you can see, this a very long paragraph. As you can see, this a very long paragraph. As you can see, this a very long paragraph. As you can see, this a very long paragraph. As you can see, this a very long paragraph. As you can see, this a very long paragraph. </p>
+      </div>
+    </article>
+    </main>
+
+    <p>As you can see, this a paragraph outside.</p>
+
+    This is <a name="anchor">an anchor</a>.
+    """
+
+    assert HtmlUtils.generate_summary_from_html(html) == "So, a description will be generated from it. Even a nested span. Another paragraph? Another paragraph 2? Another paragraph 3? As you can see, this a very long..."
+
+    html = ~S"""
+    <h1>Post Title</h1>
+
+    <main><article><div><p>So, <a href="link">a description</a> will be generated from it. Even a <span>nested span</span>.</p></div></article></main>
+
+    <p>As you can see, this a long paragraph outside.</p>This is <a name="anchor">an anchor</a>.
+    """
+
+    assert HtmlUtils.generate_summary_from_html(html) == "So, a description will be generated from it. Even a nested span. As you can see, this a long paragraph outside."
+
+    html = "<p>Do not delete Blender's Default Cube!</p>"
+
+    assert HtmlUtils.generate_summary_from_html(html) == "Do not delete Blender's Default Cube!"
+  end
+
   test "make internal <a/> links as live links" do
     html = ~S"""
     This <a href="docs">is</a> <a href="/blog" class="foo" id="boo">a link</a> to <a href="../../wiki">an</a> internal <a href="v1.0_release">post</a>.

@@ -1,6 +1,63 @@
 defmodule PardallMarkdown.Content.HtmlUtils do
   alias PardallMarkdown.Content.Utils
 
+  def generate_summary_from_html(html, expected_length \\ 157)
+  def generate_summary_from_html(html, _) when html == nil or html == "", do: nil
+
+  @doc """
+  Extract text from paragraphs `</p>` of a HTML `html` string,
+  and assemble a string up until it reaches `expected_length` length.
+
+  If the generated string length matches `expected_length`, an ellipsis
+  will be appended to it. If the generated string is smaller than `expected_length`,
+  then no ellipsis is added.
+
+  If no text could be extracted from the input html, returns nil.
+
+  ## Examples
+
+      iex> PardallMarkdown.Content.HtmlUtils.generate_summary_from_html("<h1>Post Title</h1><main><article><div><p>So, <a href='link'>a description</a> will be generated from it. Even a <span>nested span</span>.</p></div></article></main><p>As you can see, this a long paragraph outside.</p>This is <a name='anchor'>an anchor</a>.")
+      "So, a description will be generated from it. Even a nested span. As you can see, this a long paragraph outside."
+
+      iex> PardallMarkdown.Content.HtmlUtils.generate_summary_from_html("<h1>Post Title</h1><main><article><div><p>So, <a href='link'>a description</a> will be generated from it. Even a <span>nested span</span>.</p><p>Another paragraph?</p><p>Another paragraph 2?</p><p>Another paragraph 3?</p><p>As you can see, this a very long paragraph. As you can see, this a very long paragraph.</p></div></article></main>")
+      "So, a description will be generated from it. Even a nested span. Another paragraph? Another paragraph 2? Another paragraph 3? As you can see, this a very long..."
+  """
+  def generate_summary_from_html(html, expected_length) do
+    document = Floki.parse_fragment!(html)
+
+    Floki.find(document, "p")
+    |> Enum.reduce("", fn
+      {"p", _, children}, "" ->
+        truncate(String.trim(children |> Floki.text()), expected_length)
+
+      {"p", _, children}, final ->
+        if String.length(final) < expected_length do
+          truncate(final <> " " <> String.trim(children |> Floki.text()), expected_length)
+        else
+          final
+        end
+
+      _, final -> final
+    end)
+    |> trim_and_maybe_ellipsis(expected_length)
+  end
+
+  defp truncate(string, length) do
+    if String.length(string) <= length do
+      string
+    else
+      String.slice(string, 0..length)
+    end
+  end
+
+  defp trim_and_maybe_ellipsis(string, _)
+  when string == "" or is_nil(string), do: nil
+  defp trim_and_maybe_ellipsis(string, expected_length) do
+    string = String.trim(string)
+    if String.length(string) < expected_length,
+    do: string, else: string <> "..."
+  end
+
   def convert_internal_links_to_live_links(html) do
     {updated_tree, _} =
       Floki.parse_fragment!(html)
