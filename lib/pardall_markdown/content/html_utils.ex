@@ -16,10 +16,10 @@ defmodule PardallMarkdown.Content.HtmlUtils do
 
   ## Examples
 
-      iex> PardallMarkdown.Content.HtmlUtils.generate_summary_from_html("<h1>Post Title</h1><main><article><div><p>So, <a href=\"link\">a description</a> will be generated from it. Even a <span>nested span</span>.</p></div></article></main><p>As you can see, this a long paragraph outside.</p>This is <a name=\"anchor\">an anchor</a>.")
+      iex> PardallMarkdown.Content.HtmlUtils.generate_summary_from_html("<h1>Post Title</h1><main><article><div><p>So, <a href='link'>a description</a> will be generated from it. Even a <span>nested span</span>.</p></div></article></main><p>As you can see, this a long paragraph outside.</p>This is <a name='anchor'>an anchor</a>.")
       "So, a description will be generated from it. Even a nested span. As you can see, this a long paragraph outside."
 
-      iex> PardallMarkdown.Content.HtmlUtils.generate_summary_from_html("<h1>Post Title</h1><main><article><div><p>So, <a href=\"link\">a description</a> will be generated from it. Even a <span>nested span</span>.</p><p>Another paragraph?</p><p>Another paragraph 2?</p><p>Another paragraph 3?</p><p>As you can see, this a very long paragraph. As you can see, this a very long paragraph.</p></div></article></main>")
+      iex> PardallMarkdown.Content.HtmlUtils.generate_summary_from_html("<h1>Post Title</h1><main><article><div><p>So, <a href='link'>a description</a> will be generated from it. Even a <span>nested span</span>.</p><p>Another paragraph?</p><p>Another paragraph 2?</p><p>Another paragraph 3?</p><p>As you can see, this a very long paragraph. As you can see, this a very long paragraph.</p></div></article></main>")
       "So, a description will be generated from it. Even a nested span. Another paragraph? Another paragraph 2? Another paragraph 3? As you can see, this a very long..."
   """
   def generate_summary_from_html(html, expected_length) do
