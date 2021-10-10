@@ -36,7 +36,8 @@ defmodule PardallMarkdown.MixProject do
       {:slugify, "~> 1.3"},
       {:html_entities, "~> 0.5"},
       {:con_cache, "~> 0.13"},
-      {:ex_doc, ">= 0.0.0", only: :dev, runtime: false}
+      {:ex_doc, ">= 0.0.0", only: :dev, runtime: false},
+      {:git_cli, "~> 0.3"},
     ]
   end
 
