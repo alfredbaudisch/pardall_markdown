@@ -8,7 +8,9 @@ defmodule PardallMarkdown.RepositoryProviders.Git do
 
   @behaviour PardallMarkdown.RepositoryProvider
 
-  @repository_url Application.get_env(:pardall_markdown, :repository_url, "")
+  @repository_url Application.get_env(:pardall_markdown, PardallMarkdown.Content)[
+    :remote_repository_url
+  ]
   @local_path @repository_url
                 |> String.split("/")
                 |> List.last()
