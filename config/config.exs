@@ -20,7 +20,8 @@ config :pardall_markdown, PardallMarkdown.Content,
   is_markdown_metadata_required: true,
   is_content_draft_by_default: true,
   metadata_parser: PardallMarkdown.MetadataParser.ElixirMap,
-  remote_repository_url: "https://github.com/<username>/<project-name>git"
+  remote_repository_url: "https://github.com/<username>/<project-name>git",
+  recheck_pending_remote_events_interval: 5_000
 
 config :pardall_markdown, PardallMarkdown.MetadataParser.JoplinNote,
   metadata_parser_after_title: PardallMarkdown.MetadataParser.ElixirMap
