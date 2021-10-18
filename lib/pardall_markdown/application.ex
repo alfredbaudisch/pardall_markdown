@@ -30,7 +30,7 @@ defmodule PardallMarkdown.Application do
       },
       {
         PardallMarkdown.RepositoryWatcher,
-        name: PardallMarkdown.RepositoryWatcher, repo: Application.get_env(:pardall_markdown, :remote_repository_url)
+        name: PardallMarkdown.RepositoryWatcher, repo: Application.get_env(:pardall_markdown, PardallMarkdown.Content)[:remote_repository_url]
       }
       # Start a worker by calling: PardallMarkdown.Worker.start_link(arg)
       # {PardallMarkdown.Worker, arg}
