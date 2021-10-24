@@ -21,9 +21,7 @@ defmodule PardallMarkdown.FileParser do
   defp should_extract_path?(path),
     do:
       File.exists?(path) and not is_path_from_static_assets?(path) and
-        not is_file_hidden?(path)
-
-  defp is_file_hidden?(path), do: String.starts_with?(".", Path.basename(path))
+        not is_path_hidden?(path)
 
   defp extract_folder_if_valid!(path),
     do: if(should_extract_path?(path), do: extract_folder!(path))
