@@ -2,7 +2,7 @@ defmodule PardallMarkdown.MixProject do
   use Mix.Project
 
   @url "https://github.com/alfredbaudisch/pardall_markdown"
-  @version "0.3.3"
+  @version "0.4.0"
 
   def project do
     [
