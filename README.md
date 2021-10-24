@@ -39,6 +39,7 @@
 - [Who's using?](#whos-using)
 - [Roadmap](#roadmap)
 - [Sponsors and Donations](#sponsors-and-donations)
+- [Contributors](#contributors)
 - [Copyright License](#copyright-license)
   - [Additional notices](#additional-notices)
 
@@ -472,6 +473,11 @@ No.
 You can support my open-source contributions and this project on [Patreon](https://www.patreon.com/alfredbaudisch) or with a [PayPal donation](https://www.paypal.com/donate?hosted_button_id=FC5FTRRE3548C). Patrons and donors of any tier will have their name listed here. Patrons of the **Sponsors** tier or higher, can also have a link and a logo listed here.
 
 - Mike King
+
+## Contributors
+
+- [Alfred Reinold Baudisch](https://github.com/alfredbaudisch/): PardallMarkdown creator and maintainer.
+- [Cody Brunner](https://github.com/rockchalkwushock): added the initial implementation to remote content support via automatic Git repository pooling and fetching - `RepositoryWatcher` ([#31](https://github.com/alfredbaudisch/pardall_markdown/issues/31)).
 
 ## Copyright License
 
