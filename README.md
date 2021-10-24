@@ -48,6 +48,8 @@ PardallMarkdown is a reactive publishing framework and engine written in Elixir.
 
 **As opposed to static website generators** (such as Hugo, Docusaurs and others), with PardallMarkdown, **you don't need to recompile and republish your application every time you write or modify new content**. The application can be kept running indefinitely in production, while it **watches a content folder for changes** and **the new content re-actively gets available for consumption** by your application.
 
+The **content folder can be any path in the application server** or it can be a Git repository, since **PardallMarkdown has support for automatically pulling changes from a Git repository**.
+
 ### Looking for Contributors ⚠️
 I'm looking for a contributor(s) to make a more elaborate HTML and CSS template for the demo project. Check the [current demo here](https://pardall.xyz/), including its inner sections. It's a mix of Blog + Documentation + Wiki website.
 
@@ -63,9 +65,11 @@ See PardallMarkdown in action and learn how to use it by following this video:
 
 - Filesystem-based, with **Markdown** and static files support.
     - Markdown files are parsed as HTML.
-- FileWatcher, that **detects new content and modification of existing content**, which then **automatically re-parses and rebuilds the content**.
+- `FileWatcher`, that **detects new content and modification of existing content**, which then **automatically re-parses and rebuilds the content**.
     - There is **no need to recompile** and redeploy the application nor the website, the **new content is available immediately** (depends on the interval set via `:recheck_pending_file_events_interval`, see below).
     - Created with [Phoenix LiveView](https://hexdocs.pm/phoenix_live_view/Phoenix.LiveView.html) and Phoenix Channels in mind: **create or modify a post** or a whole new **set of posts** and they are **immediately published in a website**. Check out [the demo](https://github.com/alfredbaudisch/pardall-markdown-phoenix-demo) repository.
+- `RepositoryWatcher`, that **detects changes from a Git repository** (optional) and automatically pulls the content into a PardallMarkdown's content folder.
+  - Since the content folder is watched by `FileWatcher`, PardallMarkdown the rebuilds the whole content everything there are changes from the Git repository.
 - Support for the content folders outside of the application, this way, **new content files can be synced immediately from a source location** (for example, your computer), and then picked up by the FileWatcher.
 - Automatic creation of **table of contents** from Markdown headers.
 - **Infinite content hierarchies** (categories and sub-categories, sections and sub-sections).
@@ -91,11 +95,11 @@ See PardallMarkdown in action and learn how to use it by following this video:
 Add dependency and application into your `mix.exs`:
 ```elixir
 defp deps do
-[{:pardall_markdown, "~> 0.3.3"} ...]
+  [{:pardall_markdown, "~> 0.4.0"} ...]
 end
 
 def application do
-[extra_applications: [:pardall_markdown, ...], ...]
+  [extra_applications: [:pardall_markdown, ...], ...]
 end
 ```
 
@@ -122,6 +126,19 @@ config :pardall_markdown, PardallMarkdown.Content,
   # How often in ms the FileWatcher should check for
   # new or modified content in the `root_path:`?
   recheck_pending_file_events_interval: 10_000,
+
+  # Git repository to watch and automatically fetch content from,
+  # leave "" or nil to not get content from a repository.
+  #
+  # The repository is cloned into `:root_path`.
+  #
+  # By not setting a repository URL, you have to fill and modify
+  # content into the `:root_path` by other means (even manually).
+  remote_repository_url: "",
+
+  # How often in ms the RepositoryWatcher should pool
+  # the `:remote_repository_url` Git repository and `fetch` changes?
+  recheck_pending_remote_events_interval: 15_000
 
   # Should the main content tree contain a link to the Home/Root page ("/")?
   content_tree_display_home: false,
