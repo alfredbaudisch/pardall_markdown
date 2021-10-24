@@ -8,11 +8,6 @@ defmodule PardallMarkdown.RepositoryProvider do
   @type repository :: term
   @type provider :: module
   @type fetch_result :: {:no_updates} | {:updates, [String.t()]}
-  @type timestamp :: String.t()
-
-  @type file_path :: String.t()
-  @type folder :: String.t()
-  @type file_read_result :: {:ok, binary} | {:error, File.posix()}
 
   @type t :: %__MODULE__{repo: repository, provider: provider}
   @enforce_keys :provider
@@ -45,38 +40,4 @@ defmodule PardallMarkdown.RepositoryProvider do
   is remote, it should have local copy or something like that.
   """
   @callback local_path() :: String.t()
-
-  @doc """
-  Invoked to get a list of file paths of set of files contained in the locally
-  downloaded repository.
-  """
-  @callback list_files(folder) :: [file_path]
-
-  @doc """
-  Checks if a file path is contained in the local version of the repository.
-  """
-  @callback file_in?(file_path) :: boolean
-
-  @doc """
-  Returns file information for the file located at the given `file_path` in
-  the given `repository`. The result should be in the form of a map and should
-  be structured like this:
-  ```
-  %{
-    "author" => the-file-author,
-    "created_at" => the-date-the-file-was-created-in-iso-8601-format,
-    "updated_at" => the-date-of-the-last-update-of-the-file-in-iso-8601-format
-  }
-  ```
-  """
-  @callback file_info(repository, file_path) :: %{atom => String.t() | timestamp}
-
-  @doc """
-  Invoked in order to read the contents of the file located at the given
-  `file_path`.
-  The second parameter can be a path to a folder relative to
-  `Blogit.RepositoryProvider.local_path/0` in which the given `file_path` should
-  exist.
-  """
-  @callback read_file(file_path, folder) :: file_read_result
 end
