@@ -17,12 +17,14 @@ defmodule PardallMarkdown.FileWatcher do
     {:ok, %{watcher_pid: watcher_pid, pending_events: 1, processing_events: 1}}
   end
 
-  def handle_info({:file_event, _, {_path, _event} = data}, %{pending_events: pending} = state) do
-    Logger.info("Received file event: #{inspect(data)}")
-    pending = pending + 1
-    Logger.info("Event is valid. Pending events: #{pending}.")
-
-    {:noreply, put_in(state[:pending_events], pending)}
+  def handle_info({:file_event, _, {path, event} = data}, %{pending_events: pending} = state) do
+    if should_process_event?(path, event) do
+      pending = pending + 1
+      Logger.info("Received valid file event: #{inspect(data)}. Pending events: #{pending}.")
+      {:noreply, put_in(state[:pending_events], pending)}
+    else
+      {:noreply, state}
+    end
   end
 
   def handle_info({:file_event, _, :stop}, state) do
@@ -90,6 +92,8 @@ defmodule PardallMarkdown.FileWatcher do
      |> Map.put(:pending_events, max(pending - amount, 0))
      |> Map.put(:processing_events, 0)}
   end
+
+  defp should_process_event?(path, _event), do: not PardallMarkdown.Content.Utils.is_path_hidden?(path)
 
   defp schedule_next_recheck,
     do: Process.send_after(self(), :check_pending_events, @recheck_interval)
