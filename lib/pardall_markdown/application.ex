@@ -27,18 +27,22 @@ defmodule PardallMarkdown.Application do
       {
         PardallMarkdown.FileWatcher,
         name: PardallMarkdown.FileWatcher, dirs: [PardallMarkdown.Content.Utils.root_path()]
-      },
-      {
-        PardallMarkdown.RepositoryWatcher,
-        name: PardallMarkdown.RepositoryWatcher, repo: Application.get_env(:pardall_markdown, PardallMarkdown.Content)[:remote_repository_url]
       }
-      # Start a worker by calling: PardallMarkdown.Worker.start_link(arg)
-      # {PardallMarkdown.Worker, arg}
     ]
+    |> maybe_append_repository_watcher(Application.get_env(:pardall_markdown, PardallMarkdown.Content)[:remote_repository_url])
 
     # See https://hexdocs.pm/elixir/Supervisor.html
     # for other strategies and supported options
     opts = [strategy: :one_for_one, name: PardallMarkdown.Supervisor]
     Supervisor.start_link(children, opts)
+  end
+
+  def maybe_append_repository_watcher(children, url) when is_nil(url) or url == "", do: children
+  def maybe_append_repository_watcher(children, url) do
+    children ++
+    [{
+      PardallMarkdown.RepositoryWatcher,
+      name: PardallMarkdown.RepositoryWatcher, repo: url
+    }]
   end
 end
