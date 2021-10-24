@@ -30,6 +30,13 @@ defmodule PardallMarkdown.Content.Utils do
         :is_content_draft_by_default
       ]
 
+  def is_path_hidden?(path) do
+    not is_nil(path
+    |> String.replace(root_path(), "")
+    |> String.split("/")
+    |> Enum.find(fn path -> String.starts_with?(path, ".") end))
+  end
+
   @doc """
   Splits a path into a tree of categories, containing both readable category names
   and slugs for all categories in the hierarchy. The categories list is indexed from the
