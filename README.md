@@ -440,6 +440,10 @@ By the way, the idea of adding an Elixir map with metadata inside Markdown files
 ### How to sync content to PardallMarkdown?
 PardallMarkdown watches for changes from a given content folder (configured via `:root_path`), but there's nothing special about the content folder. Just add and sync content to the content folder normally.
 
+The folder contents can be changed manually or via a Git repository.
+
+PardallMarkdown has support to watch a Git repository (configured via `:remote_repository_url`), repository changes are fetched automatically, and PardallMarkdown rebuilds the contents also automagically. The [Phoenix demo project](https://github.com/alfredbaudisch/pardall_markdown_phoenix_demo) fetches content from [PardallMarkdown's Sample Content repository](https://github.com/alfredbaudisch/pardall_markdown_sample_content), so you can see how it works. 
+
 ### How to write Markdown locally in your computer and publish it immediately to a PardallMarkdown application or website?
 As written above, PardallMarkdown watches for changes in a folder. This way, you can sync content from a local source to a remote destination via any way as you would do with or without PardallMarkdown, for example: Git, SyncThings, scp, etc.
 
