@@ -23,7 +23,7 @@ config :pardall_markdown, PardallMarkdown.Content,
   # Git repository to watch and automatically fetch content from, leave "" or nil to not
   # get content from a repository.
   # Available sample content repo: "https://github.com/alfredbaudisch/pardall_markdown_sample_content",
-  remote_repository_url: "",
+  remote_repository_url: "https://github.com/alfredbaudisch/pardall_markdown_sample_content",
   recheck_pending_remote_events_interval: 15_000
 
 config :pardall_markdown, PardallMarkdown.MetadataParser.JoplinNote,

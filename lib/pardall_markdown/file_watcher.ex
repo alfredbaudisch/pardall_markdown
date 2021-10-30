@@ -11,10 +11,20 @@ defmodule PardallMarkdown.FileWatcher do
   end
 
   def init(args) do
-    {:ok, watcher_pid} = FileSystem.start_link(args)
-    FileSystem.subscribe(watcher_pid)
-    schedule_next_reload_all()
-    {:ok, %{watcher_pid: watcher_pid, pending_events: 1, processing_events: 1}}
+    dirs = Keyword.take(args, [:dirs])
+    repository_url = Keyword.get(args, :remote_repository_url)
+
+    if is_binary(repository_url) and repository_url != "" do
+      Logger.info("Delayed FileWatcher start. FileWatcher will start after #{@recheck_interval}ms.")
+      Process.send_after(self(), {:delayed_cold_start, dirs}, @recheck_interval)
+      {:ok, %{watcher_pid: nil, pending_events: 0, processing_events: 0}}
+    else
+      {:ok, cold_start(dirs)}
+    end
+  end
+
+  def handle_info({:delayed_cold_start, dirs}, _state) do
+    {:noreply, cold_start(dirs)}
   end
 
   def handle_info({:file_event, _, {path, event} = data}, %{pending_events: pending} = state) do
@@ -91,6 +101,15 @@ defmodule PardallMarkdown.FileWatcher do
      state
      |> Map.put(:pending_events, max(pending - amount, 0))
      |> Map.put(:processing_events, 0)}
+  end
+
+  defp cold_start(args) do
+    {:ok, watcher_pid} = FileSystem.start_link(args)
+    FileSystem.subscribe(watcher_pid)
+    Logger.info("FileWatcher started...")
+
+    schedule_next_reload_all()
+    %{watcher_pid: watcher_pid, pending_events: 1, processing_events: 1}
   end
 
   defp should_process_event?(path, _event), do: not PardallMarkdown.Content.Utils.is_path_hidden?(path)
