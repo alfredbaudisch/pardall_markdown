@@ -421,7 +421,7 @@ TODO: describe `FileWatcher` back pressure mechanism.
 ### How to integrate it with Phoenix and Phoenix LiveView?
 There is a demo project in a separate repository: [PardallMarkdown Phoenix Demo](https://github.com/alfredbaudisch/pardall-markdown-phoenix-demo).
 
-The demo project also has HTML helpers to print the generated tables of contents, taxonomy and hierarchy trees as HTML `<ul/>>` lists with `<a/>` links.
+The demo project also has HTML helpers to print the generated tables of contents, taxonomy and hierarchy trees as HTML `<ul/>` lists with `<a/>` links.
 
 ### PardallMarkdown vs static website generators (Hugo, Docusaurs, etc)
 Every time you make a change to the content or add new content, static website generators require you to rebuild and republish the whole application.
