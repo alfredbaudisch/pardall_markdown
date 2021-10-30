@@ -6,39 +6,38 @@ defmodule PardallMarkdown.Application do
   use Application
 
   def start(_type, _args) do
+    config = PardallMarkdown.Config.validate_and_get_startup_config!()
+
     children = [
       Supervisor.child_spec(
         {ConCache,
          [
-           name: Application.get_env(:pardall_markdown, PardallMarkdown.Content)[:cache_name],
+           name: config.cache_name,
            ttl_check_interval: false
          ]},
-        id: Application.get_env(:pardall_markdown, PardallMarkdown.Content)[:cache_name]
+        id: config.cache_name
       ),
       Supervisor.child_spec(
         {ConCache,
          [
-           name:
-             Application.get_env(:pardall_markdown, PardallMarkdown.Content)[:index_cache_name],
+           name: config.index_cache_name,
            ttl_check_interval: false
          ]},
-        id: Application.get_env(:pardall_markdown, PardallMarkdown.Content)[:index_cache_name]
+        id: config.index_cache_name
       ),
       {
         PardallMarkdown.FileWatcher,
         name: PardallMarkdown.FileWatcher, dirs: [PardallMarkdown.Content.Utils.root_path()]
       }
     ]
-    |> maybe_append_repository_watcher(Application.get_env(:pardall_markdown, PardallMarkdown.Content)[:remote_repository_url])
+    |> maybe_append_repository_watcher(config.remote_repository_url)
 
-    # See https://hexdocs.pm/elixir/Supervisor.html
-    # for other strategies and supported options
     opts = [strategy: :one_for_one, name: PardallMarkdown.Supervisor]
     Supervisor.start_link(children, opts)
   end
 
-  def maybe_append_repository_watcher(children, url) when is_nil(url) or url == "", do: children
-  def maybe_append_repository_watcher(children, url) do
+  defp maybe_append_repository_watcher(children, url) when is_nil(url) or url == "", do: children
+  defp maybe_append_repository_watcher(children, url) do
     children ++
     [{
       PardallMarkdown.RepositoryWatcher,
