@@ -18,8 +18,10 @@ defmodule PardallMarkdown.RepositoryWatcher do
 
   @impl true
   def init(provider) do
-    Process.send_after(self(), {:cold_start, :provider, provider}, @recheck_interval)
-    {:ok, %{}}
+    repo = Git.repository()
+    state = %Repository{repo: repo, provider: provider}
+    send_next_recheck()
+    {:ok, state}
   end
 
   @impl true
@@ -39,14 +41,6 @@ defmodule PardallMarkdown.RepositoryWatcher do
 
   @impl true
   def handle_info({_, {:updates, _}}, state), do: {:noreply, state}
-
-  @impl true
-  def handle_info({:cold_start, :provider, provider}, _state) do
-    repo = Git.repository()
-    state = %Repository{repo: repo, provider: provider}
-    send_next_recheck()
-    {:noreply, state}
-  end
 
   defp send_next_recheck, do: Process.send_after(self(), :check_pending_remote_events, @recheck_interval)
 end
