@@ -95,7 +95,7 @@ See PardallMarkdown in action and learn how to use it by following this video:
 Add dependency and application into your `mix.exs`:
 ```elixir
 defp deps do
-  [{:pardall_markdown, "~> 0.4.0"} ...]
+  [{:pardall_markdown, "~> 0.4"} ...]
 end
 
 def application do
@@ -125,7 +125,7 @@ config :pardall_markdown, PardallMarkdown.Content,
 
   # How often in ms the FileWatcher should check for
   # new or modified content in the `root_path:`?
-  recheck_pending_file_events_interval: 10_000,
+  recheck_pending_file_events_interval: 5_000,
 
   # Git repository to watch and automatically fetch content from,
   # leave "" or nil to not get content from a repository.
@@ -138,6 +138,10 @@ config :pardall_markdown, PardallMarkdown.Content,
 
   # How often in ms the RepositoryWatcher should pool
   # the `:remote_repository_url` Git repository and `fetch` changes?
+  #
+  # If `:remote_repository_url` is provided,
+  # `:recheck_pending_remote_events_interval` must
+  # be BIGGER than `:recheck_pending_file_events_interval`
   recheck_pending_remote_events_interval: 15_000
 
   # Should the main content tree contain a link to the Home/Root page ("/")?
