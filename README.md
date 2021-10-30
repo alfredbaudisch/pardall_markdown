@@ -1,6 +1,5 @@
 # PardallMarkdown
 
-[![Build Status](https://github.com/alfredbaudisch/pardall_markdown/actions/workflows/elixir.yml/badge.svg)](https://github.com/alfredbaudisch/pardall_markdown/actions/workflows/elixir.yml)
 [![Module Version](https://img.shields.io/hexpm/v/pardall_markdown.svg)](https://hex.pm/packages/pardall_markdown) [![Total Download](https://img.shields.io/hexpm/dt/pardall_markdown.svg)](https://hex.pm/packages/pardall_markdown) [![Last Updated](https://img.shields.io/github/last-commit/alfredbaudisch/pardall_markdown.svg)](https://github.com/alfredbaudisch/pardall_markdown/commits/master) [![Donate using PayPal](https://raw.githubusercontent.com/laurent22/joplin/dev/Assets/WebsiteAssets/images/badges/Donate-PayPal-green.svg)](https://www.paypal.com/donate?hosted_button_id=FC5FTRRE3548C) [![Become a patron](https://raw.githubusercontent.com/laurent22/joplin/dev/Assets/WebsiteAssets/images/badges/Patreon-Badge.svg)](https://www.patreon.com/alfredbaudisch)
 
 ## Table of Contents
@@ -465,7 +464,7 @@ No.
 - [x] Add support for custom metadata parsers ([#30](https://github.com/alfredbaudisch/pardall_markdown/issues/30)).
 - [x] Add support for Joplin Notes ([#32](https://github.com/alfredbaudisch/pardall_markdown/issues/32)).
 - [ ] Add support for content folders inside a S3 bucket, which will then notify a PardallMarkdown application with webhooks.
-- [ ] Add support to watch external sources for new content, such as GitHub repositories ([#31](https://github.com/alfredbaudisch/pardall_markdown/issues/31)).
+- [x] Add support to watch external sources for new content, such as Git repositories ([#31](https://github.com/alfredbaudisch/pardall_markdown/issues/31)).
 - [ ] Add support for FrontMatter post metadata with YAML ([#41](https://github.com/alfredbaudisch/pardall_markdown/issues/41)).
 
 ## Sponsors and Donations

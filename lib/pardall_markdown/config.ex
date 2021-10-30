@@ -34,8 +34,10 @@ defmodule PardallMarkdown.Config do
   end
   defp check_or_create_root_path!(_), do: raise ":root_path can't be empty"
 
+  # TODO: keep an eye on this. It may probably require the inverse (file > repo),
+  # in case of possible race conditions.
   defp file_interval_first!(repo_url, file, repo)
-  when is_binary(repo_url) and repo_url != "" and file > repo, do: :ok
+  when is_binary(repo_url) and repo_url != "" and file < repo, do: :ok
   defp file_interval_first!(_, _, _), do:
-    raise "Since :remote_repository_url has been provided, :recheck_pending_file_events_interval must be greater than :recheck_pending_remote_events_interval"
+    raise "Since :remote_repository_url has been provided, :recheck_pending_file_events_interval must be smaller than :recheck_pending_remote_events_interval"
 end

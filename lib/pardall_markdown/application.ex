@@ -24,13 +24,17 @@ defmodule PardallMarkdown.Application do
            ttl_check_interval: false
          ]},
         id: config.index_cache_name
-      ),
-      {
-        PardallMarkdown.FileWatcher,
-        name: PardallMarkdown.FileWatcher, dirs: [config.root_path]
-      }
+      )
     ]
     |> maybe_append_repository_watcher(config.remote_repository_url)
+    |> Kernel.++([
+      {
+        PardallMarkdown.FileWatcher,
+        name: PardallMarkdown.FileWatcher,
+        dirs: [config.root_path],
+        remote_repository_url: config.remote_repository_url
+      }
+    ])
 
     opts = [strategy: :one_for_one, name: PardallMarkdown.Supervisor]
     Supervisor.start_link(children, opts)
