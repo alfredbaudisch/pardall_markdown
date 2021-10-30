@@ -31,7 +31,7 @@
   - [How to integrate it with Phoenix and Phoenix LiveView?](#how-to-integrate-it-with-phoenix-and-phoenix-liveview)
   - [PardallMarkdown vs static website generators (Hugo, Docusaurs, etc)](#pardallmarkdown-vs-static-website-generators-hugo-docusaurs-etc)
   - [PardallMarkdown vs NimblePublisher](#pardallmarkdown-vs-nimblepublisher)
-  - [How to sync content to PardallMarkdown?](#how-to-sync-content-to-pardallmarkdown)
+  - [How to sync content with PardallMarkdown?](#how-to-sync-content-with-pardallmarkdown)
   - [How to write Markdown locally in your computer and publish it immediately to a PardallMarkdown application or website?](#how-to-write-markdown-locally-in-your-computer-and-publish-it-immediately-to-a-pardallmarkdown-application-or-website)
   - [Does it require a database?](#does-it-require-a-database)
   - [Why does it use Ecto?](#why-does-it-use-ecto)
@@ -437,7 +437,7 @@ If you intend to have a plain blog page, with few posts, without hierarchies, ta
 
 By the way, the idea of adding an Elixir map with metadata inside Markdown files and the code to parse it comes from a piece of code from NimblePublisher's code (inside `PardallMarkdown.FileParser.parse_contents`).
 
-### How to sync content to PardallMarkdown?
+### How to sync content with PardallMarkdown?
 PardallMarkdown watches for changes from a given content folder (configured via `:root_path`), but there's nothing special about the content folder. Just add and sync content to the content folder normally.
 
 The folder contents can be changed manually or via a Git repository.
@@ -456,7 +456,7 @@ Example:
 - Start SyncThings
 - Write locally and see the magic happens! Content appears almost immediately in your application / website.
 
-If you don't want to use SyncThings, you can have a custom Git repository just for the content and a hook that mirrors the content to a folder watched by your PardallMarkdown configuration.
+If you don't want to use SyncThings, you can have a custom Git repository just for the content and configure PardallMarkdown to watch for changes from this repository with `:remote_repository_url`. Check [Usage in Elixir OTP applications](#usage-in-elixir-otp-applications) and [How to sync content with PardallMarkdown?](#how-to-sync-content-with-pardallmarkdown) above.
 
 ### Does it require a database?
 No.
