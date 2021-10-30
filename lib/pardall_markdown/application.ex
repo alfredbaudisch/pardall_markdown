@@ -27,7 +27,7 @@ defmodule PardallMarkdown.Application do
       ),
       {
         PardallMarkdown.FileWatcher,
-        name: PardallMarkdown.FileWatcher, dirs: [PardallMarkdown.Content.Utils.root_path()]
+        name: PardallMarkdown.FileWatcher, dirs: [config.root_path]
       }
     ]
     |> maybe_append_repository_watcher(config.remote_repository_url)
