@@ -505,4 +505,6 @@ You can support my open-source contributions and this project on [Patreon](https
 ### Additional notices
 
 - It's suggested that applications using this software mention this project name with a link to this project repository. You can put it anywhere in your application, for example, in a website footer or *About* page: `Powered by [PardallMarkdown](https://github.com/alfredbaudisch/pardall_markdown)`.
-- PardallMarkdown uses a snippet of code from [nimble_publisher](https://github.com/dashbitco/nimble_publisher), Copyright 2020 Dashbit, licensed under Apache License, Version 2.0.
+- PardallMarkdown uses some snippets of code from the following projects:
+  - [nimble_publisher](https://github.com/dashbitco/nimble_publisher), Copyright 2020 Dashbit, licensed under Apache License, Version 2.0.
+  - [blogit](https://github.com/meddle0x53/blogit), Copyright (c) 2017 Nikolay Tsvetinov (Meddle), licensed under The MIT License (MIT).
