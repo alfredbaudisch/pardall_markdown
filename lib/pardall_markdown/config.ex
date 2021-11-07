@@ -1,7 +1,6 @@
 defmodule PardallMarkdown.Config do
   def validate_and_get_startup_config! do
     root_path = Application.get_env(:pardall_markdown, PardallMarkdown.Content)[:root_path]
-    check_or_create_root_path!(root_path)
 
     file_interval = Application.get_env(:pardall_markdown, PardallMarkdown.Content)[:recheck_pending_file_events_interval]
     ensure_is_integer!(file_interval, :recheck_pending_file_events_interval)
@@ -12,6 +11,17 @@ defmodule PardallMarkdown.Config do
       repo_interval = Application.get_env(:pardall_markdown, PardallMarkdown.Content)[:recheck_pending_remote_events_interval]
       ensure_is_integer!(repo_interval, :recheck_pending_remote_events_interval)
       file_interval_first!(repository_url, file_interval, repo_interval)
+
+      # If the content is coming from a remote repository,
+      # we must try to create :remote_repository_local_path, but not :root_path,
+      # because if :root_path is a subfolder of :remote_repository_local_path,
+      # cloning the repository will create :root_path anyway and we also avoiding
+      # adding changes to the repository.
+      clone_path = Application.get_env(:pardall_markdown, PardallMarkdown.Content)[:remote_repository_local_path]
+      check_or_create_path!(clone_path, :remote_repository_local_path)
+      not_empty!(root_path, :root_path)
+    else
+      check_or_create_path!(root_path, :root_path)
     end
 
     %{
@@ -25,14 +35,18 @@ defmodule PardallMarkdown.Config do
   defp ensure_is_integer!(v, _name) when is_number(v) and v > 0, do: v
   defp ensure_is_integer!(_, name), do: raise "Config #{name} is not a valid interval number"
 
-  defp check_or_create_root_path!(path) when is_binary(path) and path != "" do
+  defp check_or_create_path!(path, name) do
+    not_empty!(path, name)
+
     if File.exists?(path) do
-      if not File.dir?(path), do: raise ":root_path #{path} is not a directory"
+      if not File.dir?(path), do: raise "#{name} #{path} is not a directory"
     else
-      File.mkdir!(path)
+      PardallMarkdown.Content.Utils.recursively_create_path!(path)
     end
   end
-  defp check_or_create_root_path!(_), do: raise ":root_path can't be empty"
+
+  defp not_empty!(path, _) when is_binary(path) and path != "", do: :ok
+  defp not_empty!(_, name), do: raise "#{name} can't be empty"
 
   # TODO: keep an eye on this. It may probably require the inverse (file > repo),
   # in case of possible race conditions.

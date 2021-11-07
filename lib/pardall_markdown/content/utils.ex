@@ -11,6 +11,11 @@ defmodule PardallMarkdown.Content.Utils do
       Application.get_env(:pardall_markdown, PardallMarkdown.Content)[:static_assets_path] ||
         raise("static_assets_path not defined")
 
+  def remote_repository_local_path,
+  do:
+    Application.get_env(:pardall_markdown, PardallMarkdown.Content)[:remote_repository_local_path] ||
+      raise("remote_repository_local_path not defined")
+
   def is_path_from_static_assets?(path), do: String.starts_with?(path, static_assets_path())
 
   def remove_root_path(path), do: path |> String.replace(root_path(), "")
@@ -35,6 +40,19 @@ defmodule PardallMarkdown.Content.Utils do
     |> String.replace(root_path(), "")
     |> String.split("/")
     |> Enum.find(fn path -> String.starts_with?(path, ".") end))
+  end
+
+  def recursively_create_path!(path) do
+    path
+    |> Path.split()
+    |> Enum.reduce("", fn
+      part, _path when part in ["~", ".", ".."] -> part <> "/"
+      "/", _path -> "/"
+      part, path ->
+        path = Path.join(path, part)
+        if not File.exists?(part), do: File.mkdir!(path)
+        path
+    end)
   end
 
   @doc """

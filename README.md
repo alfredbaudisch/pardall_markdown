@@ -112,7 +112,8 @@ config :pardall_markdown, PardallMarkdown.Content,
   # you will create and update content.
   #
   # This can be any relative or absolute path,
-  # including outside of the application.
+  # including outside of the application, examples:
+  # "/home/documents/content", "./content", "../path/to/content"
   root_path: "/home/documents/content",
 
   # The path that contains static assets,
@@ -130,11 +131,21 @@ config :pardall_markdown, PardallMarkdown.Content,
   # Git repository to watch and automatically fetch content from,
   # leave "" or nil to not get content from a repository.
   #
-  # The repository is cloned into `:root_path`.
+  # The repository is cloned into `:remote_repository_local_path`.
   #
   # By not setting a repository URL, you have to fill and modify
   # content into the `:root_path` by other means (even manually).
   remote_repository_url: "",
+
+  # Where to clone the repository? Must be the same as :root_path or the parent path of :root_path.
+  # Example 1 - parent path of :root_path:
+  # - `root_path`: "/content/markdown"
+  # - `remote_repository_local_path`: "/content"
+  #
+  # Example 2 - the same as :root_path:
+  # - `root_path`: "/content"
+  # - `remote_repository_local_path`: "/content"
+  remote_repository_local_path: "/home/documents/content",
 
   # How often in ms the RepositoryWatcher should pool
   # the `:remote_repository_url` Git repository and `fetch` changes?

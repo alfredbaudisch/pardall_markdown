@@ -11,7 +11,7 @@ defmodule PardallMarkdown.RepositoryProviders.Git do
   @repository_url Application.get_env(:pardall_markdown, PardallMarkdown.Content)[
     :remote_repository_url
   ]
-  @local_path PardallMarkdown.Content.Utils.root_path()
+  @local_path PardallMarkdown.Content.Utils.remote_repository_local_path()
 
   # Callbacks
   @impl true
