@@ -50,7 +50,7 @@ defmodule PardallMarkdown.Content.Utils do
       "/", _path -> "/"
       part, path ->
         path = Path.join(path, part)
-        if not File.exists?(part), do: File.mkdir!(path)
+        if not File.exists?(path), do: File.mkdir!(path)
         path
     end)
   end
