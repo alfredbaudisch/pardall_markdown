@@ -29,7 +29,7 @@ defmodule PardallMarkdown.Config do
     if File.exists?(path) do
       if not File.dir?(path), do: raise ":root_path #{path} is not a directory"
     else
-      File.mkdir!(path)
+      PardallMarkdown.Content.Utils.recursively_create_path!(path)
     end
   end
   defp check_or_create_root_path!(_), do: raise ":root_path can't be empty"
