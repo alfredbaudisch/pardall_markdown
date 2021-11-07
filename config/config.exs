@@ -24,6 +24,7 @@ config :pardall_markdown, PardallMarkdown.Content,
   # get content from a repository.
   # Available sample content repo: "https://github.com/alfredbaudisch/pardall_markdown_sample_content",
   remote_repository_url: "https://github.com/alfredbaudisch/pardall_markdown_sample_content",
+  remote_repository_local_path: "./sample_content",
   recheck_pending_remote_events_interval: 15_000
 
 config :pardall_markdown, PardallMarkdown.MetadataParser.JoplinNote,
