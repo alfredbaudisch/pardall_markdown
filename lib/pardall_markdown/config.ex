@@ -41,7 +41,7 @@ defmodule PardallMarkdown.Config do
     if File.exists?(path) do
       if not File.dir?(path), do: raise "#{name} #{path} is not a directory"
     else
-      PardallMarkdown.Content.Utils.recursively_create_path!(path)
+      File.mkdir_p!(path)
     end
   end
 

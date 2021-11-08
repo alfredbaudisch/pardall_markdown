@@ -42,19 +42,6 @@ defmodule PardallMarkdown.Content.Utils do
     |> Enum.find(fn path -> String.starts_with?(path, ".") end))
   end
 
-  def recursively_create_path!(path) do
-    path
-    |> Path.split()
-    |> Enum.reduce("", fn
-      part, _path when part in ["~", ".", ".."] -> part <> "/"
-      "/", _path -> "/"
-      part, path ->
-        path = Path.join(path, part)
-        if not File.exists?(path), do: File.mkdir!(path)
-        path
-    end)
-  end
-
   @doc """
   Splits a path into a tree of categories, containing both readable category names
   and slugs for all categories in the hierarchy. The categories list is indexed from the
