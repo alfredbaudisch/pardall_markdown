@@ -34,3 +34,4 @@ npm-debug.log
 /priv/static/
 
 /config/prod.secret.exs
+/sample_content
