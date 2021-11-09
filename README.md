@@ -477,7 +477,7 @@ No.
 - If needed, an optional database layer may be added in the future.
 
 ## Who's using?
-- [Pardall](https://pardall.xyz/): this is [my own](https://pardall.xyz/about) [Wiki](https://pardall.xyz/wiki), which serves as a proof of concept for a website made with PardallMarkdown and Phoenix.LiveView, with Markdown files created from Joplin notes, and synced automatically from a local folder in my computer, to a production server using SyncThings.
+- [Pardall](https://pardall.xyz/): this is [my own](https://pardall.xyz/about) [Wiki](https://pardall.xyz/wiki), which serves as a proof of concept for a website made with PardallMarkdown and Phoenix.LiveView, with Markdown files created from Joplin notes. The content for the Wiki is automatically synced from the [alfredbaudisch/pardall.xyz_content](https://github.com/alfredbaudisch/pardall.xyz_content) repository.
 
 ## Roadmap
 - [x] Add support for custom metadata parsers ([#30](https://github.com/alfredbaudisch/pardall_markdown/issues/30)).
