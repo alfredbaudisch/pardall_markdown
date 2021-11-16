@@ -68,9 +68,9 @@ See PardallMarkdown in action and learn how to use it by following this video:
 - `FileWatcher`, that **detects new content and modification of existing content**, which then **automatically re-parses and rebuilds the content**.
     - There is **no need to recompile** and redeploy the application nor the website, the **new content is available immediately** (depends on the interval set via `:recheck_pending_file_events_interval`, see below).
     - Created with [Phoenix LiveView](https://hexdocs.pm/phoenix_live_view/Phoenix.LiveView.html) and Phoenix Channels in mind: **create or modify a post** or a whole new **set of posts** and they are **immediately published in a website**. Check out [the demo](https://github.com/alfredbaudisch/pardall-markdown-phoenix-demo) repository.
+- Support for content folders outside of the application, this way, **new content files can be synced immediately from a source location** (for example, your computer), and then picked up by the FileWatcher.
 - `RepositoryWatcher`, that **detects changes from a Git repository** (optional) and automatically pulls the content into a PardallMarkdown's content folder.
-  - Since the content folder is watched by `FileWatcher`, PardallMarkdown the rebuilds the whole content everything there are changes from the Git repository.
-- Support for the content folders outside of the application, this way, **new content files can be synced immediately from a source location** (for example, your computer), and then picked up by the FileWatcher.
+  - Since the content folder is watched by `FileWatcher`, PardallMarkdown then rebuilds the whole content everytime there are changes from the Git repository.
 - Automatic creation of **table of contents** from Markdown headers.
 - **Infinite content hierarchies** (categories and sub-categories, sections and sub-sections).
     - Different **sets of custom hierarchies** and post sets. For example, a website with *Documentation*, *Blog*, *News* and a *Wiki*, which in turn, have their own sub-hierarchies.
