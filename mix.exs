@@ -38,6 +38,7 @@ defmodule PardallMarkdown.MixProject do
       {:con_cache, "~> 0.13"},
       {:ex_doc, ">= 0.0.0", only: :dev, runtime: false},
       {:git_cli, "~> 0.3"},
+      {:yaml_elixir, "~> 2.8"}
     ]
   end
 
