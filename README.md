@@ -59,7 +59,7 @@ The current demo project and that HTML template have their [own repository](http
 
 ## Video Demo and Tutorial
 See PardallMarkdown in action and learn how to use it by following this video:
-[![](https://github.com/alfredbaudisch/pardall_markdown/blob/master/priv/images/pardallmarkdown-demo-and-tutorial-with-play.jpg)](https://www.youtube.com/watch?v=qMOC8xBP4Qs)
+[![](https://github.com/alfredbaudisch/pardall_markdown/blob/master/priv/images/pardallmarkdown-demo-and-tutorial-with-play.jpg)](https://www.youtube.com/watch?v=5YTZ06xrP1A)
 
 ## Features
 
@@ -200,7 +200,7 @@ plug Plug.Static,
     gzip: true
 ```
 
-Check [the demo](https://github.com/alfredbaudisch/pardall-markdown-phoenix-demo) application for a complete Phoenix application sample, including sample content. Or watch the PardallMarkdown Phoenix LiveView [tutorial video](https://www.youtube.com/watch?v=qMOC8xBP4Qs).
+Check [the demo](https://github.com/alfredbaudisch/pardall-markdown-phoenix-demo) application for a complete Phoenix application sample, including sample content. Or watch the PardallMarkdown Phoenix LiveView [tutorial video](https://www.youtube.com/watch?v=5YTZ06xrP1A).
 
 ## API
 Content is retrieved with `PardallMarkdown.Repository`. Check details and instructions [in the docs](https://hexdocs.pm/pardall_markdown/PardallMarkdown.Repository.html).
