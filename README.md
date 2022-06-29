@@ -153,7 +153,7 @@ config :pardall_markdown, PardallMarkdown.Content,
   # If `:remote_repository_url` is provided,
   # `:recheck_pending_remote_events_interval` must
   # be BIGGER than `:recheck_pending_file_events_interval`
-  recheck_pending_remote_events_interval: 15_000
+  recheck_pending_remote_events_interval: 15_000,
 
   # Should the main content tree contain a link to the Home/Root page ("/")?
   content_tree_display_home: false,
