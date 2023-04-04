@@ -68,6 +68,96 @@ defmodule PardallMarkdown.HtmlTest do
     assert html |> HtmlUtils.strip_in_between_space() == target_html
   end
 
+  @tag :header_nesting
+  test "header nesting correctly generate toc when header level changes" do
+    html = ~S"""
+    <h2>First Header</h2>
+    Some content...
+
+    <h2>Second Header</h2>
+    Some content...
+    """
+
+    {:ok, _html, toc} =
+      html |> HtmlUtils.generate_anchors_and_toc(%{slug: "/headers", title: "Title"})
+
+    assert toc == [
+      %{
+        id: "#first-header",
+        level: 1,
+        parent_slug: "/headers",
+        title: "First Header"
+      },
+      %{
+        id: "#second-header",
+        level: 1,
+        parent_slug: "/headers",
+        title: "Second Header"
+      }
+    ]
+
+    html = ~S"""
+    <h2>Header 2, Level 1</h2>
+    <h3>Header 3, Level 2</h3>
+    <h4>Header 4, Level 3</h4>
+
+    <h2>Header 2, Level 1</h2>
+
+    <h1>Header 1, Level 1</h1>
+    <h4>Header 4, Level 2</h4>
+    <h3>Header 3, Level 2</h3>
+    Some content...
+    """
+
+    {:ok, _html, toc} =
+      html |> HtmlUtils.generate_anchors_and_toc(%{slug: "/headers", title: "Title"})
+
+    assert toc == [
+      %{
+        id: "#header-2-level-1",
+        level: 1,
+        parent_slug: "/headers",
+        title: "Header 2, Level 1"
+      },
+      %{
+        id: "#header-3-level-2",
+        level: 2,
+        parent_slug: "/headers",
+        title: "Header 3, Level 2"
+      },
+      %{
+        id: "#header-4-level-3",
+        level: 3,
+        parent_slug: "/headers",
+        title: "Header 4, Level 3"
+      },
+      %{
+        id: "#header-2-level-1-1",
+        level: 1,
+        parent_slug: "/headers",
+        title: "Header 2, Level 1"
+      },
+      %{
+        id: "#header-1-level-1",
+        level: 1,
+        parent_slug: "/headers",
+        title: "Header 1, Level 1"
+      },
+      %{
+        id: "#header-4-level-2",
+        level: 2,
+        parent_slug: "/headers",
+        title: "Header 4, Level 2"
+      },
+      %{
+        id: "#header-3-level-2-1",
+        level: 2,
+        parent_slug: "/headers",
+        title: "Header 3, Level 2"
+      }
+    ]
+  end
+
   test "add ids and anchors to heading, ids and anchors should be unique, even if the title is repeated" do
     html = ~S"""
     <h3>This item should be level 1 in the TOC</h3>
@@ -108,7 +198,7 @@ defmodule PardallMarkdown.HtmlTest do
     assert toc == [
              %{
                id: "#this-item-should-be-level-1-in-the-toc",
-               level: 1,
+               level: 3,
                parent_slug: "/foo",
                title: "This item should be level 1 in the TOC"
              },
