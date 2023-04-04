@@ -212,7 +212,7 @@ defmodule PardallMarkdown.HtmlTest do
       %{
         header: 2,
         id: "#h2-level-2",
-        level: 1,
+        level: 2,
         parent_slug: "/headers",
         title: "H2 Level 2"
       },
@@ -372,14 +372,15 @@ defmodule PardallMarkdown.HtmlTest do
     assert toc == [
              %{
                id: "#this-item-should-be-level-1-in-the-toc",
-               level: 3,
+               level: 1,
+               header: 3,
                parent_slug: "/foo",
                title: "This item should be level 1 in the TOC"
              },
-             %{id: "#first-section", level: 1, parent_slug: "/foo", title: "First Section"},
-             %{id: "#inner-title", level: 2, parent_slug: "/foo", title: "Inner- \"Title\""},
-             %{id: "#second-section", level: 1, parent_slug: "/foo", title: "Second Section"},
-             %{id: "#inner-title-1", level: 2, parent_slug: "/foo", title: "Inner- \"Title\""}
+             %{id: "#first-section", level: 1, header: 1, parent_slug: "/foo", title: "First Section"},
+             %{id: "#inner-title", level: 2, header: 2, parent_slug: "/foo", title: "Inner- \"Title\""},
+             %{id: "#second-section", level: 1, header: 1, parent_slug: "/foo", title: "Second Section"},
+             %{id: "#inner-title-1", level: 2, header: 2, parent_slug: "/foo", title: "Inner- \"Title\""}
            ]
 
     assert Enum.count(toc) == 5

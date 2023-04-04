@@ -1,8 +1,5 @@
 defmodule PardallMarkdown.Content.HtmlUtils do
-  alias PardallMarkdown.Content.{
-    Utils,
-    TOC
-  }
+  alias PardallMarkdown.Content.Utils
 
   def generate_summary_from_html(html, expected_length \\ 157)
   def generate_summary_from_html(html, _) when html == nil or html == "", do: nil
@@ -104,7 +101,7 @@ defmodule PardallMarkdown.Content.HtmlUtils do
   def generate_anchors_and_toc(html, %{slug: slug}) do
     {updated_tree, %{toc: toc}} =
       Floki.parse_fragment!(html)
-      |> Floki.traverse_and_update(%{counters: %{}, toc_links: [], toc: [], toc_positions: %{}}, fn
+      |> Floki.traverse_and_update(%{counters: %{}, toc: [], toc_positions: %{}}, fn
         {"h" <> header_level, attrs, children} = el, acc ->
           case find_node_text(children) do
             nil ->
@@ -138,15 +135,7 @@ defmodule PardallMarkdown.Content.HtmlUtils do
                 title: title
               }
 
-              # toc_link = %TOC.Link{
-              #   id: link_id,
-              #   header: int_header_level,
-              #   parent_slug: slug,
-              #   title: title
-              # }
-
               acc = put_in(acc[:counters][id], increase_id_count(count))
-              # acc = put_in(acc[:toc_links], acc.toc_links ++ [toc_link])
               acc = put_in(acc[:toc], acc.toc ++ [link])
               acc = put_in(acc[:toc_positions], positions)
 
@@ -156,9 +145,6 @@ defmodule PardallMarkdown.Content.HtmlUtils do
         el, acc ->
           {el, acc}
       end)
-
-    # toc = TOC.generate(toc_links)
-    # toc = toc |> PardallMarkdown.Utils.StructUtils.struct_to_map()
 
     {:ok, updated_tree |> Floki.raw_html(), toc}
   end
@@ -170,27 +156,28 @@ defmodule PardallMarkdown.Content.HtmlUtils do
   when header == curr_header, do:
     {:level, curr_level, :positions, %{level: curr_level, header: curr_header, index: idx + 1}}
 
-  # defp get_toc_level(_, header, %{level: curr_level, header: curr_header, index: idx})
-  # when header > curr_header, do:
-  #   {:level, curr_level, :positions, %{level: curr_level, header: curr_header, index: idx + 1}}
-
   defp get_toc_level(toc, header, %{level: curr_level, header: curr_header, index: idx})
   when header < curr_header do
-    level =
-      toc
-      |> Enum.reverse()
-      |> Enum.reduce(curr_level, fn
-        %{header: i_header, level: i_level}, _acc
-        when i_header == header ->
-          i_level
+    [_|reversed_toc] = toc |> Enum.reverse()
 
-        %{header: i_header}, acc
-        when i_header > header ->
+    {_, level} =
+      reversed_toc
+      |> Enum.reduce({curr_header, curr_level}, fn
+        _, {acc_header, _} = acc
+        when acc_header <= header ->
           acc
 
         %{header: i_header, level: i_level}, _acc
         when i_header < header ->
-          i_level + 1
+          {i_header, i_level + 1}
+
+        %{header: i_header, level: i_level}, _acc
+        when i_header == header ->
+          {i_header, i_level}
+
+        %{header: i_header}, acc
+        when i_header > header ->
+          acc
       end)
 
     {:level, level, :positions, %{level: level, header: header, index: idx + 1}}
