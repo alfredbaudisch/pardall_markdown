@@ -68,7 +68,172 @@ defmodule PardallMarkdown.HtmlTest do
     assert html |> HtmlUtils.strip_in_between_space() == target_html
   end
 
-  @tag :header_nesting
+  @tag :toc_header_nesting
+  test "correctly generate TOC nesting from header nesting, example 1" do
+    html = ~S"""
+    <h2>Header 2, Level 1</h2>
+    <h3>Header 3, Level 2</h3>
+    <h4>Header 4, Level 3</h4>
+
+    <h2>Header 2, Level 1</h2>
+
+    <h1>Header 1, Level 1</h1>
+    <h4>Header 4, Level 2</h4>
+    <h3>Header 3, Level 2</h3>
+    Some content...
+    """
+
+    {:ok, _html, toc} =
+      html |> HtmlUtils.generate_anchors_and_toc(%{slug: "/headers", title: "Title"})
+
+    assert toc == [
+      %{
+        id: "#header-2-level-1",
+        header: 2,
+        level: 1,
+        parent_slug: "/headers",
+        title: "Header 2, Level 1"
+      },
+      %{
+        id: "#header-3-level-2",
+        header: 3,
+        level: 2,
+        parent_slug: "/headers",
+        title: "Header 3, Level 2"
+      },
+      %{
+        id: "#header-4-level-3",
+        header: 4,
+        level: 3,
+        parent_slug: "/headers",
+        title: "Header 4, Level 3"
+      },
+      %{
+        id: "#header-2-level-1-1",
+        header: 2,
+        level: 1,
+        parent_slug: "/headers",
+        title: "Header 2, Level 1"
+      },
+      %{
+        id: "#header-1-level-1",
+        header: 1,
+        level: 1,
+        parent_slug: "/headers",
+        title: "Header 1, Level 1"
+      },
+      %{
+        id: "#header-4-level-2",
+        header: 4,
+        level: 2,
+        parent_slug: "/headers",
+        title: "Header 4, Level 2"
+      },
+      %{
+        id: "#header-3-level-2-1",
+        header: 3,
+        level: 2,
+        parent_slug: "/headers",
+        title: "Header 3, Level 2"
+      }
+    ]
+  end
+
+  @tag :toc_header_nesting
+  test "correctly generate TOC nesting from header nesting, example 2" do
+    html = ~S"""
+    <h2>H2  Level 1</h2>
+    <h3>H3 Level 2</h3>
+    <h4>H4, Level 3</h4>
+
+    <h2>H2 Level 1</h2>
+
+    <h1>H1 Level 1</h1>
+    <h4>H4 Level 2</h4>
+    <h3>H3 Level 2</h3>
+    <h2>H2 Level 2</h2>
+    <h5>H5 Level 3</h5>
+    <h4>H4 Level 3</h4>
+    """
+
+    {:ok, _html, toc} =
+      html |> HtmlUtils.generate_anchors_and_toc(%{slug: "/headers", title: "Title"})
+
+    assert toc == [
+      %{
+        header: 2,
+        id: "#h2-level-1",
+        level: 1,
+        parent_slug: "/headers",
+        title: "H2  Level 1"
+      },
+      %{
+        header: 3,
+        id: "#h3-level-2",
+        level: 2,
+        parent_slug: "/headers",
+        title: "H3 Level 2"
+      },
+      %{
+        header: 4,
+        id: "#h4-level-3",
+        level: 3,
+        parent_slug: "/headers",
+        title: "H4, Level 3"
+      },
+      %{
+        header: 2,
+        id: "#h2-level-1-1",
+        level: 1,
+        parent_slug: "/headers",
+        title: "H2 Level 1"
+      },
+      %{
+        header: 1,
+        id: "#h1-level-1",
+        level: 1,
+        parent_slug: "/headers",
+        title: "H1 Level 1"
+      },
+      %{
+        header: 4,
+        id: "#h4-level-2",
+        level: 2,
+        parent_slug: "/headers",
+        title: "H4 Level 2"
+      },
+      %{
+        header: 3,
+        id: "#h3-level-2-1",
+        level: 2,
+        parent_slug: "/headers",
+        title: "H3 Level 2"
+      },
+      %{
+        header: 2,
+        id: "#h2-level-2",
+        level: 1,
+        parent_slug: "/headers",
+        title: "H2 Level 2"
+      },
+      %{
+        header: 5,
+        id: "#h5-level-3",
+        level: 3,
+        parent_slug: "/headers",
+        title: "H5 Level 3"
+      },
+      %{
+        header: 4,
+        id: "#h4-level-3-1",
+        level: 3,
+        parent_slug: "/headers",
+        title: "H4 Level 3"
+      }
+    ]
+  end
+
+  @tag :toc_header_nesting
   test "header nesting correctly generate toc when header level changes" do
     html = ~S"""
     <h2>First Header</h2>
@@ -85,11 +250,13 @@ defmodule PardallMarkdown.HtmlTest do
       %{
         id: "#first-header",
         level: 1,
+        header: 2,
         parent_slug: "/headers",
         title: "First Header"
       },
       %{
         id: "#second-header",
+        header: 2,
         level: 1,
         parent_slug: "/headers",
         title: "Second Header"
@@ -115,42 +282,49 @@ defmodule PardallMarkdown.HtmlTest do
     assert toc == [
       %{
         id: "#header-2-level-1",
+        header: 2,
         level: 1,
         parent_slug: "/headers",
         title: "Header 2, Level 1"
       },
       %{
         id: "#header-3-level-2",
+        header: 3,
         level: 2,
         parent_slug: "/headers",
         title: "Header 3, Level 2"
       },
       %{
         id: "#header-4-level-3",
+        header: 4,
         level: 3,
         parent_slug: "/headers",
         title: "Header 4, Level 3"
       },
       %{
         id: "#header-2-level-1-1",
+        header: 2,
         level: 1,
         parent_slug: "/headers",
         title: "Header 2, Level 1"
       },
       %{
         id: "#header-1-level-1",
+        header: 1,
         level: 1,
         parent_slug: "/headers",
         title: "Header 1, Level 1"
       },
       %{
         id: "#header-4-level-2",
+        header: 4,
         level: 2,
         parent_slug: "/headers",
         title: "Header 4, Level 2"
       },
       %{
         id: "#header-3-level-2-1",
+        header: 3,
         level: 2,
         parent_slug: "/headers",
         title: "Header 3, Level 2"

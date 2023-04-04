@@ -1,5 +1,8 @@
 defmodule PardallMarkdown.Content.HtmlUtils do
-  alias PardallMarkdown.Content.Utils
+  alias PardallMarkdown.Content.{
+    Utils,
+    TOC
+  }
 
   def generate_summary_from_html(html, expected_length \\ 157)
   def generate_summary_from_html(html, _) when html == nil or html == "", do: nil
@@ -101,8 +104,8 @@ defmodule PardallMarkdown.Content.HtmlUtils do
   def generate_anchors_and_toc(html, %{slug: slug}) do
     {updated_tree, %{toc: toc}} =
       Floki.parse_fragment!(html)
-      |> Floki.traverse_and_update(%{counters: %{}, toc: []}, fn
-        {"h" <> level, attrs, children} = el, acc ->
+      |> Floki.traverse_and_update(%{counters: %{}, toc_links: [], toc: [], toc_positions: %{}}, fn
+        {"h" <> header_level, attrs, children} = el, acc ->
           case find_node_text(children) do
             nil ->
               {el, acc}
@@ -123,11 +126,16 @@ defmodule PardallMarkdown.Content.HtmlUtils do
                    {"data-title", title}
                  ], []}
 
-              toc_item = %{
+              int_header_level = parse_header_level(header_level)
+              {:level, level, :positions, positions} =
+                get_toc_level(acc.toc, int_header_level, acc.toc_positions)
+
+              link = %{
                 id: link_id,
+                level: level,
+                header: int_header_level,
                 parent_slug: slug,
-                title: title,
-                level: get_level_for_toc(acc[:toc], level)
+                title: title
               }
 
               # toc_link = %TOC.Link{
@@ -155,8 +163,46 @@ defmodule PardallMarkdown.Content.HtmlUtils do
     {:ok, updated_tree |> Floki.raw_html(), toc}
   end
 
-  defp get_level_for_toc([], _), do: 1
-  defp get_level_for_toc(_, level), do: level |> String.to_integer()
+  defp get_toc_level([], header, _), do:
+    {:level, 1, :positions, %{level: 1, header: header, index: 0}}
+
+  defp get_toc_level(_, header, %{level: curr_level, header: curr_header, index: idx})
+  when header == curr_header, do:
+    {:level, curr_level, :positions, %{level: curr_level, header: curr_header, index: idx + 1}}
+
+  # defp get_toc_level(_, header, %{level: curr_level, header: curr_header, index: idx})
+  # when header > curr_header, do:
+  #   {:level, curr_level, :positions, %{level: curr_level, header: curr_header, index: idx + 1}}
+
+  defp get_toc_level(toc, header, %{level: curr_level, header: curr_header, index: idx})
+  when header < curr_header do
+    level =
+      toc
+      |> Enum.reverse()
+      |> Enum.reduce(curr_level, fn
+        %{header: i_header, level: i_level}, _acc
+        when i_header == header ->
+          i_level
+
+        %{header: i_header}, acc
+        when i_header > header ->
+          acc
+
+        %{header: i_header, level: i_level}, _acc
+        when i_header < header ->
+          i_level + 1
+      end)
+
+    {:level, level, :positions, %{level: level, header: header, index: idx + 1}}
+  end
+
+  defp get_toc_level(_, header, %{level: curr_level, header: curr_header, index: idx})
+  when header > curr_header do
+    level = curr_level + 1
+    {:level, level, :positions, %{level: level, header: header, index: idx + 1}}
+  end
+
+  defp parse_header_level(level), do: String.to_integer(level)
 
   def strip_in_between_space(html),
     do:
