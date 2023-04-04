@@ -130,15 +130,27 @@ defmodule PardallMarkdown.Content.HtmlUtils do
                 level: get_level_for_toc(acc[:toc], level)
               }
 
-              acc = put_in(acc[:counters][id], increase_id_count(count))
-              acc = put_in(acc[:toc], acc.toc ++ [toc_item])
+              # toc_link = %TOC.Link{
+              #   id: link_id,
+              #   header: int_header_level,
+              #   parent_slug: slug,
+              #   title: title
+              # }
 
-              {{"h" <> level, attrs, [anchor | children]}, acc}
+              acc = put_in(acc[:counters][id], increase_id_count(count))
+              # acc = put_in(acc[:toc_links], acc.toc_links ++ [toc_link])
+              acc = put_in(acc[:toc], acc.toc ++ [link])
+              acc = put_in(acc[:toc_positions], positions)
+
+              {{"h" <> header_level, attrs, [anchor | children]}, acc}
           end
 
         el, acc ->
           {el, acc}
       end)
+
+    # toc = TOC.generate(toc_links)
+    # toc = toc |> PardallMarkdown.Utils.StructUtils.struct_to_map()
 
     {:ok, updated_tree |> Floki.raw_html(), toc}
   end
