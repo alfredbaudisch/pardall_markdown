@@ -458,16 +458,17 @@ PardallMarkdown has support to watch a Git repository (configured via `:remote_r
 ### How to write Markdown locally in your computer and publish it immediately to a PardallMarkdown application or website?
 As written above, PardallMarkdown watches for changes in a folder. This way, you can sync content from a local source to a remote destination via any way as you would do with or without PardallMarkdown, for example: Git, SyncThings, scp, etc.
 
-Example:
+**You can have a custom Git repository just for the content and configure PardallMarkdown to watch for changes from this repository** with `:remote_repository_url`. Check [Usage in Elixir OTP applications](#usage-in-elixir-otp-applications) and [How to sync content with PardallMarkdown?](#how-to-sync-content-with-pardallmarkdown) above.
 
+Alternatively, for a kind of a old-school method, it's also possible to synchronize with solutions like SyncThings, making the content reflect immediately in the website without the need to push to a repository.
+
+SyncThings Example:
 - Create a folder in your computer
 - Create a folder in the server that will run your PardallMarkdown powered application
 - Install and configure [SyncThings](https://github.com/syncthing/syncthing) to sync between the two machines
 - Start your PardallMarkdown server application in the remote location
 - Start SyncThings
 - Write locally and see the magic happens! Content appears almost immediately in your application / website.
-
-If you don't want to use SyncThings, you can have a custom Git repository just for the content and configure PardallMarkdown to watch for changes from this repository with `:remote_repository_url`. Check [Usage in Elixir OTP applications](#usage-in-elixir-otp-applications) and [How to sync content with PardallMarkdown?](#how-to-sync-content-with-pardallmarkdown) above.
 
 ### Does it require a database?
 No.
