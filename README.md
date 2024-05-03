@@ -51,7 +51,7 @@ PardallMarkdown is a reactive publishing framework and engine written in Elixir.
 The **content folder can be any path in the application server** or it can be a Git repository, since **PardallMarkdown has support for automatically pulling changes from a Git repository**.
 
 ### Looking for Contributors ⚠️
-I'm looking for a contributor(s) to make a more elaborate HTML and CSS template for the demo project. Check the [current demo here](https://pardall.xyz/), including its inner sections. It's a mix of Blog + Documentation + Wiki website.
+I'm looking for a contributor(s) to make a more elaborate HTML and CSS template for the demo project. Check the [current demo here](https://github.com/alfredbaudisch/pardall-markdown-phoenix-demo), including its inner sections. It's a mix of Blog + Documentation + Wiki website.
 
 Something like [the Docusaurus template](https://docusaurus.io/docs) is perfect for this project. Docusaurus theme is MIT licensed, **so it can even be extracted to be used by PardallMarkdown**. But CSS is a thing that I'm not very fond of, so that's why I'm looking for help (**even if you could just extract Docusaurus theme as a static HTML template**, it would be awesome).
 
@@ -478,7 +478,7 @@ No.
 - If needed, an optional database layer may be added in the future.
 
 ## Who's using?
-- [Pardall](https://pardall.xyz/): this is [my own](https://pardall.xyz/about) [Wiki](https://pardall.xyz/wiki), which serves as a proof of concept for a website made with PardallMarkdown and Phoenix.LiveView, with Markdown files created from Joplin notes. The content for the Wiki is automatically synced from the [alfredbaudisch/pardall.xyz_content](https://github.com/alfredbaudisch/pardall.xyz_content) repository.
+- Pardall Wiki: this is my own Wiki (_UPDATE: URL removed because I lost the domain renewal_), which serves as a proof of concept for a website made with PardallMarkdown and Phoenix.LiveView, with Markdown files created from Joplin notes. The content for the Wiki is automatically synced from the [alfredbaudisch/pardall.xyz_content](https://github.com/alfredbaudisch/pardall.xyz_content) repository.
 
 ## Roadmap
 - [x] Add support for custom metadata parsers ([#30](https://github.com/alfredbaudisch/pardall_markdown/issues/30)).
